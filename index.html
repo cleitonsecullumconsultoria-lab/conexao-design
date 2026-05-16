@@ -339,6 +339,10 @@ textarea.fi{resize:vertical;min-height:72px}
   </div>
   <div class="sb-foot">
     <div class="sb-info">Conexão Design Móveis<br>CNPJ: 58.323.410/0001-53</div>
+    <button class="btn danger" onclick="logout()" style="width:100%;margin-top:10px;justify-content:center">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sair do sistema
+    </button>
   </div>
 </aside>
 
@@ -595,7 +599,7 @@ textarea.fi{resize:vertical;min-height:72px}
         <input type="week" class="fi" id="pt-filtro-semana" onchange="renderPonto()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
         <select class="fi" id="pt-filtro-func" onchange="renderPonto()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px"><option value="">Todos</option></select>
       </div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Data</th><th>Funcionário</th><th>Tipo</th><th>H. Extra</th><th>Valor Calculado</th><th>Obs</th><th></th></tr></thead><tbody id="pt-body"></tbody></table></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Data</th><th>Funcionário</th><th>Tipo</th><th>H. Extra</th><th>Valor</th><th>Lançado em</th><th>Obs</th><th></th></tr></thead><tbody id="pt-body"></tbody></table></div>
     </div>
     <div class="ponto-grid" id="ponto-cards"></div>
   </div>
@@ -607,6 +611,7 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="ch" style="flex:1;margin:0">Folha Semanal</div>
         <input type="week" class="fi" id="fl-semana" onchange="renderFolha()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
         <button class="btn" onclick="marcarPago()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>Marcar Pagos</button>
+        <button class="btn sm" onclick="pdfFolha()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PDF</button>
         <button class="btn sm" onclick="exportFolha()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Excel</button>
       </div>
     </div>
@@ -1282,7 +1287,8 @@ function addPonto(){
   var fid=document.getElementById('pt-func').value;
   var data=document.getElementById('pt-data').value;
   if(!fid||!data){toast('Selecione funcionário e data','warn');return;}
-  pontos.push({id:nextId(pontos),funcionario_id:parseInt(fid),data:data,tipo:document.getElementById('pt-tipo').value,horas:parseFloat(document.getElementById('pt-horas').value)||0,obs:document.getElementById('pt-obs').value});
+  var user=CURRENT_USER?(CURRENT_USER.name||CURRENT_USER.email):'Sistema';
+  pontos.push({id:nextId(pontos),funcionario_id:parseInt(fid),data:data,tipo:document.getElementById('pt-tipo').value,horas:parseFloat(document.getElementById('pt-horas').value)||0,obs:document.getElementById('pt-obs').value,created_at:new Date().toISOString(),created_by:user});
   save();syncToSheets('pontos');logActivity('Ponto registrado: '+funcNome(parseInt(document.getElementById('pt-func').value)));renderPonto();toast('Ponto registrado!','ok');
   document.getElementById('pt-horas').value='';document.getElementById('pt-obs').value='';
 }
@@ -1299,7 +1305,12 @@ function renderPonto(){
     var f=funcionarios.find(function(x){return x.id===p.funcionario_id;});
     var val=p.tipo==='diaria'?(f?f.diaria:0):p.tipo==='meio'?(f?f.diaria/2:0):p.tipo==='extra'?(p.horas*(f?f.hora_extra:0)):0;
     var tipoLbl={diaria:'Diária',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
-    html+='<tr><td>'+dp(p.data)+'</td><td>'+funcNome(p.funcionario_id)+'</td><td><span class="tag '+(p.tipo==='falta'?'venc':p.tipo==='extra'?'pend':'pago')+'">'+tipoLbl+'</span></td><td>'+(p.horas||'-')+'</td><td style="font-family:var(--fm)">'+fmt(val)+'</td><td>'+p.obs+'</td><td><button class="ibt" onclick="delItem(\'pontos\','+p.id+',\'Registro de ponto?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+    var ptCreated=p.created_at?new Date(p.created_at).toLocaleDateString('pt-BR')+' '+new Date(p.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
+    var ptBy=p.created_by||'';
+    var f2=funcionarios.find(function(x){return x.id===p.funcionario_id;});
+    var val=p.tipo==='diaria'?(f2?f2.diaria:0):p.tipo==='meio'?(f2?f2.diaria/2:0):p.tipo==='extra'?(parseFloat(p.horas||0)*(f2?parseFloat(f2.hora_extra)||0:0)):0;
+    var tipoLbl={diaria:'Diária',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
+    html+='<tr><td>'+dp(p.data)+'</td><td>'+funcNome(p.funcionario_id)+'</td><td><span class="tag '+(p.tipo==='falta'?'venc':p.tipo==='extra'?'pend':'pago')+'">'+ tipoLbl+'</span></td><td>'+(p.horas||'-')+'</td><td style="font-family:var(--fm)">'+fmt(val)+'</td><td style="font-size:10px;color:var(--t3)">'+(ptCreated?ptCreated+'<br>'+ptBy:'')+'</td><td>'+p.obs+'</td><td><button class="ibt" onclick="delItem(\'pontos\','+p.id+',\'Registro de ponto?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
   });
   document.getElementById('pt-body').innerHTML=html;
   // Cards resumo
@@ -1338,8 +1349,9 @@ function renderFolha(){
     var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
     var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
     var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-    var totD=(dias*f.diaria)+(meio*(f.diaria/2));
-    var totH=hExt*f.hora_extra;
+    var hrVal=parseFloat(f.hora_extra)||0;
+    var totD=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
+    var totH=hExt*hrVal;
     var total=totD+totH;
     totalGeral+=total;
     var pkey=sem.key+'_'+f.id;
@@ -1351,6 +1363,47 @@ function renderFolha(){
 }
 function togglePagamento(key){folha_paga[key]=!folha_paga[key];save();renderFolha();toast('Status atualizado!','ok');}
 function marcarPago(){var sem=getSemana();if(!sem.key)return;funcionarios.forEach(function(f){folha_paga[sem.key+'_'+f.id]=true;});save();renderFolha();toast('Todos marcados como pagos!','ok');}
+function pdfFolha(){
+  var sem=getSemana(); if(!sem.si){toast('Selecione uma semana','warn');return;}
+  var cfg=getCfg();
+  var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
+  var totalGeral=0;
+  var rows='';
+  funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
+    var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
+    var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
+    var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
+    var hrVal=parseFloat(f.hora_extra)||0;
+    var totD=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
+    var totH=hExt*hrVal;
+    var total=totD+totH; totalGeral+=total;
+    var pkey=sem.key+'_'+f.id;
+    var pago=folha_paga[pkey];
+    // Get individual ponto records for this week
+    var ptFunc=ptSem.filter(function(p){return p.funcionario_id===f.id;}).sort(function(a,b){return a.data.localeCompare(b.data);});
+    rows+='<tr style="background:#f0f8f0"><td colspan="8"><b>'+f.nome+'</b> - '+f.cargo+
+      ' | Diária: R$ '+parseFloat(f.diaria||0).toFixed(2)+
+      ' | H.Extra: R$ '+hrVal.toFixed(2)+'/h'+
+      ' | Status: '+(pago?'<span style="color:#2E7D52">PAGO</span>':'<span style="color:#C47D0A">PENDENTE</span>')+'</td></tr>';
+    ptFunc.forEach(function(p){
+      var tipoLbl={diaria:'Diária',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
+      var val=p.tipo==='diaria'?parseFloat(f.diaria||0):p.tipo==='meio'?parseFloat(f.diaria||0)/2:p.tipo==='extra'?(parseFloat(p.horas||0)*hrVal):0;
+      var created=p.created_at?new Date(p.created_at).toLocaleDateString('pt-BR')+' '+new Date(p.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
+      rows+='<tr><td>'+dp(p.data)+'</td><td>'+tipoLbl+'</td><td>'+(p.horas||'-')+'</td><td>R$ '+val.toFixed(2)+'</td><td>'+p.obs+'</td><td style="color:#999;font-size:9px">'+created+'</td><td style="color:#999;font-size:9px">'+(p.created_by||'')+'</td><td></td></tr>';
+    });
+    rows+='<tr style="background:#e8f4f4;font-weight:bold"><td colspan="3">TOTAL '+f.nome+'</td><td>R$ '+totD.toFixed(2)+'</td><td></td><td></td><td></td><td>R$ '+total.toFixed(2)+'</td></tr>';
+  });
+  var semLbl=sem.si+' a '+sem.sf;
+  var html='<html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px}.h{text-align:center;border-bottom:2px solid #2C2C2C;padding-bottom:10px;margin-bottom:16px}.h h1{font-size:18px;margin:0}.h p{margin:2px 0;color:#666;font-size:10px}table{width:100%;border-collapse:collapse}th{background:#2C2C2C;color:#fff;padding:6px 8px;text-align:left;font-size:10px}td{padding:5px 8px;border-bottom:1px solid #eee}.ft{margin-top:20px;border-top:1px solid #ccc;padding-top:6px;font-size:9px;color:#999;display:flex;justify-content:space-between}</style></head><body>';
+  html+='<div class="h"><h1>'+(cfg.razao||'Conexão Design')+'</h1>';
+  html+='<p>CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+' | '+(cfg.cidade||'Aparecida de Goiânia/GO')+'</p>';
+  html+='<p>Folha Semanal: '+semLbl+' | Emitido em: '+new Date().toLocaleDateString('pt-BR')+' '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</p></div>';
+  html+='<table><thead><tr><th>Data</th><th>Tipo</th><th>H.Extra</th><th>Valor</th><th>Obs</th><th>Lançado em</th><th>Por</th><th>Total</th></tr></thead><tbody>'+rows;
+  html+='<tr style="background:#2C2C2C;color:#fff;font-weight:bold"><td colspan="7">TOTAL GERAL DA SEMANA</td><td>R$ '+totalGeral.toFixed(2)+'</td></tr>';
+  html+='</tbody></table><div class="ft"><span>'+(cfg.razao||'Conexão Design')+' - CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+'</span><span>'+new Date().toLocaleDateString('pt-BR')+'</span></div></body></html>';
+  var w=window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
+}
+
 function exportFolha(){
   var sem=getSemana();if(!sem.si){toast('Selecione uma semana','warn');return;}
   var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
@@ -1682,7 +1735,7 @@ function editRec(type,id){
   _eType=type; _eId=id;
   var cfgs={
     clientes:{title:'Editar Cliente',fields:[{l:'Nome',k:'nome',w:'full'},{l:'Telefone',k:'telefone'},{l:'CPF/CNPJ',k:'documento'},{l:'Endereço',k:'endereco',w:'full'},{l:'Cidade',k:'cidade'},{l:'E-mail',k:'email'}]},
-    fornecedores:{title:'Editar Fornecedor',fields:[{l:'Nome',k:'nome',w:'full'},{l:'Telefone',k:'telefone'},{l:'CNPJ/CPF',k:'documento'},{l:'Produto/Serviço',k:'produto',w:'full'},{l:'PIX/Banco',k:'pix'},{l:'Prazo (dias)',k:'prazo',t:'number'}]},
+    fornecedores:{title:'Editar Fornecedor',fields:[{l:'Nome',k:'nome',w:'full'},{l:'Telefone',k:'telefone'},{l:'CNPJ/CPF',k:'documento'},{l:'Produto/Serviço',k:'produto',w:'full'},{l:'Endereço',k:'endereco'},{l:'Bairro',k:'bairro'},{l:'Cidade/UF',k:'cidade'},{l:'PIX/Banco',k:'pix'},{l:'Prazo (dias)',k:'prazo',t:'number'}]},
     funcionarios:{title:'Editar Funcionário',fields:[{l:'Nome',k:'nome',w:'full'},{l:'Telefone',k:'telefone'},{l:'CPF',k:'cpf'},{l:'Diária (R$)',k:'diaria',t:'number'},{l:'H.Extra (R$)',k:'hora_extra',t:'number'},{l:'PIX',k:'pix'}]},
     contas_pagar:{title:'Editar Conta',fields:[{l:'Descrição',k:'descricao',w:'full'},{l:'Valor',k:'valor',t:'number'},{l:'Vencimento',k:'vencimento',t:'date'}]}
   };
@@ -1758,6 +1811,16 @@ function relRefeicoesForn(){
   html+='<div style="text-align:right;padding:8px;background:#e8f4f4;font-weight:bold">TOTAL: R$ '+totalGeral.toFixed(2)+'</div>';
   html+='<div class="ft"><span>Conexao Design Moveis e Decoracoes</span><span>'+new Date().toLocaleDateString('pt-BR')+'</span></div></body></html>';
   var w=window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
+}
+
+function logout(){
+  if(!confirm('Deseja sair do sistema?')) return;
+  ACCESS_TOKEN = null;
+  CURRENT_USER = null;
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('tb-name').textContent = '';
+  document.getElementById('tb-avatar').style.display = 'none';
+  toast('Sessão encerrada','info');
 }
 
 // ── INIT ──────────────────────────────────────────────────
