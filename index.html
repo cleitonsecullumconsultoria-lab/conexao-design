@@ -225,6 +225,15 @@ textarea.fi{resize:vertical;min-height:72px}
 .cnpj-wrap .fi:focus{border:none;box-shadow:none}
 .cnpj-btn{background:var(--mint);border:none;padding:0 12px;cursor:pointer;font-size:12px;font-weight:600;color:var(--charcoal);white-space:nowrap}
 .cnpj-btn:hover{background:var(--mint2)}
+
+.log-row{font-size:11px;padding:6px 8px;border-bottom:1px solid var(--bg3);display:flex;gap:8px;align-items:flex-start}
+.log-time{color:var(--t3);white-space:nowrap;font-family:var(--fm)}
+.log-user{color:var(--sage2);font-weight:600;white-space:nowrap}
+.log-action{color:var(--t2);flex:1}
+.tipo-tag{font-size:10px;padding:1px 7px;border-radius:4px;font-weight:600;white-space:nowrap}
+.tipo-diarista{background:rgba(122,158,126,0.15);color:var(--sage2)}
+.tipo-mensalista{background:rgba(184,216,216,0.2);color:var(--mint3)}
+.tipo-prolabore{background:rgba(196,125,10,0.12);color:var(--amber)}
 </style>
 </head>
 <body>
@@ -317,6 +326,15 @@ textarea.fi{resize:vertical;min-height:72px}
     <div class="ni" onclick="go('refeicoes')" id="nav-refeicoes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
       Refeições
+    </div>
+    <div class="sb-sec">Sistema</div>
+    <div class="ni" onclick="go('configuracoes')" id="nav-configuracoes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Configurações
+    </div>
+    <div class="ni" onclick="go('usuarios')" id="nav-usuarios">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Usuários / Log
     </div>
   </div>
   <div class="sb-foot">
@@ -446,6 +464,7 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="fgroup"><label class="flabel">Categoria</label><select class="fi" id="pg-cat"><option value="">Selecione...</option></select></div>
         <div class="fgroup"><label class="flabel">Valor</label><input type="number" class="fi" id="pg-valor" placeholder="0,00" step="0.01"></div>
         <div class="fgroup"><label class="flabel">Vencimento</label><input type="date" class="fi" id="pg-venc"></div>
+        <div class="fgroup" style="flex:2"><label class="flabel">Observação</label><input type="text" class="fi" id="pg-obs" placeholder="Observação opcional..."></div>
         <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="addConta()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar</button></div>
       </div>
     </div>
@@ -455,6 +474,10 @@ textarea.fi{resize:vertical;min-height:72px}
         <select class="fi" id="pg-filtro" onchange="renderPagar()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
           <option value="todas">Todas</option><option value="pendente">Pendentes</option><option value="vencido">Vencidas</option><option value="pago">Pagas</option>
         </select>
+        <button class="btn sm" onclick="pdfContasPagar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </button>
       </div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Vencimento</th><th>Descrição</th><th>Fornecedor</th><th>Categoria</th><th>Valor</th><th>Status</th><th></th></tr></thead><tbody id="pg-body"></tbody></table></div>
     </div>
@@ -496,6 +519,11 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="fgroup" style="flex:2"><label class="flabel">Produto / Serviço</label><input type="text" class="fi" id="fr-prod" placeholder="Ex: Vidros, perfis, pintura..."></div>
         <div class="fgroup"><label class="flabel">Banco / PIX</label><input type="text" class="fi" id="fr-pix" placeholder="Chave PIX ou banco..."></div>
         <div class="fgroup"><label class="flabel">Prazo Médio (dias)</label><input type="number" class="fi" id="fr-prazo" placeholder="30"></div>
+      </div>
+      <div class="frow">
+        <div class="fgroup" style="flex:2"><label class="flabel">Endereço</label><input type="text" class="fi" id="fr-end" placeholder="Rua, número..."></div>
+        <div class="fgroup"><label class="flabel">Bairro</label><input type="text" class="fi" id="fr-bairro" placeholder="Bairro..."></div>
+        <div class="fgroup"><label class="flabel">Cidade/UF</label><input type="text" class="fi" id="fr-cidade" placeholder="Cidade - UF"></div>
         <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="addFornecedor()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Salvar</button></div>
       </div>
     </div>
@@ -533,8 +561,10 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="fgroup"><label class="flabel">CPF</label><input type="text" class="fi" id="fn-cpf" placeholder="000.000.000-00"></div>
       </div>
       <div class="frow">
-        <div class="fgroup"><label class="flabel">Valor Diária (R$)</label><input type="number" class="fi" id="fn-diaria" placeholder="0,00" step="0.01"></div>
-        <div class="fgroup"><label class="flabel">Valor Hora Extra (R$)</label><input type="number" class="fi" id="fn-hora-extra" placeholder="0,00" step="0.01"></div>
+        <div class="fgroup"><label class="flabel">Tipo</label><select class="fi" id="fn-tipo" onchange="toggleFnTipo()"><option value="diarista">Diarista</option><option value="mensalista">Mensalista</option><option value="prolabore">Pró-labore</option></select></div>
+        <div class="fgroup" id="fn-diaria-wrap"><label class="flabel">Valor Diária (R$)</label><input type="number" class="fi" id="fn-diaria" placeholder="0,00" step="0.01"></div>
+        <div class="fgroup" id="fn-salario-wrap" style="display:none"><label class="flabel">Salário Mensal (R$)</label><input type="number" class="fi" id="fn-salario" placeholder="0,00" step="0.01"></div>
+        <div class="fgroup" id="fn-hextra-wrap"><label class="flabel">Valor Hora Extra (R$)</label><input type="number" class="fi" id="fn-hora-extra" placeholder="0,00" step="0.01"></div>
         <div class="fgroup"><label class="flabel">PIX / Banco</label><input type="text" class="fi" id="fn-pix" placeholder="Chave PIX..."></div>
         <div class="fgroup"><label class="flabel">Data Admissão</label><input type="date" class="fi" id="fn-admissao"></div>
         <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="addFuncionario()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Salvar</button></div>
@@ -542,7 +572,7 @@ textarea.fi{resize:vertical;min-height:72px}
     </div>
     <div class="card">
       <div class="ch">Colaboradores</div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nome</th><th>Cargo</th><th>Telefone</th><th>Diária</th><th>H. Extra</th><th>PIX</th><th>Status</th><th></th></tr></thead><tbody id="fn-body"></tbody></table></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nome</th><th>Cargo</th><th>Tipo</th><th>Telefone</th><th>Valor</th><th>H. Extra</th><th>PIX</th><th>Status</th><th></th></tr></thead><tbody id="fn-body"></tbody></table></div>
     </div>
   </div>
 
@@ -618,6 +648,55 @@ textarea.fi{resize:vertical;min-height:72px}
         <select class="fi" id="rf-filtro-func" onchange="renderRefeicoes()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px"><option value="">Todos</option></select>
       </div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Data</th><th>Funcionário</th><th>Fornecedor</th><th>Refeição</th><th>Valor</th><th></th></tr></thead><tbody id="rf-body"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- CONFIGURAÇÕES -->
+  <div class="view" id="view-configuracoes">
+    <div class="g2 mb16">
+      <div class="card">
+        <div class="ch">Dados da Empresa</div>
+        <div class="frow">
+          <div class="fgroup" style="flex:2"><label class="flabel">Razão Social</label><input type="text" class="fi" id="cfg-razao" placeholder="Conexão Design Móveis e Decorações"></div>
+          <div class="fgroup"><label class="flabel">CNPJ</label><input type="text" class="fi" id="cfg-cnpj" placeholder="58.323.410/0001-53"></div>
+        </div>
+        <div class="frow">
+          <div class="fgroup" style="flex:2"><label class="flabel">Endereço</label><input type="text" class="fi" id="cfg-end" placeholder="Rua J44 QD.09 LT.08..."></div>
+          <div class="fgroup"><label class="flabel">Cidade/UF</label><input type="text" class="fi" id="cfg-cidade" placeholder="Aparecida de Goiânia/GO"></div>
+        </div>
+        <div class="frow">
+          <div class="fgroup"><label class="flabel">Telefone</label><input type="text" class="fi" id="cfg-tel" placeholder="(62) 9..."></div>
+          <div class="fgroup"><label class="flabel">E-mail</label><input type="email" class="fi" id="cfg-email" placeholder="email@..."></div>
+          <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="saveCfg()">Salvar dados</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch">Saldo Inicial de Caixa</div>
+        <p style="font-size:12px;color:var(--t2);margin-bottom:14px">Defina o saldo atual de cada conta para calcular a previsão de caixa corretamente.</p>
+        <div class="frow">
+          <div class="fgroup"><label class="flabel">PagBank (R$)</label><input type="number" class="fi" id="cfg-saldo-pagbank" placeholder="0,00" step="0.01"></div>
+          <div class="fgroup"><label class="flabel">Infinit (R$)</label><input type="number" class="fi" id="cfg-saldo-infinit" placeholder="0,00" step="0.01"></div>
+          <div class="fgroup"><label class="flabel">Caixa (R$)</label><input type="number" class="fi" id="cfg-saldo-caixa" placeholder="0,00" step="0.01"></div>
+        </div>
+        <button class="btn mint" onclick="saveSaldos()">Salvar saldos</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">Provisão de Caixa - Próxima Semana</div>
+      <div id="cfg-previsao"></div>
+    </div>
+  </div>
+
+  <!-- USUÁRIOS / LOG -->
+  <div class="view" id="view-usuarios">
+    <div class="card mb16">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="ch" style="flex:1;margin:0">Log de Atividades</div>
+        <select class="fi" id="log-filtro-user" onchange="renderLog()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px"><option value="">Todos usuários</option></select>
+        <input type="date" class="fi" id="log-filtro-data" onchange="renderLog()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+        <button class="btn sm danger" onclick="if(confirm('Limpar todo o log?')){actLog=[];saveLog();renderLog();}">Limpar log</button>
+      </div>
+      <div id="log-list"></div>
     </div>
   </div>
 
@@ -917,7 +996,7 @@ function nextId(arr){return arr.reduce(function(m,x){return Math.max(m,x.id||0);
 var viewAtual='dashboard';
 
 // ── NAVIGATION ────────────────────────────────────────────
-var LBLS={dashboard:'Dashboard',caixa:'Caixa / Extrato',pagar:'Contas a Pagar',clientes:'Clientes',fornecedores:'Fornecedores',categorias:'Categorias',funcionarios:'Funcionários',ponto:'Ponto / Jornada',folha:'Folha Semanal',refeicoes:'Refeições'};
+var LBLS={dashboard:'Dashboard',caixa:'Caixa / Extrato',pagar:'Contas a Pagar',clientes:'Clientes',fornecedores:'Fornecedores',categorias:'Categorias',funcionarios:'Funcionários',ponto:'Ponto / Jornada',folha:'Folha Semanal',refeicoes:'Refeições',configuracoes:'Configurações',usuarios:'Usuários / Log'};
 
 function go(v){
   document.querySelectorAll('.view').forEach(function(e){e.classList.remove('active');});
@@ -936,6 +1015,8 @@ function go(v){
   if(v==='ponto'){populateFuncSelect('pt-func');populateFuncSelect('pt-filtro-func');renderPonto();}
   if(v==='folha')renderFolha();
   if(v==='refeicoes'){populateFuncSelect('rf-func');populateFornSelect('rf-forn');populateFuncSelect('rf-filtro-func');renderRefeicoes();}
+  if(v==='configuracoes')renderConfig();
+  if(v==='usuarios')renderLog();
   closeSb();
 }
 
@@ -971,11 +1052,12 @@ function renderDash(){
   var txMes=transacoes.filter(function(t){return t.data&&t.data.startsWith(mes);});
   var entradas=txMes.filter(function(t){return t.tipo==='entrada';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
   var saidas=txMes.filter(function(t){return t.tipo==='saida';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
-  var saldoPag=transacoes.filter(function(t){return t.conta==='pagbank'&&t.tipo==='entrada';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0)
+  var cfg=getCfg();
+  var saldoPag=(cfg.saldo_pagbank||0)+transacoes.filter(function(t){return t.conta==='pagbank'&&t.tipo==='entrada';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0)
     -transacoes.filter(function(t){return t.conta==='pagbank'&&t.tipo==='saida';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
-  var saldoInf=transacoes.filter(function(t){return t.conta==='infinit'&&t.tipo==='entrada';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0)
+  var saldoInf=(cfg.saldo_infinit||0)+transacoes.filter(function(t){return t.conta==='infinit'&&t.tipo==='entrada';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0)
     -transacoes.filter(function(t){return t.conta==='infinit'&&t.tipo==='saida';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
-  var saldoCx=transacoes.filter(function(t){return t.conta==='caixa'&&t.tipo==='entrada';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0)
+  var saldoCx=(cfg.saldo_caixa||0)+transacoes.filter(function(t){return t.conta==='caixa'&&t.tipo==='entrada';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0)
     -transacoes.filter(function(t){return t.conta==='caixa'&&t.tipo==='saida';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
   var saldoTotal=saldoPag+saldoInf+saldoCx;
   var hoje=fd(td);
@@ -983,7 +1065,9 @@ function renderDash(){
   document.getElementById('ds-saldo').textContent=fmt(saldoTotal);
   document.getElementById('ds-entradas').textContent=fmt(entradas);
   document.getElementById('ds-saidas').textContent=fmt(saidas);
-  document.getElementById('ds-vencer').textContent=fmt(vencer);
+  var rfMes=refeicoes.filter(function(r){return r.data&&r.data.startsWith(mes);}).reduce(function(s,r){return s+parseFloat(r.valor||0);},0);
+  var provFolha=funcionarios.filter(function(f){return f.ativo!==false&&(f.tipo==='mensalista'||f.tipo==='prolabore');}).reduce(function(s,f){return s+(parseFloat(f.salario)||0);},0);
+  document.getElementById('ds-vencer').textContent=fmt(vencer+rfMes+provFolha);
   // Contas
   document.getElementById('dash-contas').innerHTML=[
     {nome:'PagBank',emoji:'🏦',saldo:saldoPag,cor:'#B8D8D8'},
@@ -1036,7 +1120,7 @@ function addTransacao(){
   var valor=parseFloat(document.getElementById('cx-valor').value);
   if(!desc||!valor){toast('Preencha descrição e valor','warn');return;}
   transacoes.push({id:nextId(transacoes),descricao:desc,data:document.getElementById('cx-data').value||fd(td),valor:valor,tipo:document.getElementById('cx-tipo').value,conta:document.getElementById('cx-conta').value,categoria_id:document.getElementById('cx-cat').value});
-  save();syncToSheets('transacoes');renderCaixa();toast('Lançamento registrado!','ok');
+  save();syncToSheets('transacoes');logActivity('Novo lançamento: '+desc+' ('+fmt(valor)+')');renderCaixa();toast('Lançamento registrado!','ok');
   document.getElementById('cx-desc').value='';document.getElementById('cx-valor').value='';
 }
 
@@ -1089,8 +1173,8 @@ function addConta(){
   var valor=parseFloat(document.getElementById('pg-valor').value);
   var venc=document.getElementById('pg-venc').value;
   if(!desc||!valor||!venc){toast('Preencha todos os campos','warn');return;}
-  contas_pagar.push({id:nextId(contas_pagar),descricao:desc,fornecedor_id:document.getElementById('pg-forn').value,categoria_id:document.getElementById('pg-cat').value,valor:valor,vencimento:venc,status:'pendente'});
-  save();syncToSheets('contas_pagar');renderPagar();toast('Conta adicionada!','ok');
+  contas_pagar.push({id:nextId(contas_pagar),descricao:desc,fornecedor_id:document.getElementById('pg-forn').value,categoria_id:document.getElementById('pg-cat').value,valor:valor,vencimento:venc,status:'pendente',obs:document.getElementById('pg-obs').value,created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
+  save();syncToSheets('contas_pagar');logActivity('Nova conta a pagar: '+desc+' ('+fmt(valor)+')');renderPagar();toast('Conta adicionada!','ok');
   document.getElementById('pg-desc').value='';document.getElementById('pg-valor').value='';document.getElementById('pg-venc').value='';
   document.getElementById('badge-pagar').textContent=contas_pagar.filter(function(c){return c.status!=='pago';}).length;
 }
@@ -1116,7 +1200,7 @@ function renderPagar(){
   else list.forEach(function(c){
     var st=c.status==='pago'?'pago':c.vencimento<hoje?'venc':'pend';
     var stLbl=c.status==='pago'?'Pago':c.vencimento<hoje?'Vencida':'Pendente';
-    html+='<tr><td>'+dp(c.vencimento)+'</td><td>'+c.descricao+'</td><td>'+fornNome(c.fornecedor_id)+'</td><td><span class="tag cat">'+catNome(c.categoria_id)+'</span></td><td style="font-family:var(--fm)">'+fmt(c.valor)+'</td><td><span class="tag '+st+'">'+stLbl+'</span></td><td style="display:flex;gap:4px">'+(c.status!=='pago'?'<button class="ibt" onclick="pagarConta('+c.id+')" title="Marcar como pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>':'')+'<button class="ibt" onclick="delItem(\'contas_pagar\','+c.id+',\'Conta: '+c.descricao.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+    html+='<tr><td>'+dp(c.vencimento)+'</td><td>'+c.descricao+(c.obs?'<br><span style="font-size:10px;color:var(--t3)">'+c.obs+'</span>':'')+'</td><td>'+fornNome(c.fornecedor_id)+'</td><td><span class="tag cat">'+catNome(c.categoria_id)+'</span></td><td style="font-family:var(--fm)">'+fmt(c.valor)+'</td><td><span class="tag '+st+'">'+stLbl+'</span></td><td style="display:flex;gap:4px">'+(c.status!=='pago'?'<button class="ibt" onclick="pagarConta('+c.id+')" title="Marcar como pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>':'')+'<button class="ibt" onclick="delItem(\'contas_pagar\','+c.id+',\'Conta: '+c.descricao.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
   });
   document.getElementById('pg-body').innerHTML=html;
 }
@@ -1126,7 +1210,7 @@ function addCliente(){
   var nome=document.getElementById('cl-nome').value.trim();
   if(!nome){toast('Informe o nome','warn');return;}
   clientes.push({id:nextId(clientes),nome:nome,telefone:document.getElementById('cl-tel').value,documento:document.getElementById('cl-doc').value,endereco:document.getElementById('cl-end').value,cidade:document.getElementById('cl-cidade').value,email:document.getElementById('cl-email').value,ativo:true});
-  save();syncToSheets('clientes');renderClientes();toast('Cliente salvo!','ok');
+  save();syncToSheets('clientes');logActivity('Novo cliente: '+document.getElementById('cl-nome').value);renderClientes();toast('Cliente salvo!','ok');
   ['cl-nome','cl-tel','cl-doc','cl-end','cl-cidade','cl-email'].forEach(function(id){document.getElementById(id).value='';});
 }
 function renderClientes(){
@@ -1142,8 +1226,8 @@ function renderClientes(){
 function addFornecedor(){
   var nome=document.getElementById('fr-nome').value.trim();
   if(!nome){toast('Informe o nome','warn');return;}
-  fornecedores.push({id:nextId(fornecedores),nome:nome,categoria_id:document.getElementById('fr-cat').value,telefone:document.getElementById('fr-tel').value,documento:document.getElementById('fr-doc').value,produto:document.getElementById('fr-prod').value,pix:document.getElementById('fr-pix').value,prazo:document.getElementById('fr-prazo').value,ativo:true});
-  save();syncToSheets('fornecedores');renderFornecedores();toast('Fornecedor salvo!','ok');
+  fornecedores.push({id:nextId(fornecedores),nome:nome,categoria_id:document.getElementById('fr-cat').value,telefone:document.getElementById('fr-tel').value,documento:document.getElementById('fr-doc').value,produto:document.getElementById('fr-prod').value,pix:document.getElementById('fr-pix').value,endereco:document.getElementById('fr-end').value,bairro:document.getElementById('fr-bairro').value,cidade:document.getElementById('fr-cidade').value,prazo:document.getElementById('fr-prazo').value,ativo:true,created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
+  save();syncToSheets('fornecedores');logActivity('Novo fornecedor: '+nome);renderFornecedores();toast('Fornecedor salvo!','ok');
   ['fr-nome','fr-tel','fr-doc','fr-prod','fr-pix','fr-prazo'].forEach(function(id){document.getElementById(id).value='';});
 }
 function renderFornecedores(){
@@ -1176,15 +1260,19 @@ function renderCategorias(){
 function addFuncionario(){
   var nome=document.getElementById('fn-nome').value.trim();
   if(!nome){toast('Informe o nome','warn');return;}
-  funcionarios.push({id:nextId(funcionarios),nome:nome,cargo:document.getElementById('fn-cargo').value,telefone:document.getElementById('fn-tel').value,cpf:document.getElementById('fn-cpf').value,diaria:parseFloat(document.getElementById('fn-diaria').value)||0,hora_extra:parseFloat(document.getElementById('fn-hora-extra').value)||0,pix:document.getElementById('fn-pix').value,admissao:document.getElementById('fn-admissao').value,ativo:true});
-  save();syncToSheets('funcionarios');renderFuncionarios();toast('Funcionário salvo!','ok');
+  var fnTipo=document.getElementById('fn-tipo').value;
+  funcionarios.push({id:nextId(funcionarios),nome:nome,tipo:fnTipo,cargo:document.getElementById('fn-cargo').value,telefone:document.getElementById('fn-tel').value,cpf:document.getElementById('fn-cpf').value,diaria:parseFloat(document.getElementById('fn-diaria').value)||0,salario:parseFloat(document.getElementById('fn-salario').value)||0,hora_extra:parseFloat(document.getElementById('fn-hora-extra').value)||0,pix:document.getElementById('fn-pix').value,admissao:document.getElementById('fn-admissao').value,ativo:true,created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
+  save();syncToSheets('funcionarios');logActivity('Novo funcionário: '+nome);renderFuncionarios();toast('Funcionário salvo!','ok');
   ['fn-nome','fn-cargo','fn-tel','fn-cpf','fn-diaria','fn-hora-extra','fn-pix','fn-admissao'].forEach(function(id){document.getElementById(id).value='';});
 }
 function renderFuncionarios(){
   var html='';
   if(!funcionarios.length){html='<tr><td colspan="8"><div class="empty">Nenhum funcionário cadastrado</div></td></tr>';}
   else funcionarios.forEach(function(f){
-    html+='<tr><td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td><td>'+f.telefone+'</td><td style="font-family:var(--fm)">'+fmt(f.diaria)+'</td><td style="font-family:var(--fm)">'+fmt(f.hora_extra)+'/h</td><td>'+f.pix+'</td><td><span class="tag '+(f.ativo?'ativo':'inativo')+'">'+(f.ativo?'Ativo':'Inativo')+'</span></td><td style="display:flex;gap:4px"><button class="ibt" onclick="toggleAtivo(\'funcionarios\','+f.id+')" title="Ativar/Inativar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button><button class="ibt" onclick="delItem(\'funcionarios\','+f.id+',\'Funcionário: '+f.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+    var tipoClass={diarista:'tipo-diarista',mensalista:'tipo-mensalista',prolabore:'tipo-prolabore'}[f.tipo||'diarista']||'tipo-diarista';
+var tipoLbl={diarista:'Diarista',mensalista:'Mensalista',prolabore:'Pró-labore'}[f.tipo||'diarista']||'Diarista';
+var valLbl=f.tipo==='diarista'?fmt(f.diaria)+'/dia':(f.tipo==='mensalista'||f.tipo==='prolabore')?fmt(f.salario||0)+'/mês':fmt(f.diaria)+'/dia';
+html+='<tr><td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td><td><span class="tipo-tag '+tipoClass+'">'+tipoLbl+'</span></td><td>'+f.telefone+'</td><td style="font-family:var(--fm)">'+valLbl+'</td><td style="font-family:var(--fm)">'+fmt(f.hora_extra)+'/h</td><td>'+f.pix+'</td><td><span class="tag '+(f.ativo?'ativo':'inativo')+'">'+(f.ativo?'Ativo':'Inativo')+'</span></td><td style="display:flex;gap:4px"><button class="ibt" onclick="toggleAtivo(\'funcionarios\','+f.id+')" title="Ativar/Inativar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button><button class="ibt" onclick="delItem(\'funcionarios\','+f.id+',\'Funcionário: '+f.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
   });
   document.getElementById('fn-body').innerHTML=html;
 }
@@ -1195,7 +1283,7 @@ function addPonto(){
   var data=document.getElementById('pt-data').value;
   if(!fid||!data){toast('Selecione funcionário e data','warn');return;}
   pontos.push({id:nextId(pontos),funcionario_id:parseInt(fid),data:data,tipo:document.getElementById('pt-tipo').value,horas:parseFloat(document.getElementById('pt-horas').value)||0,obs:document.getElementById('pt-obs').value});
-  save();syncToSheets('pontos');renderPonto();toast('Ponto registrado!','ok');
+  save();syncToSheets('pontos');logActivity('Ponto registrado: '+funcNome(parseInt(document.getElementById('pt-func').value)));renderPonto();toast('Ponto registrado!','ok');
   document.getElementById('pt-horas').value='';document.getElementById('pt-obs').value='';
 }
 function renderPonto(){
@@ -1420,6 +1508,126 @@ function toast(msg,type){
 function openSb(){document.getElementById('sb').classList.add('open');document.getElementById('ov').classList.add('show');}
 function closeSb(){document.getElementById('sb').classList.remove('open');document.getElementById('ov').classList.remove('show');}
 
+// ── CONFIGURAÇÕES ────────────────────────────────────────
+function getCfg(){
+  return JSON.parse(localStorage.getItem('cd_cfg')||'{}');
+}
+function saveCfg(){
+  var cfg={
+    razao:document.getElementById('cfg-razao').value,
+    cnpj:document.getElementById('cfg-cnpj').value,
+    end:document.getElementById('cfg-end').value,
+    cidade:document.getElementById('cfg-cidade').value,
+    tel:document.getElementById('cfg-tel').value,
+    email:document.getElementById('cfg-email').value
+  };
+  localStorage.setItem('cd_cfg', JSON.stringify(Object.assign(getCfg(),cfg)));
+  toast('Dados da empresa salvos!','ok');
+}
+function saveSaldos(){
+  var cfg=getCfg();
+  cfg.saldo_pagbank=parseFloat(document.getElementById('cfg-saldo-pagbank').value)||0;
+  cfg.saldo_infinit=parseFloat(document.getElementById('cfg-saldo-infinit').value)||0;
+  cfg.saldo_caixa=parseFloat(document.getElementById('cfg-saldo-caixa').value)||0;
+  localStorage.setItem('cd_cfg',JSON.stringify(cfg));
+  toast('Saldos salvos!','ok');
+  renderDash();
+}
+function renderConfig(){
+  var cfg=getCfg();
+  document.getElementById('cfg-razao').value=cfg.razao||'Conexão Design Móveis e Decorações';
+  document.getElementById('cfg-cnpj').value=cfg.cnpj||'58.323.410/0001-53';
+  document.getElementById('cfg-end').value=cfg.end||'Rua J44 QD.09 LT.08 Setor Mansões Paraíso';
+  document.getElementById('cfg-cidade').value=cfg.cidade||'Aparecida de Goiânia/GO';
+  document.getElementById('cfg-tel').value=cfg.tel||'';
+  document.getElementById('cfg-email').value=cfg.email||'conexaodesign0@gmail.com';
+  document.getElementById('cfg-saldo-pagbank').value=cfg.saldo_pagbank||0;
+  document.getElementById('cfg-saldo-infinit').value=cfg.saldo_infinit||0;
+  document.getElementById('cfg-saldo-caixa').value=cfg.saldo_caixa||0;
+  // Previsão de caixa
+  var hoje=fd(td);
+  var proxSem=new Date(td); proxSem.setDate(td.getDate()+7);
+  var psf=fd(proxSem);
+  var totalPag=contas_pagar.filter(function(c){return c.status!=='pago'&&c.vencimento>=hoje&&c.vencimento<=psf;}).reduce(function(s,c){return s+parseFloat(c.valor||0);},0);
+  var totalRf=refeicoes.filter(function(r){return r.data>=hoje&&r.data<=psf;}).reduce(function(s,r){return s+parseFloat(r.valor||0);},0);
+  var totalFolha=funcionarios.filter(function(f){return f.ativo!==false&&(f.tipo==='mensalista'||f.tipo==='prolabore');}).reduce(function(s,f){return s+(parseFloat(f.salario)||0)/4;},0);
+  var saldoAtual=(cfg.saldo_pagbank||0)+(cfg.saldo_infinit||0)+(cfg.saldo_caixa||0);
+  var saldoPrev=saldoAtual-totalPag-totalRf-totalFolha;
+  document.getElementById('cfg-previsao').innerHTML=
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:4px">'+
+    '<div class="stat"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div><div class="sn">'+fmt(saldoAtual)+'</div><div class="sl">Saldo Atual</div></div>'+
+    '<div class="stat red"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg></div><div class="sn">'+fmt(totalPag+totalRf+totalFolha)+'</div><div class="sl">Saídas Previstas</div></div>'+
+    '<div class="stat '+(saldoPrev>=0?'green':'red')+'"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg></div><div class="sn">'+fmt(saldoPrev)+'</div><div class="sl">Saldo Previsto 7 dias</div></div>'+
+    '</div>'+
+    '<div style="margin-top:14px;font-size:12px;color:var(--t2)"><b>Detalhe das saídas previstas (próximos 7 dias):</b>'+
+    '<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">'+
+    '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bg3)"><span>Contas a pagar vencendo</span><span style="font-family:var(--fm)">'+fmt(totalPag)+'</span></div>'+
+    '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bg3)"><span>Refeições previstas</span><span style="font-family:var(--fm)">'+fmt(totalRf)+'</span></div>'+
+    '<div style="display:flex;justify-content:space-between;padding:5px 0"><span>Folha mensalistas/pró-labore (semanal)</span><span style="font-family:var(--fm)">'+fmt(totalFolha)+'</span></div>'+
+    '</div></div>';
+}
+
+// ── TOGGLE TIPO FUNCIONARIO ───────────────────────────────
+function toggleFnTipo(){
+  var tipo=document.getElementById('fn-tipo').value;
+  document.getElementById('fn-diaria-wrap').style.display=tipo==='diarista'?'flex':'none';
+  document.getElementById('fn-salario-wrap').style.display=(tipo==='mensalista'||tipo==='prolabore')?'flex':'none';
+  document.getElementById('fn-hextra-wrap').style.display=tipo==='diarista'?'flex':'none';
+}
+
+// ── ACTIVITY LOG ──────────────────────────────────────────
+var actLog = JSON.parse(localStorage.getItem('cd_log')||'[]');
+function saveLog(){ localStorage.setItem('cd_log',JSON.stringify(actLog.slice(0,500))); }
+function logActivity(action){
+  var user=CURRENT_USER?CURRENT_USER.name||CURRENT_USER.email:'Sistema';
+  actLog.unshift({ts:new Date().toISOString(),user:user,action:action});
+  saveLog();
+}
+function renderLog(){
+  var fu=document.getElementById('log-filtro-user').value;
+  var fd2=document.getElementById('log-filtro-data').value;
+  // Populate user filter
+  var users=[...new Set(actLog.map(function(l){return l.user;}))];
+  var curU=fu;
+  document.getElementById('log-filtro-user').innerHTML='<option value="">Todos usuários</option>'+users.map(function(u){return '<option value="'+u+'"'+(u===curU?' selected':'')+'>'+u+'</option>';}).join('');
+  var list=actLog.filter(function(l){
+    if(fu&&l.user!==fu) return false;
+    if(fd2&&!l.ts.startsWith(fd2)) return false;
+    return true;
+  });
+  if(!list.length){document.getElementById('log-list').innerHTML='<div class="empty">Nenhuma atividade registrada</div>';return;}
+  document.getElementById('log-list').innerHTML=list.slice(0,100).map(function(l){
+    var dt=new Date(l.ts);
+    var dtStr=dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    return '<div class="log-row"><span class="log-time">'+dtStr+'</span><span class="log-user">'+l.user+'</span><span class="log-action">'+l.action+'</span></div>';
+  }).join('');
+}
+
+// ── PDF CONTAS A PAGAR ────────────────────────────────────
+function pdfContasPagar(){
+  var cfg=getCfg();
+  var f=document.getElementById('pg-filtro').value;
+  var hoje=fd(td);
+  var list=contas_pagar.filter(function(c){
+    if(f==='pendente')return c.status==='pendente';
+    if(f==='vencido')return c.status!=='pago'&&c.vencimento<hoje;
+    if(f==='pago')return c.status==='pago';
+    return true;
+  }).sort(function(a,b){return a.vencimento.localeCompare(b.vencimento);});
+  var total=list.reduce(function(s,c){return s+parseFloat(c.valor||0);},0);
+  var html='<html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px}.h{text-align:center;border-bottom:2px solid #2C2C2C;padding-bottom:10px;margin-bottom:16px}.h h1{font-size:18px;margin:0;color:#2C2C2C}.h p{margin:2px 0;color:#666;font-size:10px}table{width:100%;border-collapse:collapse}th{background:#2C2C2C;color:#fff;padding:6px 8px;text-align:left;font-size:10px}td{padding:6px 8px;border-bottom:1px solid #eee}tr:nth-child(even){background:#f9f9f9}.pago{color:#2E7D52;font-weight:600}.venc{color:#C0392B;font-weight:600}.pend{color:#C47D0A;font-weight:600}.tot{font-weight:bold;background:#f0f0f0!important}.ft{margin-top:20px;border-top:1px solid #ccc;padding-top:8px;font-size:9px;color:#999;display:flex;justify-content:space-between}</style></head><body>';
+  html+='<div class="h"><h1>'+(cfg.razao||'Conexão Design')+'</h1><p>CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+' | '+(cfg.end||'')+' - '+(cfg.cidade||'')+'</p><p>Relatório de Contas a Pagar | Emitido em: '+new Date().toLocaleDateString('pt-BR')+'</p></div>';
+  html+='<table><thead><tr><th>Vencimento</th><th>Descrição</th><th>Fornecedor</th><th>Categoria</th><th>Observação</th><th>Valor</th><th>Status</th></tr></thead><tbody>';
+  list.forEach(function(c){
+    var st=c.status==='pago'?'pago':c.vencimento<hoje?'venc':'pend';
+    var stl=c.status==='pago'?'Pago':c.vencimento<hoje?'Vencida':'Pendente';
+    html+='<tr><td>'+dp(c.vencimento)+'</td><td>'+c.descricao+'</td><td>'+fornNome(c.fornecedor_id)+'</td><td>'+catNome(c.categoria_id)+'</td><td style="color:#666">'+( c.obs||'')+'</td><td style="font-weight:600">R$ '+parseFloat(c.valor).toFixed(2)+'</td><td class="'+st+'">'+stl+'</td></tr>';
+  });
+  html+='<tr class="tot"><td colspan="5">TOTAL</td><td>R$ '+total.toFixed(2)+'</td><td></td></tr>';
+  html+='</tbody></table><div class="ft"><span>'+(cfg.razao||'Conexão Design Móveis e Decorações')+' - CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+'</span><span>'+new Date().toLocaleDateString('pt-BR')+'</span></div></body></html>';
+  var w=window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
+}
+
 // ── CARGOS ────────────────────────────────────────────────
 var funcoes_cargo = JSON.parse(localStorage.getItem('cd_cargos')||'null')||['Soldador','Montador','Polidor','Instalador','Auxiliar','Motorista','Pintor','Eletricista','Vidraceiro'];
 function saveCargos(){ localStorage.setItem('cd_cargos',JSON.stringify(funcoes_cargo)); }
@@ -1459,6 +1667,10 @@ async function buscarCNPJ(prefix){
     } else {
       document.getElementById('fr-nome').value=d.razao_social||'';
       document.getElementById('fr-tel').value=d.ddd_telefone_1||'';
+      document.getElementById('fr-end').value=(d.logradouro||'')+(d.numero?' '+d.numero:'')+(d.complemento?' '+d.complemento:'');
+      document.getElementById('fr-bairro').value=d.bairro||'';
+      document.getElementById('fr-cidade').value=(d.municipio||'')+(d.uf?' - '+d.uf:'');
+      document.getElementById('fr-doc').value=d.cnpj||document.getElementById('fr-doc').value;
     }
     toast('Dados preenchidos!','ok');
   } catch(e){ toast('CNPJ nao encontrado','warn'); }
@@ -1558,6 +1770,8 @@ var weekStr=fd(td).slice(0,4)+'-W'+String(Math.ceil((((new Date(td.getFullYear()
 if(document.getElementById('fl-semana'))document.getElementById('fl-semana').value=weekStr;
 if(document.getElementById('pt-filtro-semana'))document.getElementById('pt-filtro-semana').value=weekStr;
 populateCargos();
+// Load cfg into config view when available
+var _cfg=getCfg();
 // Show auth screen - renderDash called after login
 </script>
 </body>
