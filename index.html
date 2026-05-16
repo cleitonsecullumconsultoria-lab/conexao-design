@@ -297,6 +297,10 @@ textarea.fi{resize:vertical;min-height:72px}
       Contas a Pagar
       <span class="nbadge" id="badge-pagar">0</span>
     </div>
+    <div class="ni" onclick="go('contas')" id="nav-contas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      Contas Bancárias
+    </div>
     <div class="sb-sec">Cadastros</div>
     <div class="ni" onclick="go('clientes')" id="nav-clientes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -358,6 +362,10 @@ textarea.fi{resize:vertical;min-height:72px}
     <button class="btn sm" onclick="exportarAtual()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Excel
+    </button>
+    <button class="btn sm" onclick="pdfAtual()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      PDF
     </button>
     <button class="btn sm" onclick="loadAllData()" title="Sincronizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
     <button class="btn mint" onclick="novoItem()">
@@ -487,6 +495,39 @@ textarea.fi{resize:vertical;min-height:72px}
     </div>
   </div>
 
+
+  <!-- CONTAS BANCARIAS -->
+  <div class="view" id="view-contas">
+    <div class="card mb16">
+      <div class="ch">Cadastrar Conta Bancaria</div>
+      <div class="frow">
+        <div class="fgroup" style="flex:2;min-width:200px"><label class="flabel">Nome da Conta</label><input type="text" class="fi" id="cb-nome" placeholder="Ex: PagBank Principal, Caixa..."></div>
+        <div class="fgroup"><label class="flabel">Banco / Instituicao</label><input type="text" class="fi" id="cb-banco" placeholder="Ex: PagBank, Inter, Itau..."></div>
+        <div class="fgroup"><label class="flabel">Tipo</label>
+          <select class="fi" id="cb-tipo">
+            <option value="corrente">Conta Corrente</option>
+            <option value="poupanca">Poupanca</option>
+            <option value="pagamento">Conta Pagamento</option>
+            <option value="caixa">Caixa Fisico</option>
+            <option value="pix">PIX / Carteira</option>
+          </select>
+        </div>
+        <div class="fgroup"><label class="flabel">Agencia</label><input type="text" class="fi" id="cb-agencia" placeholder="0001"></div>
+        <div class="fgroup"><label class="flabel">Numero da Conta</label><input type="text" class="fi" id="cb-numero" placeholder="00000-0"></div>
+      </div>
+      <div class="frow">
+        <div class="fgroup"><label class="flabel">Chave PIX</label><input type="text" class="fi" id="cb-pix" placeholder="CPF, CNPJ, e-mail, telefone ou chave..."></div>
+        <div class="fgroup"><label class="flabel">Saldo Inicial (R$)</label><input type="number" class="fi" id="cb-saldo" placeholder="0,00" step="0.01"></div>
+        <div class="fgroup" style="flex:2"><label class="flabel">Observacao</label><input type="text" class="fi" id="cb-obs" placeholder="Observacao opcional..."></div>
+        <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="addContaBancaria()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Cadastrar</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">Contas Cadastradas</div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nome</th><th>Banco</th><th>Tipo</th><th>Agencia</th><th>N. Conta</th><th>Chave PIX</th><th>Saldo</th><th>Obs</th><th></th></tr></thead><tbody id="cb-body"></tbody></table></div>
+    </div>
+  </div>
+
   <!-- CLIENTES -->
   <div class="view" id="view-clientes">
     <div class="card mb16">
@@ -599,7 +640,7 @@ textarea.fi{resize:vertical;min-height:72px}
         <input type="week" class="fi" id="pt-filtro-semana" onchange="renderPonto()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
         <select class="fi" id="pt-filtro-func" onchange="renderPonto()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px"><option value="">Todos</option></select>
       </div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Data</th><th>Funcionário</th><th>Tipo</th><th>H. Extra</th><th>Valor</th><th>Lançado em</th><th>Obs</th><th></th></tr></thead><tbody id="pt-body"></tbody></table></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Data</th><th>Funcionário</th><th>Tipo</th><th>Valor</th><th>Lançado em</th><th>Obs</th><th></th></tr></thead><tbody id="pt-body"></tbody></table></div>
     </div>
     <div class="ponto-grid" id="ponto-cards"></div>
   </div>
@@ -711,6 +752,43 @@ textarea.fi{resize:vertical;min-height:72px}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- MODAL EDITAR PONTO -->
+<div class="mbg" id="m-edit-ponto">
+  <div class="mbox" style="max-width:480px">
+    <button class="ibt mclose" onclick="document.getElementById('m-edit-ponto').classList.remove('show')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <h3>Editar Registro de Ponto</h3>
+    <p>Edite tipo, horas e observacao. A data original do lancamento e preservada.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
+      <div style="background:var(--bg3);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--t2)">
+        <b>Funcionario:</b> <span id="ep-func-nome"></span><br>
+        <b>Data de servico:</b> <span id="ep-data-servico"></span><br>
+        <span style="color:var(--t3);font-size:11px">Lancado em: <b id="ep-lancado-em"></b> por <b id="ep-lancado-por"></b></span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1"><label class="flabel">Tipo</label>
+          <select class="fi" id="ep-tipo" onchange="calcEpValor()">
+            <option value="diaria">Diaria</option>
+            <option value="meio">Meio periodo</option>
+            <option value="extra">Hora extra</option>
+            <option value="falta">Falta</option>
+          </select>
+        </div>
+        <div style="flex:1"><label class="flabel">Qtd Horas Extra</label>
+          <input type="number" class="fi" id="ep-horas" placeholder="0" step="0.5" min="0" oninput="calcEpValor()">
+        </div>
+      </div>
+      <div><label class="flabel">Observacao</label>
+        <input type="text" class="fi" id="ep-obs" placeholder="Observacao..." style="width:100%">
+      </div>
+      <div style="background:var(--green-s);border-radius:var(--r);padding:8px 14px;font-size:12px;color:var(--green);font-weight:600" id="ep-valor-calc"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" onclick="document.getElementById('m-edit-ponto').classList.remove('show')" style="flex:1">Cancelar</button>
+      <button class="btn mint" onclick="saveEditPonto()" style="flex:2">Salvar alteracoes</button>
+    </div>
+  </div>
+</div>
+
 <div class="mbg" id="m-edit-rec">
   <div class="mbox" style="max-width:500px">
     <button class="ibt mclose" onclick="document.getElementById('m-edit-rec').classList.remove('show')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -748,13 +826,13 @@ textarea.fi{resize:vertical;min-height:72px}
 </div>
 
 <script>
-// ── HELPERS ──────────────────────────────────────────────
+// -- HELPERS ----------------------------------------------
 var fd=function(d){return(d instanceof Date?d:new Date(d)).toISOString().slice(0,10);};
 var td=new Date();
 var fmt=function(v){return'R$ '+parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});};
 var dp=function(s){if(!s)return'';var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0].slice(2);};
 
-// ── CONFIG ────────────────────────────────────────────────
+// -- CONFIG ------------------------------------------------
 var GOOGLE_CLIENT_ID = '715814366188-vv7eh5m7nkd9k9ns1vn50pl16ejt3a0e.apps.googleusercontent.com';
 var SHEET_ID = '1S7WokfT-GLzCqCZR14tt8CbTY9H57uC76fKbiMe87TA';
 var ACCESS_TOKEN = null;
@@ -768,7 +846,7 @@ var SHEET_NAMES = {
   pontos:'Pontos', refeicoes:'Refeicoes'
 };
 
-// ── AUTH ──────────────────────────────────────────────────
+// -- AUTH --------------------------------------------------
 function handleGoogleLogin(response){
   var payload = JSON.parse(atob(response.credential.split('.')[1]));
   CURRENT_USER = payload;
@@ -812,7 +890,7 @@ function onAuthenticated(){
   initSheets();
 }
 
-// ── SHEETS API ────────────────────────────────────────────
+// -- SHEETS API --------------------------------------------
 function syncStart(){ document.getElementById('sync-bar').classList.add('active'); }
 function syncEnd(){ document.getElementById('sync-bar').classList.remove('active'); }
 
@@ -947,7 +1025,7 @@ function rowFuncionario(f){ return [f.id,f.nome,f.cargo,f.telefone,f.cpf,f.diari
 function rowPonto(p){ return [p.id,p.funcionario_id,p.data,p.tipo,p.horas,p.obs]; }
 function rowRefeicao(r){ return [r.id,r.funcionario_id,r.fornecedor_id,r.data,r.tipo,r.valor]; }
 
-// ── STATE ─────────────────────────────────────────────────
+// -- STATE -------------------------------------------------
 function sg(k){try{var v=JSON.parse(localStorage.getItem('cd_'+k));return v;}catch(e){return null;}}
 function ss(k,v){localStorage.setItem('cd_'+k,JSON.stringify(v));}
 
@@ -960,12 +1038,13 @@ var funcionarios = sg('funcionarios')||[];
 var pontos = sg('pontos')||[];
 var refeicoes = sg('refeicoes')||[];
 var folha_paga = sg('folha_paga')||{};
+var contas_bancarias = sg('contas_bancarias')||[];
 
 function save(){
   // Keep local backup
   ss('transacoes',transacoes);ss('contas_pagar',contas_pagar);ss('clientes',clientes);
   ss('fornecedores',fornecedores);ss('categorias',categorias);ss('funcionarios',funcionarios);
-  ss('pontos',pontos);ss('refeicoes',refeicoes);ss('folha_paga',folha_paga);
+  ss('pontos',pontos);ss('refeicoes',refeicoes);ss('folha_paga',folha_paga);ss('contas_bancarias',contas_bancarias);
 }
 // Sync specific collection to Sheets
 async function syncToSheets(type){
@@ -1000,8 +1079,8 @@ function defCats(){
 function nextId(arr){return arr.reduce(function(m,x){return Math.max(m,x.id||0);},0)+1;}
 var viewAtual='dashboard';
 
-// ── NAVIGATION ────────────────────────────────────────────
-var LBLS={dashboard:'Dashboard',caixa:'Caixa / Extrato',pagar:'Contas a Pagar',clientes:'Clientes',fornecedores:'Fornecedores',categorias:'Categorias',funcionarios:'Funcionários',ponto:'Ponto / Jornada',folha:'Folha Semanal',refeicoes:'Refeições',configuracoes:'Configurações',usuarios:'Usuários / Log'};
+// -- NAVIGATION --------------------------------------------
+var LBLS={dashboard:'Dashboard',caixa:'Caixa / Extrato',pagar:'Contas a Pagar',contas:'Contas Bancárias',clientes:'Clientes',fornecedores:'Fornecedores',categorias:'Categorias',funcionarios:'Funcionários',ponto:'Ponto / Jornada',folha:'Folha Semanal',refeicoes:'Refeições',configuracoes:'Configurações',usuarios:'Usuários / Log'};
 
 function go(v){
   document.querySelectorAll('.view').forEach(function(e){e.classList.remove('active');});
@@ -1020,6 +1099,7 @@ function go(v){
   if(v==='ponto'){populateFuncSelect('pt-func');populateFuncSelect('pt-filtro-func');renderPonto();}
   if(v==='folha')renderFolha();
   if(v==='refeicoes'){populateFuncSelect('rf-func');populateFornSelect('rf-forn');populateFuncSelect('rf-filtro-func');renderRefeicoes();}
+  if(v==='contas')renderContasBancarias();
   if(v==='configuracoes')renderConfig();
   if(v==='usuarios')renderLog();
   closeSb();
@@ -1030,7 +1110,7 @@ function novoItem(){
   if(forms[viewAtual]){var el=document.getElementById(forms[viewAtual]);if(el)el.focus();}
 }
 
-// ── POPULATE SELECTS ──────────────────────────────────────
+// -- POPULATE SELECTS --------------------------------------
 function populateCatSelect(id){
   var sel=document.getElementById(id);if(!sel)return;
   var cur=sel.value;
@@ -1051,7 +1131,7 @@ function catNome(id){var c=categorias.find(function(x){return x.id==id;});return
 function fornNome(id){var f=fornecedores.find(function(x){return x.id==id;});return f?f.nome:'';}
 function funcNome(id){var f=funcionarios.find(function(x){return x.id==id;});return f?f.nome:'';}
 
-// ── DASHBOARD ─────────────────────────────────────────────
+// -- DASHBOARD ---------------------------------------------
 function renderDash(){
   var mes=td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0');
   var txMes=transacoes.filter(function(t){return t.data&&t.data.startsWith(mes);});
@@ -1119,7 +1199,7 @@ function renderDash(){
   document.getElementById('badge-pagar').textContent=contas_pagar.filter(function(c){return c.status!=='pago';}).length;
 }
 
-// ── CAIXA ─────────────────────────────────────────────────
+// -- CAIXA -------------------------------------------------
 function addTransacao(){
   var desc=document.getElementById('cx-desc').value.trim();
   var valor=parseFloat(document.getElementById('cx-valor').value);
@@ -1172,7 +1252,7 @@ function renderCaixa(){
   document.getElementById('cx-body').innerHTML=html;
 }
 
-// ── CONTAS A PAGAR ────────────────────────────────────────
+// -- CONTAS A PAGAR ----------------------------------------
 function addConta(){
   var desc=document.getElementById('pg-desc').value.trim();
   var valor=parseFloat(document.getElementById('pg-valor').value);
@@ -1210,7 +1290,7 @@ function renderPagar(){
   document.getElementById('pg-body').innerHTML=html;
 }
 
-// ── CLIENTES ──────────────────────────────────────────────
+// -- CLIENTES ----------------------------------------------
 function addCliente(){
   var nome=document.getElementById('cl-nome').value.trim();
   if(!nome){toast('Informe o nome','warn');return;}
@@ -1227,7 +1307,7 @@ function renderClientes(){
   document.getElementById('cl-body').innerHTML=html;
 }
 
-// ── FORNECEDORES ──────────────────────────────────────────
+// -- FORNECEDORES ------------------------------------------
 function addFornecedor(){
   var nome=document.getElementById('fr-nome').value.trim();
   if(!nome){toast('Informe o nome','warn');return;}
@@ -1244,7 +1324,7 @@ function renderFornecedores(){
   document.getElementById('fr-body').innerHTML=html;
 }
 
-// ── CATEGORIAS ────────────────────────────────────────────
+// -- CATEGORIAS --------------------------------------------
 function addCategoria(){
   var nome=document.getElementById('cat-nome').value.trim();
   if(!nome){toast('Informe o nome','warn');return;}
@@ -1261,7 +1341,7 @@ function renderCategorias(){
   document.getElementById('cat-body').innerHTML=html;
 }
 
-// ── FUNCIONÁRIOS ──────────────────────────────────────────
+// -- FUNCIONÁRIOS ------------------------------------------
 function addFuncionario(){
   var nome=document.getElementById('fn-nome').value.trim();
   if(!nome){toast('Informe o nome','warn');return;}
@@ -1282,7 +1362,7 @@ html+='<tr><td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td><td><span class="tipo-t
   document.getElementById('fn-body').innerHTML=html;
 }
 
-// ── PONTO ─────────────────────────────────────────────────
+// -- PONTO -------------------------------------------------
 function addPonto(){
   var fid=document.getElementById('pt-func').value;
   var data=document.getElementById('pt-data').value;
@@ -1326,7 +1406,7 @@ function renderPonto(){
   document.getElementById('ponto-cards').innerHTML=cards;
 }
 
-// ── FOLHA SEMANAL ─────────────────────────────────────────
+// -- FOLHA SEMANAL -----------------------------------------
 function getSemana(){
   var fw=document.getElementById('fl-semana').value;
   if(!fw)return{si:null,sf:null,key:null};
@@ -1384,7 +1464,8 @@ function pdfFolha(){
     rows+='<tr style="background:#f0f8f0"><td colspan="8"><b>'+f.nome+'</b> - '+f.cargo+
       ' | Diária: R$ '+parseFloat(f.diaria||0).toFixed(2)+
       ' | H.Extra: R$ '+hrVal.toFixed(2)+'/h'+
-      ' | Status: '+(pago?'<span style="color:#2E7D52">PAGO</span>':'<span style="color:#C47D0A">PENDENTE</span>')+'</td></tr>';
+      (f.pix?' | <b>PIX: '+f.pix+'</b>':'')+
+      ' | Status: '+(pago?'<span style="color:#2E7D52">✓ PAGO</span>':'<span style="color:#C47D0A">⚠ PENDENTE</span>')+'</td></tr>';
     ptFunc.forEach(function(p){
       var tipoLbl={diaria:'Diária',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
       var val=p.tipo==='diaria'?parseFloat(f.diaria||0):p.tipo==='meio'?parseFloat(f.diaria||0)/2:p.tipo==='extra'?(parseFloat(p.horas||0)*hrVal):0;
@@ -1421,7 +1502,7 @@ function exportFolha(){
   exportCSV(BOM+hdr+'\n'+rows.join('\n'),'folha_'+sem.key+'.csv');
 }
 
-// ── REFEIÇÕES ─────────────────────────────────────────────
+// -- REFEIÇÕES ---------------------------------------------
 function addRefeicao(){
   var fid=document.getElementById('rf-func').value;
   var forn=document.getElementById('rf-forn').value;
@@ -1462,7 +1543,7 @@ function renderRefeicoes(){
   document.getElementById('rf-body').innerHTML=html;
 }
 
-// ── EXPORTAR ──────────────────────────────────────────────
+// -- EXPORTAR ----------------------------------------------
 function exportCSV(content,filename){
   var blob=new Blob([content],{type:'text/csv;charset=utf-8;'});
   var url=URL.createObjectURL(blob);
@@ -1509,7 +1590,7 @@ function exportarAtual(){
   }
 }
 
-// ── UTIL ──────────────────────────────────────────────────
+// -- UTIL --------------------------------------------------
 var _delArr=null,_delId=null;
 function delItem(arr,id,msg){
   _delArr=arr;_delId=id;
@@ -1518,6 +1599,11 @@ function delItem(arr,id,msg){
 }
 function doDel(){
   if(!_delArr)return;
+  // Bloquear exclusão de fornecedor com lançamentos
+  if(_delArr==='fornecedores'){
+    var temLanc=contas_pagar.some(function(c){return c.fornecedor_id==_delId;})||refeicoes.some(function(r){return r.fornecedor_id==_delId;});
+    if(temLanc){document.getElementById('m-del').classList.remove('show');toast('Fornecedor possui lançamentos e não pode ser excluído','warn');return;}
+  }
   var maps={transacoes:transacoes,contas_pagar:contas_pagar,clientes:clientes,fornecedores:fornecedores,categorias:categorias,funcionarios:funcionarios,pontos:pontos,refeicoes:refeicoes};
   var arr=maps[_delArr];
   if(!arr)return;
@@ -1561,7 +1647,7 @@ function toast(msg,type){
 function openSb(){document.getElementById('sb').classList.add('open');document.getElementById('ov').classList.add('show');}
 function closeSb(){document.getElementById('sb').classList.remove('open');document.getElementById('ov').classList.remove('show');}
 
-// ── CONFIGURAÇÕES ────────────────────────────────────────
+// -- CONFIGURAÇÕES ----------------------------------------
 function getCfg(){
   return JSON.parse(localStorage.getItem('cd_cfg')||'{}');
 }
@@ -1620,7 +1706,7 @@ function renderConfig(){
     '</div></div>';
 }
 
-// ── TOGGLE TIPO FUNCIONARIO ───────────────────────────────
+// -- TOGGLE TIPO FUNCIONARIO -------------------------------
 function toggleFnTipo(){
   var tipo=document.getElementById('fn-tipo').value;
   document.getElementById('fn-diaria-wrap').style.display=tipo==='diarista'?'flex':'none';
@@ -1628,7 +1714,7 @@ function toggleFnTipo(){
   document.getElementById('fn-hextra-wrap').style.display=tipo==='diarista'?'flex':'none';
 }
 
-// ── ACTIVITY LOG ──────────────────────────────────────────
+// -- ACTIVITY LOG ------------------------------------------
 var actLog = JSON.parse(localStorage.getItem('cd_log')||'[]');
 function saveLog(){ localStorage.setItem('cd_log',JSON.stringify(actLog.slice(0,500))); }
 function logActivity(action){
@@ -1656,7 +1742,7 @@ function renderLog(){
   }).join('');
 }
 
-// ── PDF CONTAS A PAGAR ────────────────────────────────────
+// -- PDF CONTAS A PAGAR ------------------------------------
 function pdfContasPagar(){
   var cfg=getCfg();
   var f=document.getElementById('pg-filtro').value;
@@ -1681,7 +1767,7 @@ function pdfContasPagar(){
   var w=window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
 }
 
-// ── CARGOS ────────────────────────────────────────────────
+// -- CARGOS ------------------------------------------------
 var funcoes_cargo = JSON.parse(localStorage.getItem('cd_cargos')||'null')||['Soldador','Montador','Polidor','Instalador','Auxiliar','Motorista','Pintor','Eletricista','Vidraceiro'];
 function saveCargos(){ localStorage.setItem('cd_cargos',JSON.stringify(funcoes_cargo)); }
 function populateCargos(){
@@ -1702,7 +1788,7 @@ function addCargo(){
   abrirCargos(); populateCargos(); toast('Cargo adicionado!','ok');
 }
 
-// ── CNPJ LOOKUP ──────────────────────────────────────────
+// -- CNPJ LOOKUP ------------------------------------------
 async function buscarCNPJ(prefix){
   var cnpj=document.getElementById(prefix+'-doc').value.replace(/\D/g,'');
   if(cnpj.length!==14){ toast('CNPJ deve ter 14 digitos','warn'); return; }
@@ -1729,13 +1815,25 @@ async function buscarCNPJ(prefix){
   } catch(e){ toast('CNPJ nao encontrado','warn'); }
 }
 
-// ── EDIT RECORDS ──────────────────────────────────────────
+// -- EDIT RECORDS ------------------------------------------
 var _eType=null, _eId=null, _eFields=[];
 function editRec(type,id){
+  // Bloquear edição de fornecedor se tiver lançamentos vinculados
+  if(type==='fornecedores'){
+    var temLanc=contas_pagar.some(function(c){return c.fornecedor_id==id;})||refeicoes.some(function(r){return r.fornecedor_id==id;});
+    if(temLanc){toast('Fornecedor possui lançamentos e não pode ser alterado','warn');return;}
+  }
   _eType=type; _eId=id;
   var cfgs={
     clientes:{title:'Editar Cliente',fields:[{l:'Nome',k:'nome',w:'full'},{l:'Telefone',k:'telefone'},{l:'CPF/CNPJ',k:'documento'},{l:'Endereço',k:'endereco',w:'full'},{l:'Cidade',k:'cidade'},{l:'E-mail',k:'email'}]},
-    fornecedores:{title:'Editar Fornecedor',fields:[{l:'Nome',k:'nome',w:'full'},{l:'Telefone',k:'telefone'},{l:'CNPJ/CPF',k:'documento'},{l:'Produto/Serviço',k:'produto',w:'full'},{l:'Endereço',k:'endereco'},{l:'Bairro',k:'bairro'},{l:'Cidade/UF',k:'cidade'},{l:'PIX/Banco',k:'pix'},{l:'Prazo (dias)',k:'prazo',t:'number'}]},
+    fornecedores:{title:'Editar Fornecedor',fields:[
+      {l:'Nome / Razão Social',k:'nome',w:'full'},
+      {l:'Telefone',k:'telefone'},{l:'CNPJ/CPF',k:'documento'},
+      {l:'Produto / Serviço',k:'produto',w:'full'},
+      {l:'Endereço',k:'endereco',w:'full'},
+      {l:'Bairro',k:'bairro'},{l:'Cidade/UF',k:'cidade'},
+      {l:'PIX / Chave PIX',k:'pix'},{l:'Prazo (dias)',k:'prazo',t:'number'}
+    ]},
     funcionarios:{title:'Editar Funcionário',fields:[{l:'Nome',k:'nome',w:'full'},{l:'Telefone',k:'telefone'},{l:'CPF',k:'cpf'},{l:'Diária (R$)',k:'diaria',t:'number'},{l:'H.Extra (R$)',k:'hora_extra',t:'number'},{l:'PIX',k:'pix'}]},
     contas_pagar:{title:'Editar Conta',fields:[{l:'Descrição',k:'descricao',w:'full'},{l:'Valor',k:'valor',t:'number'},{l:'Vencimento',k:'vencimento',t:'date'}]}
   };
@@ -1745,6 +1843,11 @@ function editRec(type,id){
   document.getElementById('edit-rec-title').textContent=cfg.title;
   _eFields=cfg.fields;
   var html=''; var row=[];
+  // Fornecedor: campo categoria com select
+  if(type==='fornecedores'){
+    var catOpts=categorias.map(function(c){return'<option value="'+c.id+'"'+(c.id==item.categoria_id?' selected':'')+'>'+c.nome+'</option>';}).join('');
+    html+='<div><label class="flabel">Categoria Financeira</label><select class="fi" id="ef_categoria_id" style="width:100%"><option value="">Selecione...</option>'+catOpts+'</select></div>';
+  }
   cfg.fields.forEach(function(f,i){
     if(f.w==='full'){
       if(row.length){ html+='<div style="display:flex;gap:8px">'+row.join('')+'</div>'; row=[]; }
@@ -1759,19 +1862,237 @@ function editRec(type,id){
 }
 function saveEditRec(){
   if(!_eType||!_eId) return;
-  var maps={clientes:clientes,fornecedores:fornecedores,funcionarios:funcionarios,contas_pagar:contas_pagar};
-  var item=maps[_eType].find(function(x){ return x.id===_eId; }); if(!item) return;
+  var maps={clientes:clientes,fornecedores:fornecedores,funcionarios:funcionarios,contas_pagar:contas_pagar,contas_bancarias:contas_bancarias};
+  var item=maps[_eType]?maps[_eType].find(function(x){ return x.id===_eId; }):null; if(!item) return;
   _eFields.forEach(function(f){ var el=document.getElementById('ef_'+f.k); if(!el) return; item[f.k]=f.t==='number'?parseFloat(el.value)||0:el.value; });
-  save(); syncToSheets(_eType);
+  // Salvar categoria_id do fornecedor
+  if(_eType==='fornecedores'){var elCat=document.getElementById('ef_categoria_id');if(elCat)item.categoria_id=elCat.value;}
+  // Salvar tipo da conta bancária
+  if(_eType==='contas_bancarias'){var elTipo=document.getElementById('ef_tipo');if(elTipo)item.tipo=elTipo.value;}
+  save();
+  if(_eType!=='contas_bancarias') syncToSheets(_eType);
   document.getElementById('m-edit-rec').classList.remove('show');
   if(_eType==='clientes') renderClientes();
   else if(_eType==='fornecedores') renderFornecedores();
   else if(_eType==='funcionarios') renderFuncionarios();
   else if(_eType==='contas_pagar') renderPagar();
+  else if(_eType==='contas_bancarias') renderContasBancarias();
   toast('Atualizado!','ok');
 }
 
-// ── RELATÓRIO FUNCIONÁRIOS ────────────────────────────────
+
+// -- EDITAR PONTO ------------------------------------------
+var _editPontoId = null;
+function editPonto(id){
+  var p=pontos.find(function(x){return x.id===id;}); if(!p) return;
+  var f=funcionarios.find(function(x){return x.id===p.funcionario_id;});
+  _editPontoId=id;
+  document.getElementById('ep-func-nome').textContent=funcNome(p.funcionario_id);
+  document.getElementById('ep-data-servico').textContent=dp(p.data);
+  var created=p.created_at?new Date(p.created_at).toLocaleDateString('pt-BR')+' '+new Date(p.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'não registrado';
+  document.getElementById('ep-lancado-em').textContent=created;
+  document.getElementById('ep-lancado-por').textContent=p.created_by||'-';
+  document.getElementById('ep-tipo').value=p.tipo||'diaria';
+  document.getElementById('ep-horas').value=p.horas||'';
+  document.getElementById('ep-obs').value=p.obs||'';
+  calcEpValor();
+  document.getElementById('m-edit-ponto').classList.add('show');
+}
+function calcEpValor(){
+  if(!_editPontoId) return;
+  var p=pontos.find(function(x){return x.id===_editPontoId;}); if(!p) return;
+  var f=funcionarios.find(function(x){return x.id===p.funcionario_id;});
+  var tipo=document.getElementById('ep-tipo').value;
+  var horas=parseFloat(document.getElementById('ep-horas').value)||0;
+  var val=tipo==='diaria'?(f?parseFloat(f.diaria||0):0)
+    :tipo==='meio'?(f?parseFloat(f.diaria||0)/2:0)
+    :tipo==='extra'?horas*(f?parseFloat(f.hora_extra||0):0)
+    :0;
+  var calc=document.getElementById('ep-valor-calc');
+  if(tipo==='falta'){calc.textContent='Falta - sem valor';calc.style.background='var(--red-s)';calc.style.color='var(--red)';}
+  else{var extra=tipo==='extra'?' ('+horas.toFixed(1)+'h x '+fmt(f?f.hora_extra:0)+')':'';calc.textContent='Valor calculado: '+fmt(val)+extra;calc.style.background='var(--green-s)';calc.style.color='var(--green)';}
+}
+function saveEditPonto(){
+  if(!_editPontoId) return;
+  var p=pontos.find(function(x){return x.id===_editPontoId;}); if(!p) return;
+  // Preservar created_at e created_by originais
+  p.tipo=document.getElementById('ep-tipo').value;
+  p.horas=parseFloat(document.getElementById('ep-horas').value)||0;
+  p.obs=document.getElementById('ep-obs').value;
+  save(); syncToSheets('pontos');
+  logActivity('Ponto editado: '+funcNome(p.funcionario_id)+' ('+dp(p.data)+')');
+  document.getElementById('m-edit-ponto').classList.remove('show');
+  renderPonto(); toast('Ponto atualizado!','ok');
+  _editPontoId=null;
+}
+
+// -- CONTAS BANCARIAS --------------------------------------
+function addContaBancaria(){
+  var nome=document.getElementById('cb-nome').value.trim();
+  if(!nome){toast('Informe o nome da conta','warn');return;}
+  contas_bancarias.push({
+    id:nextId(contas_bancarias),
+    nome:nome,
+    banco:document.getElementById('cb-banco').value,
+    tipo:document.getElementById('cb-tipo').value,
+    agencia:document.getElementById('cb-agencia').value,
+    numero:document.getElementById('cb-numero').value,
+    pix:document.getElementById('cb-pix').value,
+    saldo:parseFloat(document.getElementById('cb-saldo').value)||0,
+    obs:document.getElementById('cb-obs').value,
+    ativo:true,
+    created_at:new Date().toISOString(),
+    created_by:CURRENT_USER?CURRENT_USER.name:''
+  });
+  save();
+  logActivity('Nova conta bancaria: '+nome);
+  renderContasBancarias();
+  toast('Conta cadastrada!','ok');
+  ['cb-nome','cb-banco','cb-agencia','cb-numero','cb-pix','cb-saldo','cb-obs'].forEach(function(id){document.getElementById(id).value='';});
+}
+function renderContasBancarias(){
+  var tipoLbl={corrente:'Corrente',poupanca:'Poupança',pagamento:'Pagamento',caixa:'Caixa Físico',pix:'PIX/Carteira'};
+  var html='';
+  if(!contas_bancarias.length){html='<tr><td colspan="9"><div class="empty">Nenhuma conta cadastrada</div></td></tr>';}
+  else contas_bancarias.forEach(function(c){
+    html+='<tr>'
+      +'<td><b>'+c.nome+'</b></td>'
+      +'<td>'+c.banco+'</td>'
+      +'<td><span class="tag cat">'+(tipoLbl[c.tipo]||c.tipo)+'</span></td>'
+      +'<td style="font-family:var(--fm)">'+c.agencia+'</td>'
+      +'<td style="font-family:var(--fm)">'+c.numero+'</td>'
+      +'<td style="font-family:var(--fm);font-size:11px">'+c.pix+'</td>'
+      +'<td style="font-family:var(--fm);font-weight:600">'+fmt(c.saldo)+'</td>'
+      +'<td style="font-size:11px;color:var(--t3)">'+c.obs+'</td>'
+      +'<td style="display:flex;gap:4px">'
+      +'<button class="ibt" onclick="editContaBancaria('+c.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
+      +'<button class="ibt" onclick="delContaBancaria('+c.id+')" title="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>'
+      +'</td></tr>';
+  });
+  document.getElementById('cb-body').innerHTML=html;
+}
+function editContaBancaria(id){
+  var c=contas_bancarias.find(function(x){return x.id===id;}); if(!c) return;
+  _eType='contas_bancarias'; _eId=id;
+  _eFields=[{l:'Nome',k:'nome',w:'full'},{l:'Banco',k:'banco'},{l:'Agencia',k:'agencia'},{l:'N. Conta',k:'numero'},{l:'Chave PIX',k:'pix',w:'full'},{l:'Saldo (R$)',k:'saldo',t:'number'},{l:'Observacao',k:'obs',w:'full'}];
+  document.getElementById('edit-rec-title').textContent='Editar Conta Bancaria';
+  var html=''; var row=[];
+  _eFields.forEach(function(f,i){
+    if(f.w==='full'){
+      if(row.length){html+='<div style="display:flex;gap:8px">'+row.join('')+'</div>';row=[];}
+      html+='<div><label class="flabel">'+f.l+'</label><input type="'+(f.t||'text')+'" class="fi" id="ef_'+f.k+'" value="'+(c[f.k]||'')+'" style="width:100%"></div>';
+    }else{
+      row.push('<div style="flex:1;min-width:120px"><label class="flabel">'+f.l+'</label><input type="'+(f.t||'text')+'" class="fi" id="ef_'+f.k+'" value="'+(c[f.k]||'')+'"></div>');
+      if(row.length===2||i===_eFields.length-1){html+='<div style="display:flex;gap:8px">'+row.join('')+'</div>';row=[];}
+    }
+  });
+  // tipo select
+  var tipoSel='<div><label class="flabel">Tipo</label><select class="fi" id="ef_tipo" style="width:100%"><option value="corrente"'+(c.tipo==='corrente'?' selected':'')+'>Conta Corrente</option><option value="poupanca"'+(c.tipo==='poupanca'?' selected':'')+'>Poupança</option><option value="pagamento"'+(c.tipo==='pagamento'?' selected':'')+'>Conta Pagamento</option><option value="caixa"'+(c.tipo==='caixa'?' selected':'')+'>Caixa Físico</option><option value="pix"'+(c.tipo==='pix'?' selected':'')+'>PIX/Carteira</option></select></div>';
+  document.getElementById('edit-rec-fields').innerHTML=tipoSel+html;
+  document.getElementById('m-edit-rec').classList.add('show');
+}
+function delContaBancaria(id){
+  var c=contas_bancarias.find(function(x){return x.id===id;}); if(!c) return;
+  if(!confirm('Excluir conta "'+c.nome+'"?')) return;
+  contas_bancarias=contas_bancarias.filter(function(x){return x.id!==id;});
+  save(); renderContasBancarias(); toast('Conta excluída!','info');
+}
+
+// -- PDF DASHBOARD ----------------------------------------
+function pdfAtual(){
+  if(viewAtual==='dashboard'){pdfDashboard();return;}
+  if(viewAtual==='folha'){pdfFolha();return;}
+  if(viewAtual==='pagar'){pdfContasPagar();return;}
+  toast('PDF não disponível nesta tela. Use o botão PDF da tela específica.','info');
+}
+function pdfDashboard(){
+  var cfg=getCfg();
+  var mes=td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0');
+  var mesLbl=new Date(td.getFullYear(),td.getMonth(),1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  var txMes=transacoes.filter(function(t){return t.data&&t.data.startsWith(mes);});
+  var entradas=txMes.filter(function(t){return t.tipo==='entrada';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
+  var saidas=txMes.filter(function(t){return t.tipo==='saida';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
+  var cfg2=getCfg();
+  var sPB=parseFloat(cfg2.saldo_pagbank||0),sIN=parseFloat(cfg2.saldo_infinit||0),sCX=parseFloat(cfg2.saldo_caixa||0);
+  var txPB=transacoes.filter(function(t){return t.conta==='pagbank';}).reduce(function(s,t){return s+(t.tipo==='entrada'?parseFloat(t.valor||0):-parseFloat(t.valor||0));},0);
+  var txIN=transacoes.filter(function(t){return t.conta==='infinit';}).reduce(function(s,t){return s+(t.tipo==='entrada'?parseFloat(t.valor||0):-parseFloat(t.valor||0));},0);
+  var txCX=transacoes.filter(function(t){return t.conta==='caixa';}).reduce(function(s,t){return s+(t.tipo==='entrada'?parseFloat(t.valor||0):-parseFloat(t.valor||0));},0);
+  var hoje=fd(td);
+  var vencer=contas_pagar.filter(function(c){return c.status!=='pago';}).reduce(function(s,c){return s+parseFloat(c.valor||0);},0);
+  var vencidas=contas_pagar.filter(function(c){return c.status!=='pago'&&c.vencimento<hoje;}).length;
+  var pendentes=contas_pagar.filter(function(c){return c.status!=='pago';}).length;
+  // semana atual
+  var sem=getSemana();
+  var folhaSem=0;
+  if(sem.si){
+    var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
+    funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
+      var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
+      var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
+      var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
+      folhaSem+=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2))+(hExt*parseFloat(f.hora_extra||0));
+    });
+  }
+  // Próximos vencimentos
+  var proxVenc=contas_pagar.filter(function(c){return c.status!=='pago';}).sort(function(a,b){return a.vencimento.localeCompare(b.vencimento);}).slice(0,8);
+  var proxRows=proxVenc.map(function(c){
+    var venc=c.vencimento<hoje?'<span style="color:#C0392B">VENCIDA</span>':'';
+    return '<tr><td>'+dp(c.vencimento)+'</td><td>'+c.descricao+'</td><td>'+fornNome(c.fornecedor_id)+'</td><td style="text-align:right">R$ '+parseFloat(c.valor||0).toFixed(2)+'</td><td>'+venc+'</td></tr>';
+  }).join('');
+
+  var html='<html><head><meta charset="UTF-8"><style>'
+    +'body{font-family:Arial,sans-serif;font-size:11px;margin:24px;color:#1A1A1A}'
+    +'.h{text-align:center;border-bottom:3px solid #2C2C2C;padding-bottom:12px;margin-bottom:20px}'
+    +'.h h1{font-size:20px;margin:0;color:#2C2C2C}.h p{margin:3px 0;color:#666;font-size:10px}'
+    +'.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}'
+    +'.stat{border:1px solid #D4E4E2;border-radius:8px;padding:12px 14px;background:#F5F8F7}'
+    +'.stat-lbl{font-size:9px;color:#8FA8A6;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}'
+    +'.stat-val{font-size:18px;font-weight:bold;color:#2C2C2C}'
+    +'.stat-val.green{color:#2E7D52}.stat-val.red{color:#C0392B}.stat-val.amber{color:#C47D0A}'
+    +'.section{margin-bottom:16px}'
+    +'.section h3{font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:.08em;color:#5A6A69;border-bottom:1px solid #D4E4E2;padding-bottom:5px;margin-bottom:8px}'
+    +'.contas{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}'
+    +'.conta{border:1px solid #D4E4E2;border-radius:6px;padding:10px 12px;background:#fff}'
+    +'.conta-nome{font-size:10px;color:#8FA8A6;margin-bottom:3px}'
+    +'.conta-val{font-size:15px;font-weight:bold;color:#2C2C2C}'
+    +'table{width:100%;border-collapse:collapse}th{background:#2C2C2C;color:#fff;padding:5px 8px;text-align:left;font-size:9px;text-transform:uppercase}'
+    +'td{padding:5px 8px;border-bottom:1px solid #EDF2F1}'
+    +'.ft{margin-top:24px;border-top:1px solid #ccc;padding-top:8px;font-size:9px;color:#999;display:flex;justify-content:space-between}'
+    +'</style></head><body>';
+  html+='<div class="h"><h1>'+(cfg.razao||'Conexão Design Móveis e Decorações')+'</h1>';
+  html+='<p>CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+' | '+(cfg.cidade||'Aparecida de Goiânia/GO')+'</p>';
+  html+='<p>Relatório Dashboard - '+mesLbl+' | Gerado em: '+new Date().toLocaleDateString('pt-BR')+' às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</p></div>';
+  html+='<div class="stats">';
+  html+='<div class="stat"><div class="stat-lbl">Saldo Total</div><div class="stat-val">R$ '+(sPB+sIN+sCX+txPB+txIN+txCX).toFixed(2)+'</div></div>';
+  html+='<div class="stat"><div class="stat-lbl">Entradas no Mês</div><div class="stat-val green">R$ '+entradas.toFixed(2)+'</div></div>';
+  html+='<div class="stat"><div class="stat-lbl">Saídas no Mês</div><div class="stat-val red">R$ '+saidas.toFixed(2)+'</div></div>';
+  html+='<div class="stat"><div class="stat-lbl">A Vencer (total)</div><div class="stat-val amber">R$ '+vencer.toFixed(2)+'</div></div>';
+  html+='</div>';
+  html+='<div class="section"><h3>Contas Bancárias</h3><div class="contas">';
+  html+='<div class="conta"><div class="conta-nome">PagBank</div><div class="conta-val">R$ '+(sPB+txPB).toFixed(2)+'</div></div>';
+  html+='<div class="conta"><div class="conta-nome">Infinit</div><div class="conta-val">R$ '+(sIN+txIN).toFixed(2)+'</div></div>';
+  html+='<div class="conta"><div class="conta-nome">Caixa</div><div class="conta-val">R$ '+(sCX+txCX).toFixed(2)+'</div></div>';
+  html+='</div></div>';
+  html+='<div class="section"><h3>Contas a Pagar - '+pendentes+' pendentes ('+vencidas+' vencidas)</h3>';
+  html+='<table><thead><tr><th>Vencimento</th><th>Descrição</th><th>Fornecedor</th><th style="text-align:right">Valor</th><th>Situação</th></tr></thead><tbody>'+proxRows+'</tbody></table></div>';
+  html+='<div class="section"><h3>Folha da Semana</h3><table><thead><tr><th>Funcionário</th><th>Cargo</th><th>Diárias</th><th>H.Extra</th><th style="text-align:right">Total</th></tr></thead><tbody>';
+  if(sem.si){
+    var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
+    funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
+      var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
+      var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
+      var tot=(dias*parseFloat(f.diaria||0))+(hExt*parseFloat(f.hora_extra||0));
+      html+='<tr><td>'+f.nome+'</td><td>'+f.cargo+'</td><td>'+dias+'</td><td>'+hExt.toFixed(1)+'h</td><td style="text-align:right;font-weight:bold">R$ '+tot.toFixed(2)+'</td></tr>';
+    });
+    html+='<tr style="background:#E2ECEA;font-weight:bold"><td colspan="4">TOTAL DA SEMANA</td><td style="text-align:right">R$ '+folhaSem.toFixed(2)+'</td></tr>';
+  }else{html+='<tr><td colspan="5" style="text-align:center;color:#999">Selecione uma semana na tela Folha Semanal</td></tr>';}
+  html+='</tbody></table></div>';
+  html+='<div class="ft"><span>'+(cfg.razao||'Conexão Design')+' | CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+'</span><span>Gerado em '+new Date().toLocaleDateString('pt-BR')+'</span></div>';
+  html+='</body></html>';
+  var w=window.open('','_blank');w.document.write(html);w.document.close();w.print();
+}
+
+// -- RELATÓRIO FUNCIONÁRIOS --------------------------------
 function relFuncionarios(funcId){
   var lista=funcId?funcionarios.filter(function(f){return f.id===funcId;}):funcionarios.filter(function(f){return f.ativo!==false;});
   var mes=td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0');
@@ -1793,7 +2114,7 @@ function relFuncionarios(funcId){
   var w=window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
 }
 
-// ── RELATÓRIO REFEIÇÕES ───────────────────────────────────
+// -- RELATÓRIO REFEIÇÕES -----------------------------------
 function relRefeicoesForn(){
   var mes=document.getElementById('rf-filtro-mes').value||td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0');
   var mesLbl=new Date(mes+'-01').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
@@ -1823,7 +2144,7 @@ function logout(){
   toast('Sessão encerrada','info');
 }
 
-// ── INIT ──────────────────────────────────────────────────
+// -- INIT --------------------------------------------------
 document.getElementById('cx-data').value=fd(td);
 document.getElementById('pt-data').value=fd(td);
 document.getElementById('rf-data').value=fd(td);
