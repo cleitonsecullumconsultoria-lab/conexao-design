@@ -235,6 +235,19 @@ textarea.fi{resize:vertical;min-height:72px}
 .tipo-diarista{background:rgba(122,158,126,0.15);color:var(--sage2)}
 .tipo-mensalista{background:rgba(184,216,216,0.2);color:var(--mint3)}
 .tipo-prolabore{background:rgba(196,125,10,0.12);color:var(--amber)}
+
+/* PRINT MODAL */
+.print-modal{position:fixed;inset:0;background:#fff;z-index:9999;display:none;flex-direction:column;overflow:hidden}
+.print-modal.show{display:flex}
+.print-modal-bar{background:#2C2C2C;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;-webkit-print-color-adjust:exact}
+.print-modal-bar span{color:#fff;font-size:13px;font-weight:500;flex:1}
+.print-modal-content{flex:1;overflow-y:auto;padding:20px;background:#fff}
+@media print{
+  .print-modal-bar{display:none!important}
+  .print-modal-content{padding:0;overflow:visible;height:auto}
+  body > *:not(.print-modal){display:none!important}
+  .print-modal{display:flex!important;position:static!important}
+}
 </style>
 </head>
 <body>
@@ -292,10 +305,6 @@ textarea.fi{resize:vertical;min-height:72px}
       Dashboard
     </div>
     <div class="sb-sec">Financeiro</div>
-    <div class="ni" onclick="go('contas')" id="nav-contas">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="14" x2="6.01" y2="14"/><line x1="10" y1="14" x2="12" y2="14"/></svg>
-      Contas Bancárias
-    </div>
     <div class="ni" onclick="go('caixa')" id="nav-caixa">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
       Caixa / Extrato
@@ -367,7 +376,6 @@ textarea.fi{resize:vertical;min-height:72px}
       <img id="tb-avatar" src="" style="width:22px;height:22px;border-radius:50%;display:none">
       <span id="tb-name" style="color:var(--t2)"></span>
     </div>
-    <button class="btn sm" id="btn-pdf-dash" onclick="pdfDashboard()" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>PDF</button>
     <button class="btn sm" onclick="exportarAtual()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Excel
@@ -430,30 +438,6 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="ch">Folha da Semana</div>
         <div id="dash-folha"></div>
       </div>
-    </div>
-  </div>
-
-  <!-- CONTAS BANCÁRIAS -->
-  <div class="view" id="view-contas">
-    <div class="card mb16">
-      <div class="ch">Nova Conta</div>
-      <div class="frow">
-        <div class="fgroup" style="flex:2"><label class="flabel">Nome</label><input type="text" class="fi" id="ct-nome" placeholder="Ex: PagBank, Bradesco..."></div>
-        <div class="fgroup"><label class="flabel">Tipo</label><select class="fi" id="ct-tipo"><option value="corrente">Conta Corrente</option><option value="poupanca">Poupança</option><option value="pagamento">Pagamento</option><option value="caixa">Caixa Físico</option></select></div>
-        <div class="fgroup"><label class="flabel">Banco</label><input type="text" class="fi" id="ct-banco" placeholder="Banco..."></div>
-        <div class="fgroup"><label class="flabel">Agência</label><input type="text" class="fi" id="ct-agencia" placeholder="0001"></div>
-        <div class="fgroup"><label class="flabel">Nº Conta</label><input type="text" class="fi" id="ct-num" placeholder="00000-0"></div>
-        <div class="fgroup"><label class="flabel">Saldo Inicial (R$)</label><input type="number" class="fi" id="ct-saldo" placeholder="0,00" step="0.01"></div>
-        <div class="fgroup"><label class="flabel">Cor</label><input type="color" class="fi" id="ct-cor" value="#B8D8D8" style="height:40px;padding:4px"></div>
-        <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="addContaBanc()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Salvar</button></div>
-      </div>
-    </div>
-    <div class="g2 mb16" id="contas-cards"></div>
-    <div class="card"><div class="ch">Contas Cadastradas</div>
-      <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>Nome</th><th>Tipo</th><th>Banco</th><th>Agência</th><th>Conta</th><th>Saldo Inicial</th><th>Saldo Atual</th><th>Status</th><th></th></tr></thead>
-        <tbody id="ct-body"></tbody>
-      </table></div>
     </div>
   </div>
 
@@ -867,7 +851,7 @@ var dp=function(s){if(!s)return'';var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[
 
 // -- CONFIG ------------------------------------------------
 var GOOGLE_CLIENT_ID = '715814366188-vv7eh5m7nkd9k9ns1vn50pl16ejt3a0e.apps.googleusercontent.com';
-var SHEET_ID = '15gYPzKQ8ZekMvmWpAcGtV16x93n32Jfa';
+var SHEET_ID = '1-Pp1HK249I8H0gGnkBF5H4GbtX2l2bNP5b6sZ4NOq9s';
 var ACCESS_TOKEN = null;
 var CURRENT_USER = null;
 var SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets/';
@@ -988,25 +972,17 @@ async function sheetsClear(sheetName){
 }
 
 async function sheetsWriteAll(sheetName, rows){
-  if(!ACCESS_TOKEN){ toast('Sem autenticação - dados salvos localmente','warn'); return; }
+  if(!ACCESS_TOKEN) return;
   syncStart();
   try{
     await sheetsClear(sheetName);
     if(rows.length === 0){ syncEnd(); return; }
     var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!A2') + '?valueInputOption=RAW';
-    var res = await fetch(url, {
+    await fetch(url, {
       method: 'PUT',
       headers: {Authorization: 'Bearer ' + ACCESS_TOKEN, 'Content-Type': 'application/json'},
       body: JSON.stringify({values: rows})
     });
-    if(!res.ok){
-      var errData = await res.json().catch(function(){return {};});
-      var msg = errData.error ? errData.error.message : 'Erro '+res.status;
-      if(res.status===403) toast('Sem permissão na planilha. Verifique o compartilhamento.','warn');
-      else if(res.status===401){ toast('Sessão expirada. Refaça o login.','warn'); ACCESS_TOKEN=null; }
-      else toast('Erro Sheets: '+msg,'warn');
-      syncEnd(); return;
-    }
   } catch(e){ toast('Erro ao sincronizar','warn'); }
   finally{ syncEnd(); }
 }
@@ -1146,7 +1122,7 @@ function nextId(arr){return arr.reduce(function(m,x){return Math.max(m,x.id||0);
 var viewAtual='dashboard';
 
 // -- NAVIGATION --------------------------------------------
-var LBLS={dashboard:'Dashboard',contas:'Contas Bancárias',caixa:'Caixa / Extrato',pagar:'Contas a Pagar',contas:'Contas Bancárias',clientes:'Clientes',fornecedores:'Fornecedores',categorias:'Categorias',funcionarios:'Funcionários',ponto:'Ponto / Jornada',folha:'Folha Semanal',refeicoes:'Refeições',configuracoes:'Configurações',usuarios:'Usuários / Log'};
+var LBLS={dashboard:'Dashboard',caixa:'Caixa / Extrato',pagar:'Contas a Pagar',contas:'Contas Bancárias',clientes:'Clientes',fornecedores:'Fornecedores',categorias:'Categorias',funcionarios:'Funcionários',ponto:'Ponto / Jornada',folha:'Folha Semanal',refeicoes:'Refeições',configuracoes:'Configurações',usuarios:'Usuários / Log'};
 
 function go(v){
   document.querySelectorAll('.view').forEach(function(e){e.classList.remove('active');});
@@ -1154,10 +1130,8 @@ function go(v){
   document.getElementById('view-'+v).classList.add('active');
   document.getElementById('nav-'+v).classList.add('active');
   document.getElementById('tt').textContent=LBLS[v]||v;
-  var pdfBtn=document.getElementById('btn-pdf-dash'); if(pdfBtn) pdfBtn.style.display=v==='dashboard'?'inline-flex':'none';
   viewAtual=v;
   if(v==='dashboard')renderDash();
-  if(v==='contas')renderContas();
   if(v==='caixa'){populateCatSelect('cx-cat');renderCaixa();}
   if(v==='pagar'){populateFornSelect('pg-forn');populateCatSelect('pg-cat');renderPagar();}
   if(v==='clientes')renderClientes();
@@ -1550,7 +1524,7 @@ function pdfFolha(){
   html+='<table><thead><tr><th>Data</th><th>Tipo</th><th>H.Extra</th><th>Valor</th><th>Obs</th><th>Lançado em</th><th>Por</th><th>Total</th></tr></thead><tbody>'+rows;
   html+='<tr style="background:#2C2C2C;color:#fff;font-weight:bold"><td colspan="7">TOTAL GERAL DA SEMANA</td><td>R$ '+totalGeral.toFixed(2)+'</td></tr>';
   html+='</tbody></table><div class="ft"><span>'+(cfg.razao||'Conexão Design')+' - CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+'</span><span>'+new Date().toLocaleDateString('pt-BR')+'</span></div></body></html>';
-  var w=window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
+  showPrint('Folha Semanal - PDF', html);
 }
 
 function exportFolha(){
@@ -1832,7 +1806,7 @@ function pdfContasPagar(){
   });
   html+='<tr class="tot"><td colspan="5">TOTAL</td><td>R$ '+total.toFixed(2)+'</td><td></td></tr>';
   html+='</tbody></table><div class="ft"><span>'+(cfg.razao||'Conexão Design Móveis e Decorações')+' - CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+'</span><span>'+new Date().toLocaleDateString('pt-BR')+'</span></div></body></html>';
-  var w=window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
+  showPrint('Relatório', html);
 }
 
 // -- CARGOS ------------------------------------------------
@@ -2157,7 +2131,7 @@ function pdfDashboard(){
   html+='</tbody></table></div>';
   html+='<div class="ft"><span>'+(cfg.razao||'Conexão Design')+' | CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+'</span><span>Gerado em '+new Date().toLocaleDateString('pt-BR')+'</span></div>';
   html+='</body></html>';
-  var w=window.open('','_blank');w.document.write(html);w.document.close();w.print();
+  showPrint('Relatório', html);
 }
 
 // -- RELATÓRIO FUNCIONÁRIOS --------------------------------
@@ -2179,7 +2153,7 @@ function relFuncionarios(funcId){
   html+='<table><thead><tr><th>Nome</th><th>Cargo</th><th>CPF</th><th>PIX</th><th>Diarias</th><th>Meio</th><th>H.Extra</th><th>Tot.Diarias</th><th>Tot.Extra</th><th>TOTAL</th></tr></thead><tbody>'+rows;
   html+='<tr class="tot"><td colspan="7">TOTAL GERAL</td><td colspan="3">R$ '+totalGeral.toFixed(2)+'</td></tr></tbody></table>';
   html+='<div class="ft"><span>Conexao Design Moveis e Decoracoes</span><span>'+new Date().toLocaleDateString('pt-BR')+'</span></div></body></html>';
-  var w=window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
+  showPrint('Relatório', html);
 }
 
 // -- RELATÓRIO REFEIÇÕES -----------------------------------
@@ -2199,64 +2173,25 @@ function relRefeicoesForn(){
   });
   html+='<div style="text-align:right;padding:8px;background:#e8f4f4;font-weight:bold">TOTAL: R$ '+totalGeral.toFixed(2)+'</div>';
   html+='<div class="ft"><span>Conexao Design Moveis e Decoracoes</span><span>'+new Date().toLocaleDateString('pt-BR')+'</span></div></body></html>';
-  var w=window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
+  showPrint('Relatório', html);
 }
 
 // logout() definido no bloco de auth acima
 
-// -- CONTAS BANCÁRIAS ----------------------------------------
-function addContaBanc(){
-  var nome=document.getElementById('ct-nome').value.trim();
-  if(!nome){toast('Informe o nome','warn');return;}
-  contas_bancarias.push({id:nextId(contas_bancarias),nome:nome,tipo:document.getElementById('ct-tipo').value,banco:document.getElementById('ct-banco').value,agencia:document.getElementById('ct-agencia').value,conta:document.getElementById('ct-num').value,saldo_inicial:parseFloat(document.getElementById('ct-saldo').value)||0,cor:document.getElementById('ct-cor').value,ativo:true});
-  save();renderContas();renderDash();toast('Conta salva!','ok');
-  ['ct-nome','ct-banco','ct-agencia','ct-num','ct-saldo'].forEach(function(id){document.getElementById(id).value='';});
+// -- PRINT MODAL ---------------------------------------------
+function showPrint(title, htmlContent){
+  var bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+  var content = bodyMatch ? bodyMatch[1] : htmlContent;
+  var styleMatches = htmlContent.match(/<style[^>]*>[\s\S]*?<\/style>/gi);
+  var styles = styleMatches ? styleMatches.join('') : '';
+  document.getElementById('print-title').textContent = title;
+  document.getElementById('print-content').innerHTML = styles + content;
+  document.getElementById('print-modal').classList.add('show');
+  window.scrollTo(0,0);
 }
-function getSaldoContaCalc(ctId){
-  var ct=contas_bancarias.find(function(x){return x.id===ctId;});
-  if(!ct) return 0;
-  var nm=ct.nome.toLowerCase();
-  var ini=parseFloat(ct.saldo_inicial||0);
-  var ent=transacoes.filter(function(t){return (t.conta===nm||t.conta_id===ctId)&&t.tipo==='entrada';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
-  var sai=transacoes.filter(function(t){return (t.conta===nm||t.conta_id===ctId)&&t.tipo==='saida';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
-  return ini+ent-sai;
-}
-function renderContas(){
-  var cardsHtml=contas_bancarias.filter(function(ct){return ct.ativo;}).map(function(ct){
-    var s=getSaldoConta(ct.id);
-    return '<div class="acct-card"><div class="acct-icon" style="background:'+ct.cor+'33">🏦</div><div style="flex:1"><div class="acct-lbl">'+ct.nome+'</div><div class="acct-bal" style="color:'+(s>=0?'var(--charcoal)':'var(--red)')+'">'+fmt(s)+'</div><div style="font-size:10px;color:var(--t3)">'+ct.banco+(ct.conta?' | '+ct.conta:'')+'</div></div></div>';
-  }).join('');
-  document.getElementById('contas-cards').innerHTML=cardsHtml||'<p style="color:var(--t3);font-size:13px">Nenhuma conta ativa</p>';
-  var html='';
-  contas_bancarias.forEach(function(ct){
-    var s=getSaldoConta(ct.id);
-    var tl={corrente:'Corrente',poupanca:'Poupança',pagamento:'Pagamento',caixa:'Caixa'}[ct.tipo]||ct.tipo;
-    html+='<tr><td><div style="display:flex;align-items:center;gap:7px"><div style="width:10px;height:10px;border-radius:50%;background:'+ct.cor+'"></div><b>'+ct.nome+'</b></div></td><td><span class="tag cat">'+tl+'</span></td><td>'+ct.banco+'</td><td>'+ct.agencia+'</td><td>'+ct.conta+'</td><td style="font-family:var(--fm)">'+fmt(ct.saldo_inicial)+'</td><td style="font-family:var(--fm);font-weight:600;color:'+(s>=0?'var(--green)':'var(--red)')+'">'+fmt(s)+'</td><td><span class="tag '+(ct.ativo?'ativo':'inativo')+'">'+(ct.ativo?'Ativa':'Inativa')+'</span></td><td style="display:flex;gap:4px"><button class="ibt" onclick="toggleCtAtivo('+ct.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button><button class="ibt" onclick="delContaBanc('+ct.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
-  });
-  document.getElementById('ct-body').innerHTML=html||'<tr><td colspan="9"><div class="empty">Nenhuma conta</div></td></tr>';
-}
-function toggleCtAtivo(id){var ct=contas_bancarias.find(function(x){return x.id===id;});if(ct){ct.ativo=!ct.ativo;save();renderContas();}}
-function delContaBanc(id){if(!confirm('Excluir conta?'))return;contas_bancarias=contas_bancarias.filter(function(x){return x.id!==id;});save();renderContas();toast('Excluída','info');}
-
-// -- DASHBOARD PDF -------------------------------------------
-function pdfDashboard(){
-  var cfg=getCfg();
-  var mes=td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0');
-  var mesLbl=new Date(td.getFullYear(),td.getMonth(),1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-  var txMes=transacoes.filter(function(t){return t.data&&t.data.startsWith(mes);});
-  var ent=txMes.filter(function(t){return t.tipo==='entrada';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
-  var sai=txMes.filter(function(t){return t.tipo==='saida';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
-  var vencer=contas_pagar.filter(function(c){return c.status!=='pago';}).reduce(function(s,c){return s+parseFloat(c.valor||0);},0);
-  var hoje=fd(td);
-  var ctRows=contas_bancarias.filter(function(ct){return ct.ativo;}).map(function(ct){var s=getSaldoContaCalc(ct.id);return '<tr><td>'+ct.nome+'</td><td>'+ct.banco+'</td><td style="text-align:right;font-weight:700;color:'+(s>=0?'#2E7D52':'#C0392B')+'">'+fmt(s)+'</td></tr>';}).join('');
-  var vencRows=contas_pagar.filter(function(c){return c.status!=='pago';}).sort(function(a,b){return a.vencimento.localeCompare(b.vencimento);}).slice(0,10).map(function(c){return '<tr><td>'+dp(c.vencimento)+'</td><td>'+c.descricao+'</td><td>'+fornNome(c.fornecedor_id)+'</td><td style="text-align:right">'+fmt(c.valor)+'</td></tr>';}).join('');
-  var html='<html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px}.h{text-align:center;border-bottom:2px solid #2C2C2C;padding-bottom:12px;margin-bottom:18px}.h h1{font-size:20px;margin:0}.h p{margin:3px 0;color:#666;font-size:10px}.kpis{display:flex;gap:10px;margin-bottom:18px}.kpi{flex:1;border:1px solid #ddd;border-radius:8px;padding:12px;text-align:center}.kpi .v{font-size:17px;font-weight:700;margin:4px 0}.kpi .l{font-size:9px;color:#999;text-transform:uppercase}.sec h3{font-size:12px;font-weight:700;margin:0 0 8px;border-bottom:1px solid #B8D8D8;padding-bottom:4px}table{width:100%;border-collapse:collapse;margin-bottom:16px}th{background:#2C2C2C;color:#fff;padding:5px 7px;text-align:left;font-size:10px}td{padding:5px 7px;border-bottom:1px solid #eee}.ft{margin-top:16px;border-top:1px solid #ccc;padding-top:6px;font-size:9px;color:#999;display:flex;justify-content:space-between}</style></head><body>';
-  html+='<div class="h"><h1>'+(cfg.razao||'Conexão Design Móveis e Decorações')+'</h1><p>CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+' | '+(cfg.cidade||'Aparecida de Goiânia/GO')+'</p><p>Dashboard '+mesLbl+' | '+new Date().toLocaleDateString('pt-BR')+' '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</p></div>';
-  html+='<div class="kpis"><div class="kpi"><div class="l">Entradas</div><div class="v" style="color:#2E7D52">'+fmt(ent)+'</div></div><div class="kpi"><div class="l">Saídas</div><div class="v" style="color:#C0392B">'+fmt(sai)+'</div></div><div class="kpi"><div class="l">Resultado</div><div class="v" style="color:'+(ent-sai>=0?'#2E7D52':'#C0392B')+'">'+fmt(ent-sai)+'</div></div><div class="kpi"><div class="l">A Vencer</div><div class="v" style="color:#C47D0A">'+fmt(vencer)+'</div></div></div>';
-  html+='<div class="sec"><h3>Saldo por Conta</h3><table><thead><tr><th>Conta</th><th>Banco</th><th style="text-align:right">Saldo</th></tr></thead><tbody>'+ctRows+'</tbody></table></div>';
-  html+='<div class="sec"><h3>Contas Pendentes</h3><table><thead><tr><th>Vencimento</th><th>Descrição</th><th>Fornecedor</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+vencRows+'</tbody></table></div>';
-  html+='<div class="ft"><span>'+(cfg.razao||'Conexão Design')+'</span><span>'+new Date().toLocaleDateString('pt-BR')+'</span></div></body></html>';
-  var w=window.open('','_blank');w.document.write(html);w.document.close();w.print();
+function closePrint(){
+  document.getElementById('print-modal').classList.remove('show');
+  document.getElementById('print-content').innerHTML = '';
 }
 
 // -- INIT --------------------------------------------------
@@ -2273,5 +2208,21 @@ populateCargos();
 var _cfg=getCfg();
 // Show auth screen - renderDash called after login
 </script>
+
+<!-- PRINT MODAL -->
+<div class="print-modal" id="print-modal">
+  <div class="print-modal-bar">
+    <span id="print-title">Relatório</span>
+    <button onclick="window.print()" style="background:var(--mint);border:none;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:600;color:#2C2C2C;display:flex;align-items:center;gap:6px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Imprimir
+    </button>
+    <button onclick="closePrint()" style="background:#C0392B;border:none;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:600;color:#fff;display:flex;align-items:center;gap:6px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      Fechar e Voltar
+    </button>
+  </div>
+  <div class="print-modal-content" id="print-content"></div>
+</div>
 </body>
 </html>
