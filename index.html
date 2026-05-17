@@ -69,6 +69,24 @@ html,body{height:100%;font-family:var(--ff);background:var(--bg);color:var(--t);
   .ov.show{display:block}
   .main{width:100%;min-width:0}
 }
+@media(max-width:768px){
+  .stats{grid-template-columns:1fr 1fr!important}
+  .g2,.g3{grid-template-columns:1fr!important}
+  .frow{flex-direction:column!important}
+  .fgroup{min-width:100%!important;width:100%!important;flex:none!important}
+  .fgroup input,.fgroup select,.fgroup textarea{width:100%!important}
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tbl{min-width:500px}
+  .card{padding:12px}
+  .view{padding:12px}
+  .topbar{padding:0 12px;gap:6px}
+  .tt{font-size:14px}
+  .btn{padding:6px 10px;font-size:11px}
+  .btn svg{width:12px;height:12px}
+  .acct-card{flex-wrap:wrap}
+  .ponto-grid{grid-template-columns:1fr!important}
+  .clock-grid{grid-template-columns:1fr!important}
+}
 @media(max-width:520px){
   .stats{grid-template-columns:1fr 1fr!important}
   .g2,.g3{grid-template-columns:1fr!important}
@@ -239,14 +257,17 @@ textarea.fi{resize:vertical;min-height:72px}
 /* PRINT MODAL */
 .print-modal{position:fixed;inset:0;background:#fff;z-index:9999;display:none;flex-direction:column;overflow:hidden}
 .print-modal.show{display:flex}
-.print-modal-bar{background:#2C2C2C;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;-webkit-print-color-adjust:exact}
+.print-modal-bar{background:#2C2C2C;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0}
 .print-modal-bar span{color:#fff;font-size:13px;font-weight:500;flex:1}
 .print-modal-content{flex:1;overflow-y:auto;padding:20px;background:#fff}
 @media print{
   .print-modal-bar{display:none!important}
-  .print-modal-content{padding:0;overflow:visible;height:auto}
+  .print-modal-content{padding:0;overflow:visible;height:auto;position:static}
   body > *:not(.print-modal){display:none!important}
-  .print-modal{display:flex!important;position:static!important}
+  .print-modal{display:flex!important;position:static!important;height:auto!important}
+  table{page-break-inside:auto}
+  tr{page-break-inside:avoid;page-break-after:auto}
+  .ft{position:relative!important;margin-top:12px}
 }
 </style>
 </head>
@@ -319,6 +340,14 @@ textarea.fi{resize:vertical;min-height:72px}
       Contas Bancárias
     </div>
     <div class="sb-sec">Cadastros</div>
+    <div class="ni" onclick="go('contas')" id="nav-contas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="14" x2="6.01" y2="14"/><line x1="10" y1="14" x2="12" y2="14"/></svg>
+      Contas Bancárias
+    </div>
+    <div class="ni" onclick="go('funcionarios')" id="nav-funcionarios">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Funcionários
+    </div>
     <div class="ni" onclick="go('clientes')" id="nav-clientes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Clientes
@@ -332,10 +361,6 @@ textarea.fi{resize:vertical;min-height:72px}
       Categorias
     </div>
     <div class="sb-sec">RH</div>
-    <div class="ni" onclick="go('funcionarios')" id="nav-funcionarios">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      Funcionários
-    </div>
     <div class="ni" onclick="go('ponto')" id="nav-ponto">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       Ponto / Jornada
@@ -347,6 +372,11 @@ textarea.fi{resize:vertical;min-height:72px}
     <div class="ni" onclick="go('refeicoes')" id="nav-refeicoes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
       Refeições
+    </div>
+    <div class="sb-sec">Projetos</div>
+    <div class="ni" onclick="go('projetos')" id="nav-projetos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="2" y="15" width="6" height="6" rx="1"/><rect x="16" y="15" width="6" height="6" rx="1"/><rect x="9" y="15" width="6" height="6" rx="1"/></svg>
+      Projetos
     </div>
     <div class="sb-sec">Sistema</div>
     <div class="ni" onclick="go('configuracoes')" id="nav-configuracoes">
@@ -551,7 +581,7 @@ textarea.fi{resize:vertical;min-height:72px}
       <div class="ch">Novo Cliente</div>
       <div class="frow">
         <div class="fgroup" style="flex:2;min-width:180px"><label class="flabel">Nome / Razão Social</label><input type="text" class="fi" id="cl-nome" placeholder="Nome completo ou empresa..."></div>
-        <div class="fgroup"><label class="flabel">Telefone</label><input type="text" class="fi" id="cl-tel" placeholder="(62) 9..."></div>
+        <div class="fgroup"><label class="flabel">Telefone</label><input type="text" class="fi" id="cl-tel" placeholder="(62) 99999-9999" oninput="maskPhone(this)"></div>
         <div class="fgroup"><label class="flabel">CPF / CNPJ</label><div class="cnpj-wrap"><input type="text" class="fi" id="cl-doc" placeholder="00.000.000/0001-00"><button class="cnpj-btn" onclick="buscarCNPJ('cl')">🔍</button></div></div>
       </div>
       <div class="frow">
@@ -574,7 +604,7 @@ textarea.fi{resize:vertical;min-height:72px}
       <div class="frow">
         <div class="fgroup" style="flex:2;min-width:180px"><label class="flabel">Nome / Razão Social</label><input type="text" class="fi" id="fr-nome" placeholder="Nome do fornecedor..."></div>
         <div class="fgroup"><label class="flabel">Categoria Financeira</label><select class="fi" id="fr-cat"><option value="">Selecione...</option></select></div>
-        <div class="fgroup"><label class="flabel">Telefone</label><input type="text" class="fi" id="fr-tel" placeholder="(62) 9..."></div>
+        <div class="fgroup"><label class="flabel">Telefone</label><input type="text" class="fi" id="fr-tel" placeholder="(62) 99999-9999" oninput="maskPhone(this)"></div>
         <div class="fgroup"><label class="flabel">CNPJ / CPF</label><div class="cnpj-wrap"><input type="text" class="fi" id="fr-doc" placeholder="00.000.000/0001-00"><button class="cnpj-btn" onclick="buscarCNPJ('fr')">🔍</button></div></div>
       </div>
       <div class="frow">
@@ -619,11 +649,11 @@ textarea.fi{resize:vertical;min-height:72px}
       <div class="frow">
         <div class="fgroup" style="flex:2;min-width:180px"><label class="flabel">Nome Completo</label><input type="text" class="fi" id="fn-nome" placeholder="Nome do colaborador..."></div>
         <div class="fgroup"><label class="flabel">Cargo / Função</label><div style="display:flex;gap:4px"><select class="fi" id="fn-cargo" style="flex:1"></select><button class="btn sm" onclick="abrirCargos()" style="padding:8px 10px">⚙️</button></div></div>
-        <div class="fgroup"><label class="flabel">Telefone</label><input type="text" class="fi" id="fn-tel" placeholder="(62) 9..."></div>
+        <div class="fgroup"><label class="flabel">Telefone</label><input type="text" class="fi" id="fn-tel" placeholder="(62) 99999-9999" oninput="maskPhone(this)"></div>
         <div class="fgroup"><label class="flabel">CPF</label><input type="text" class="fi" id="fn-cpf" placeholder="000.000.000-00"></div>
       </div>
       <div class="frow">
-        <div class="fgroup"><label class="flabel">Tipo</label><select class="fi" id="fn-tipo" onchange="toggleFnTipo()"><option value="diarista">Diarista</option><option value="mensalista">Mensalista</option><option value="prolabore">Pró-labore</option></select></div>
+        <div class="fgroup"><label class="flabel">Tipo</label><div style="display:flex;gap:4px"><select class="fi" id="fn-tipo" onchange="toggleFnTipo()" style="flex:1"></select><button class="btn sm" onclick="abrirTipos()" style="padding:8px 10px" title="Gerenciar tipos">⚙️</button></div></div>
         <div class="fgroup" id="fn-diaria-wrap"><label class="flabel">Valor Diária (R$)</label><input type="number" class="fi" id="fn-diaria" placeholder="0,00" step="0.01"></div>
         <div class="fgroup" id="fn-salario-wrap" style="display:none"><label class="flabel">Salário Mensal (R$)</label><input type="number" class="fi" id="fn-salario" placeholder="0,00" step="0.01"></div>
         <div class="fgroup" id="fn-hextra-wrap"><label class="flabel">Valor Hora Extra (R$)</label><input type="number" class="fi" id="fn-hora-extra" placeholder="0,00" step="0.01"></div>
@@ -647,7 +677,8 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="fgroup"><label class="flabel">Data</label><input type="date" class="fi" id="pt-data"></div>
         <div class="fgroup"><label class="flabel">Tipo</label><select class="fi" id="pt-tipo"><option value="diaria">Diária</option><option value="meio">Meio período</option><option value="extra">Hora extra</option><option value="falta">Falta</option></select></div>
         <div class="fgroup"><label class="flabel">Qtd Horas Extra</label><input type="number" class="fi" id="pt-horas" placeholder="0" step="0.5" min="0"></div>
-        <div class="fgroup"><label class="flabel">Obs</label><input type="text" class="fi" id="pt-obs" placeholder="Observação..."></div>
+        <div class="fgroup"><label class="flabel">Qtd de Obras <span style="color:var(--red)">*</span></label><input type="number" class="fi" id="pt-obras" placeholder="1" min="0"></div>
+        <div class="fgroup"><label class="flabel">Observação <span style="color:var(--red)">*</span></label><input type="text" class="fi" id="pt-obs" placeholder="Observação obrigatória..."></div>
         <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="addPonto()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Registrar</button></div>
       </div>
     </div>
@@ -714,6 +745,117 @@ textarea.fi{resize:vertical;min-height:72px}
     </div>
   </div>
 
+  <!-- PROJETOS -->
+  <div class="view" id="view-projetos">
+    <!-- TABS -->
+    <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:3px;width:fit-content">
+      <button class="fbt on" id="proj-tab-lista" onclick="projTab('lista',this)">📋 Projetos</button>
+      <button class="fbt" id="proj-tab-novo" onclick="projTab('novo',this)">➕ Novo Projeto</button>
+      <button class="fbt" id="proj-tab-custos" onclick="projTab('custos',this)">💰 Custos</button>
+      <button class="fbt" id="proj-tab-dash" onclick="projTab('dash',this)">📊 Dashboard</button>
+    </div>
+
+    <!-- LISTA DE PROJETOS -->
+    <div id="proj-panel-lista">
+      <div class="card mb16">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <div class="ch" style="flex:1;margin:0">Projetos</div>
+          <select class="fi" id="proj-filtro-status" onchange="renderProjetos()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+            <option value="todos">Todos</option>
+            <option value="orcamento">Orçamento</option>
+            <option value="andamento">Em Andamento</option>
+            <option value="concluido">Concluído</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+          <input type="month" class="fi" id="proj-filtro-mes" onchange="renderProjetos()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Projeto</th><th>Cliente</th><th>Início</th><th>Entrega</th><th>Status</th><th>Estimado</th><th>Real</th><th>Margem</th><th></th></tr></thead>
+            <tbody id="proj-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOVO PROJETO -->
+    <div id="proj-panel-novo" style="display:none">
+      <div class="card mb16">
+        <div class="ch" id="proj-form-title">Novo Projeto</div>
+        <input type="hidden" id="proj-edit-id">
+        <div class="frow">
+          <div class="fgroup" style="flex:2"><label class="flabel">Nome do Projeto</label><input type="text" class="fi" id="proj-nome" placeholder="Ex: Dormitório Casal - Dr. Pablo..."></div>
+          <div class="fgroup"><label class="flabel">Cliente</label><select class="fi" id="proj-cliente"><option value="">Selecione...</option></select></div>
+          <div class="fgroup"><label class="flabel">Status</label>
+            <select class="fi" id="proj-status">
+              <option value="orcamento">Orçamento</option>
+              <option value="andamento">Em Andamento</option>
+              <option value="concluido">Concluído</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fgroup"><label class="flabel">Data Início</label><input type="date" class="fi" id="proj-inicio"></div>
+          <div class="fgroup"><label class="flabel">Previsão Entrega</label><input type="date" class="fi" id="proj-entrega"></div>
+          <div class="fgroup" style="flex:2"><label class="flabel">Descrição</label><input type="text" class="fi" id="proj-desc" placeholder="Descrição do projeto..."></div>
+        </div>
+        <div class="ch" style="margin-top:16px">Custo Estimado por Categoria</div>
+        <div class="frow">
+          <div class="fgroup"><label class="flabel">Material (R$)</label><input type="number" class="fi" id="proj-est-material" placeholder="0,00" step="0.01" oninput="calcEstTotal()"></div>
+          <div class="fgroup"><label class="flabel">Mão de Obra (R$)</label><input type="number" class="fi" id="proj-est-mdo" placeholder="0,00" step="0.01" oninput="calcEstTotal()"></div>
+          <div class="fgroup"><label class="flabel">Espelhos (R$)</label><input type="number" class="fi" id="proj-est-espelho" placeholder="0,00" step="0.01" oninput="calcEstTotal()"></div>
+          <div class="fgroup"><label class="flabel">Outros (R$)</label><input type="number" class="fi" id="proj-est-outros" placeholder="0,00" step="0.01" oninput="calcEstTotal()"></div>
+          <div class="fgroup"><label class="flabel">Total Estimado</label><input type="text" class="fi" id="proj-est-total" readonly style="background:var(--bg3);font-weight:600"></div>
+          <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="saveProjeto()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Salvar</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOS REAIS -->
+    <div id="proj-panel-custos" style="display:none">
+      <div class="card mb16">
+        <div class="ch">Lançar Custo Real</div>
+        <div class="frow">
+          <div class="fgroup"><label class="flabel">Projeto</label><select class="fi" id="custo-projeto"><option value="">Selecione...</option></select></div>
+          <div class="fgroup"><label class="flabel">Tipo</label>
+            <select class="fi" id="custo-tipo">
+              <option value="material">Material</option>
+              <option value="espelho">Espelho</option>
+              <option value="outros">Outros</option>
+            </select>
+          </div>
+          <div class="fgroup" style="flex:2"><label class="flabel">Descrição</label><input type="text" class="fi" id="custo-desc" placeholder="Ex: MDF 18mm, Vidro temperado..."></div>
+          <div class="fgroup"><label class="flabel">Valor (R$)</label><input type="number" class="fi" id="custo-valor" placeholder="0,00" step="0.01"></div>
+          <div class="fgroup"><label class="flabel">Data</label><input type="date" class="fi" id="custo-data"></div>
+          <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="saveCusto()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lançar</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <div class="ch" style="flex:1;margin:0">Custos Lançados</div>
+          <select class="fi" id="custo-filtro-proj" onchange="renderCustos()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px"><option value="">Todos projetos</option></select>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Projeto</th><th>Tipo</th><th>Descrição</th><th>Data</th><th>Valor</th><th></th></tr></thead>
+            <tbody id="custo-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD PROJETOS -->
+    <div id="proj-panel-dash" style="display:none">
+      <div class="frow mb16" style="align-items:flex-start">
+        <div class="fgroup"><label class="flabel">Selecione o Projeto</label><select class="fi" id="dash-proj-sel" onchange="renderDashProjeto()"><option value="">Selecione...</option></select></div>
+      </div>
+      <div id="dash-proj-content">
+        <div class="empty" style="padding:40px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/></svg>Selecione um projeto para ver o dashboard</div>
+      </div>
+    </div>
+  </div>
+
   <!-- CONFIGURAÇÕES -->
   <div class="view" id="view-configuracoes">
     <div class="g2 mb16">
@@ -728,7 +870,7 @@ textarea.fi{resize:vertical;min-height:72px}
           <div class="fgroup"><label class="flabel">Cidade/UF</label><input type="text" class="fi" id="cfg-cidade" placeholder="Aparecida de Goiânia/GO"></div>
         </div>
         <div class="frow">
-          <div class="fgroup"><label class="flabel">Telefone</label><input type="text" class="fi" id="cfg-tel" placeholder="(62) 9..."></div>
+          <div class="fgroup"><label class="flabel">Telefone</label><input type="text" class="fi" id="cfg-tel" placeholder="(62) 99999-9999" oninput="maskPhone(this)"></div>
           <div class="fgroup"><label class="flabel">E-mail</label><input type="email" class="fi" id="cfg-email" placeholder="email@..."></div>
           <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="saveCfg()">Salvar dados</button></div>
         </div>
@@ -1098,6 +1240,8 @@ async function syncToSheets(type){
     fornecedores:{data:fornecedores,sheet:'Fornecedores',row:rowFornecedor},
     categorias:{data:categorias,sheet:'Categorias',row:rowCategoria},
     funcionarios:{data:funcionarios,sheet:'Funcionarios',row:rowFuncionario},
+    projetos:{data:projetos,sheet:'Projetos',row:function(p){return[p.id,p.nome,p.cliente_id,p.status,p.inicio,p.entrega,p.descricao,p.est_material,p.est_mdo,p.est_espelho,p.est_outros,p.created_at,p.created_by];}},
+    proj_custos:{data:proj_custos,sheet:'ProjetoCustos',row:function(c){return[c.id,c.projeto_id,c.tipo,c.descricao,c.valor,c.data,c.created_by];}},
     pontos:{data:pontos,sheet:'Pontos',row:rowPonto},
     refeicoes:{data:refeicoes,sheet:'Refeicoes',row:rowRefeicao}
   };
@@ -1122,7 +1266,7 @@ function nextId(arr){return arr.reduce(function(m,x){return Math.max(m,x.id||0);
 var viewAtual='dashboard';
 
 // -- NAVIGATION --------------------------------------------
-var LBLS={dashboard:'Dashboard',caixa:'Caixa / Extrato',pagar:'Contas a Pagar',contas:'Contas Bancárias',clientes:'Clientes',fornecedores:'Fornecedores',categorias:'Categorias',funcionarios:'Funcionários',ponto:'Ponto / Jornada',folha:'Folha Semanal',refeicoes:'Refeições',configuracoes:'Configurações',usuarios:'Usuários / Log'};
+var LBLS={dashboard:'Dashboard',projetos:'Projetos',caixa:'Caixa / Extrato',pagar:'Contas a Pagar',contas:'Contas Bancárias',clientes:'Clientes',fornecedores:'Fornecedores',categorias:'Categorias',funcionarios:'Funcionários',ponto:'Ponto / Jornada',folha:'Folha Semanal',refeicoes:'Refeições',configuracoes:'Configurações',usuarios:'Usuários / Log'};
 
 function go(v){
   document.querySelectorAll('.view').forEach(function(e){e.classList.remove('active');});
@@ -1142,6 +1286,7 @@ function go(v){
   if(v==='folha')renderFolha();
   if(v==='refeicoes'){populateFuncSelect('rf-func');populateFornSelect('rf-forn');populateFuncSelect('rf-filtro-func');renderRefeicoes();}
   if(v==='contas')renderContasBancarias();
+  if(v==='projetos'){renderProjetos();populateClienteSelect('proj-cliente');populateProjetoSelects();}  
   if(v==='configuracoes')renderConfig();
   if(v==='usuarios')renderLog();
   closeSb();
@@ -1385,6 +1530,24 @@ function renderCategorias(){
 
 // -- FUNCIONÁRIOS ------------------------------------------
 function addFuncionario(){
+  // Handle edit mode
+  if(window._editFnId){
+    var fn=funcionarios.find(function(x){return x.id===window._editFnId;});
+    if(fn){
+      fn.nome=document.getElementById('fn-nome').value.trim()||fn.nome;
+      fn.tipo=document.getElementById('fn-tipo').value;
+      fn.cargo=document.getElementById('fn-cargo').value;
+      fn.telefone=document.getElementById('fn-tel').value;
+      fn.cpf=document.getElementById('fn-cpf').value;
+      fn.diaria=parseFloat(document.getElementById('fn-diaria').value)||fn.diaria;
+      fn.salario=parseFloat(document.getElementById('fn-salario').value)||fn.salario;
+      fn.hora_extra=parseFloat(document.getElementById('fn-hora-extra').value)||fn.hora_extra;
+      fn.pix=document.getElementById('fn-pix').value||fn.pix;
+    }
+    window._editFnId=null;
+    save();syncToSheets('funcionarios');renderFuncionarios();
+    toast('Funcionário atualizado!','ok');return;
+  }
   var nome=document.getElementById('fn-nome').value.trim();
   if(!nome){toast('Informe o nome','warn');return;}
   var fnTipo=document.getElementById('fn-tipo').value;
@@ -1408,9 +1571,15 @@ html+='<tr><td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td><td><span class="tipo-t
 function addPonto(){
   var fid=document.getElementById('pt-func').value;
   var data=document.getElementById('pt-data').value;
-  if(!fid||!data){toast('Selecione funcionário e data','warn');return;}
+  var obs=document.getElementById('pt-obs').value.trim();
+  var obras=document.getElementById('pt-obras').value;
+  var tipo=document.getElementById('pt-tipo').value;
+  if(!fid){toast('Selecione o funcionário','warn');return;}
+  if(!data){toast('Informe a data','warn');return;}
+  if(!tipo){toast('Selecione o tipo','warn');return;}
+  if(!obs){toast('Observação é obrigatória','warn');document.getElementById('pt-obs').focus();return;}
   var user=CURRENT_USER?(CURRENT_USER.name||CURRENT_USER.email):'Sistema';
-  pontos.push({id:nextId(pontos),funcionario_id:parseInt(fid),data:data,tipo:document.getElementById('pt-tipo').value,horas:parseFloat(document.getElementById('pt-horas').value)||0,obs:document.getElementById('pt-obs').value,created_at:new Date().toISOString(),created_by:user});
+  pontos.push({id:nextId(pontos),funcionario_id:parseInt(fid),data:data,tipo:tipo,horas:parseFloat(document.getElementById('pt-horas').value)||0,obras:parseInt(document.getElementById('pt-obras').value)||1,obs:obs,created_at:new Date().toISOString(),created_by:user});
   save();syncToSheets('pontos');logActivity('Ponto registrado: '+funcNome(parseInt(document.getElementById('pt-func').value)));renderPonto();toast('Ponto registrado!','ok');
   document.getElementById('pt-horas').value='';document.getElementById('pt-obs').value='';
 }
@@ -2183,7 +2352,8 @@ function showPrint(title, htmlContent){
   var bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*)<\/body>/i);
   var content = bodyMatch ? bodyMatch[1] : htmlContent;
   var styleMatches = htmlContent.match(/<style[^>]*>[\s\S]*?<\/style>/gi);
-  var styles = styleMatches ? styleMatches.join('') : '';
+  var baseStyle = '<style>*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}body{margin:0;padding:12px;font-size:11px}table{width:100%;border-collapse:collapse;page-break-inside:auto}tr{page-break-inside:avoid}th,td{padding:5px 7px;font-size:10px}.ft{margin-top:10px}</style>';
+  var styles = styleMatches ? baseStyle + styleMatches.join('') : baseStyle;
   document.getElementById('print-title').textContent = title;
   document.getElementById('print-content').innerHTML = styles + content;
   document.getElementById('print-modal').classList.add('show');
@@ -2194,6 +2364,372 @@ function closePrint(){
   document.getElementById('print-content').innerHTML = '';
 }
 
+// -- PHONE MASK ----------------------------------------------
+function maskPhone(el){
+  var v=el.value.replace(/\D/g,'');
+  if(v.length<=10) v=v.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3');
+  else v=v.replace(/(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3');
+  el.value=v.trim().replace(/-$/,'');
+}
+
+// -- TIPOS FUNCIONÁRIO ----------------------------------------
+var tipos_func = JSON.parse(localStorage.getItem('cd_tipos_func')||'null')||['Diarista','Mensalista','Pró-labore'];
+function saveTipos(){ localStorage.setItem('cd_tipos_func',JSON.stringify(tipos_func)); }
+function populateTiposFn(){
+  var sel=document.getElementById('fn-tipo'); if(!sel) return;
+  var cur=sel.value;
+  sel.innerHTML=tipos_func.map(function(t){
+    var val=t.toLowerCase().replace('-','').replace(' ','').replace('ó','o').replace('ô','o');
+    return '<option value="'+val+'"'+(val===cur?' selected':'')+'>'+t+'</option>';
+  }).join('');
+}
+function abrirTipos(){
+  document.getElementById('tipos-list').innerHTML=tipos_func.map(function(t,i){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg3)"><span style="flex:1">'+t+'</span><button class="ibt" onclick="delTipo('+i+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+  }).join('');
+  document.getElementById('m-tipos').classList.add('show');
+}
+function delTipo(i){ tipos_func.splice(i,1); saveTipos(); abrirTipos(); populateTiposFn(); }
+function addTipo(){
+  var v=document.getElementById('new-tipo').value.trim(); if(!v) return;
+  tipos_func.push(v); saveTipos(); document.getElementById('new-tipo').value='';
+  abrirTipos(); populateTiposFn(); toast('Tipo adicionado!','ok');
+}
+
+// -- EDIT FUNCIONÁRIO -----------------------------------------
+function editFuncionario(id){
+  var f=funcionarios.find(function(x){return x.id===id;}); if(!f) return;
+  document.getElementById('fn-nome').value=f.nome||'';
+  populateTiposFn();
+  document.getElementById('fn-tipo').value=f.tipo||'diarista';
+  toggleFnTipo();
+  populateCargos();
+  document.getElementById('fn-cargo').value=f.cargo||'';
+  document.getElementById('fn-tel').value=f.telefone||'';
+  document.getElementById('fn-cpf').value=f.cpf||'';
+  document.getElementById('fn-diaria').value=f.diaria||'';
+  document.getElementById('fn-salario').value=f.salario||'';
+  document.getElementById('fn-hora-extra').value=f.hora_extra||'';
+  document.getElementById('fn-pix').value=f.pix||'';
+  document.getElementById('fn-admissao').value=f.admissao||'';
+  // Store editing ID
+  window._editFnId = id;
+  toast('Editando: '+f.nome+' - altere os campos e clique Salvar','info');
+  document.getElementById('fn-nome').focus();
+  // Scroll to form
+  document.querySelector('#view-funcionarios .card').scrollIntoView({behavior:'smooth'});
+}
+
+// Override addFuncionario to handle edit mode
+var _origAddFn = null;
+
+// -- PROJETOS -------------------------------------------------
+var projetos = JSON.parse(localStorage.getItem('cd_projetos')||'null')||[];
+var proj_custos = JSON.parse(localStorage.getItem('cd_proj_custos')||'null')||[];
+var proj_rateio = JSON.parse(localStorage.getItem('cd_proj_rateio')||'null')||[];
+
+function saveProj(){
+  localStorage.setItem('cd_projetos',JSON.stringify(projetos));
+  localStorage.setItem('cd_proj_custos',JSON.stringify(proj_custos));
+  localStorage.setItem('cd_proj_rateio',JSON.stringify(proj_rateio));
+  if(ACCESS_TOKEN){
+    syncToSheets('projetos');
+    syncToSheets('proj_custos');
+  }
+}
+
+function projTab(tab, btn){
+  ['lista','novo','custos','dash'].forEach(function(t){
+    document.getElementById('proj-panel-'+t).style.display = t===tab?'block':'none';
+  });
+  document.querySelectorAll('#view-projetos .fbt').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  if(tab==='lista') renderProjetos();
+  if(tab==='custos'){ renderCustos(); populateProjetoSelects(); }
+  if(tab==='dash') populateProjetoSelects();
+}
+
+function populateProjetoSelects(){
+  var sels=['proj-cliente','custo-projeto','custo-filtro-proj','dash-proj-sel'];
+  sels.forEach(function(id){
+    var sel=document.getElementById(id); if(!sel) return;
+    var isCliente = id==='proj-cliente';
+    if(isCliente){
+      sel.innerHTML='<option value="">Selecione...</option>'+clientes.map(function(cl){return'<option value="'+cl.id+'">'+cl.nome+'</option>';}).join('');
+    } else {
+      var cur=sel.value;
+      var emptyLbl=id==='custo-filtro-proj'?'Todos projetos':'Selecione...';
+      sel.innerHTML='<option value="">'+emptyLbl+'</option>'+projetos.map(function(p){return'<option value="'+p.id+'"'+(p.id==cur?' selected':'')+'>'+p.nome+'</option>';}).join('');
+    }
+  });
+}
+
+function populateClienteSelect(selId){
+  var sel=document.getElementById(selId); if(!sel) return;
+  sel.innerHTML='<option value="">Selecione...</option>'+clientes.map(function(cl){return'<option value="'+cl.id+'">'+cl.nome+'</option>';}).join('');
+}
+
+function calcEstTotal(){
+  var m=parseFloat(document.getElementById('proj-est-material').value)||0;
+  var mo=parseFloat(document.getElementById('proj-est-mdo').value)||0;
+  var e=parseFloat(document.getElementById('proj-est-espelho').value)||0;
+  var o=parseFloat(document.getElementById('proj-est-outros').value)||0;
+  document.getElementById('proj-est-total').value=fmt(m+mo+e+o);
+}
+
+function saveProjeto(){
+  var nome=document.getElementById('proj-nome').value.trim();
+  if(!nome){toast('Informe o nome do projeto','warn');return;}
+  var editId=window._editProjId;
+  var user=CURRENT_USER?(CURRENT_USER.name||CURRENT_USER.email):'Sistema';
+  var dados={
+    nome:nome,
+    cliente_id:document.getElementById('proj-cliente').value,
+    status:document.getElementById('proj-status').value,
+    inicio:document.getElementById('proj-inicio').value,
+    entrega:document.getElementById('proj-entrega').value,
+    descricao:document.getElementById('proj-desc').value,
+    est_material:parseFloat(document.getElementById('proj-est-material').value)||0,
+    est_mdo:parseFloat(document.getElementById('proj-est-mdo').value)||0,
+    est_espelho:parseFloat(document.getElementById('proj-est-espelho').value)||0,
+    est_outros:parseFloat(document.getElementById('proj-est-outros').value)||0,
+    updated_by:user,
+    updated_at:new Date().toISOString()
+  };
+  if(editId){
+    var p=projetos.find(function(x){return x.id===editId;});
+    if(p) Object.assign(p,dados);
+    window._editProjId=null;
+    document.getElementById('proj-form-title').textContent='Novo Projeto';
+  } else {
+    dados.id=nextId(projetos);
+    dados.created_at=new Date().toISOString();
+    dados.created_by=user;
+    projetos.push(dados);
+    logActivity('Novo projeto: '+nome);
+  }
+  saveProj();
+  projTab('lista',document.getElementById('proj-tab-lista'));
+  toast('Projeto salvo!','ok');
+  ['proj-nome','proj-desc','proj-inicio','proj-entrega','proj-est-material','proj-est-mdo','proj-est-espelho','proj-est-outros','proj-est-total'].forEach(function(id){document.getElementById(id).value='';});
+}
+
+function editProjeto(id){
+  var p=projetos.find(function(x){return x.id===id;}); if(!p) return;
+  window._editProjId=id;
+  document.getElementById('proj-form-title').textContent='Editar Projeto';
+  document.getElementById('proj-nome').value=p.nome||'';
+  document.getElementById('proj-cliente').value=p.cliente_id||'';
+  document.getElementById('proj-status').value=p.status||'orcamento';
+  document.getElementById('proj-inicio').value=p.inicio||'';
+  document.getElementById('proj-entrega').value=p.entrega||'';
+  document.getElementById('proj-desc').value=p.descricao||'';
+  document.getElementById('proj-est-material').value=p.est_material||0;
+  document.getElementById('proj-est-mdo').value=p.est_mdo||0;
+  document.getElementById('proj-est-espelho').value=p.est_espelho||0;
+  document.getElementById('proj-est-outros').value=p.est_outros||0;
+  calcEstTotal();
+  projTab('novo',document.getElementById('proj-tab-novo'));
+}
+
+function getProjetoReal(projId){
+  var custos=proj_custos.filter(function(c){return c.projeto_id==projId;});
+  var mat=custos.filter(function(c){return c.tipo==='material';}).reduce(function(s,c){return s+parseFloat(c.valor||0);},0);
+  var esp=custos.filter(function(c){return c.tipo==='espelho';}).reduce(function(s,c){return s+parseFloat(c.valor||0);},0);
+  var out=custos.filter(function(c){return c.tipo==='outros';}).reduce(function(s,c){return s+parseFloat(c.valor||0);},0);
+  var mdo=proj_rateio.filter(function(r){return r.projeto_id==projId;}).reduce(function(s,r){return s+parseFloat(r.custo_rateado||0);},0);
+  return{material:mat,espelho:esp,outros:out,mdo:mdo,total:mat+esp+out+mdo};
+}
+
+function renderProjetos(){
+  var fs=document.getElementById('proj-filtro-status').value;
+  var list=projetos.filter(function(p){
+    if(fs!=='todos'&&p.status!==fs) return false;
+    return true;
+  }).sort(function(a,b){return(b.created_at||'').localeCompare(a.created_at||'');});
+  if(!list.length){document.getElementById('proj-body').innerHTML='<tr><td colspan="9"><div class="empty">Nenhum projeto encontrado</div></td></tr>';return;}
+  var statusCfg={
+    orcamento:{lbl:'Orçamento',cls:'pend'},
+    andamento:{lbl:'Em Andamento',cls:'ativo'},
+    concluido:{lbl:'Concluído',cls:'pago'},
+    cancelado:{lbl:'Cancelado',cls:'venc'}
+  };
+  var html='';
+  list.forEach(function(p){
+    var est=parseFloat(p.est_material||0)+parseFloat(p.est_mdo||0)+parseFloat(p.est_espelho||0)+parseFloat(p.est_outros||0);
+    var real=getProjetoReal(p.id);
+    var margem=est-real.total;
+    var margemCls=margem>0?'color:var(--green)':margem<0?'color:var(--red)':'color:var(--t3)';
+    var st=statusCfg[p.status]||{lbl:p.status,cls:'cat'};
+    var cl=clientes.find(function(x){return x.id==p.cliente_id;});
+    var indicator=margem>0?'🟢':margem<0?'🔴':'🟡';
+    html+='<tr>'+
+      '<td><b>'+indicator+' '+p.nome+'</b>'+(p.descricao?'<br><span style="font-size:10px;color:var(--t3)">'+p.descricao+'</span>':'')+'</td>'+
+      '<td>'+(cl?cl.nome:'')+'</td>'+
+      '<td>'+dp(p.inicio)+'</td>'+
+      '<td>'+dp(p.entrega)+'</td>'+
+      '<td><span class="tag '+st.cls+'">'+st.lbl+'</span></td>'+
+      '<td style="font-family:var(--fm)">'+fmt(est)+'</td>'+
+      '<td style="font-family:var(--fm)">'+fmt(real.total)+'</td>'+
+      '<td style="font-family:var(--fm);font-weight:600;'+margemCls+'">'+fmt(margem)+'</td>'+
+      '<td style="display:flex;gap:4px">'+
+        '<button class="ibt" onclick="editProjeto('+p.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'+
+        '<button class="ibt" onclick="dashProjeto('+p.id+')" title="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>'+
+        '<button class="ibt" onclick="pdfProjeto('+p.id+')" title="PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></button>'+
+        '<button class="ibt" onclick="delProjeto('+p.id+')" title="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>'+
+      '</td></tr>';
+  });
+  document.getElementById('proj-body').innerHTML=html;
+}
+
+function delProjeto(id){
+  if(!confirm('Excluir projeto?')) return;
+  projetos=projetos.filter(function(x){return x.id!==id;});
+  saveProj(); renderProjetos(); toast('Projeto excluído','info');
+}
+
+function saveCusto(){
+  var projId=document.getElementById('custo-projeto').value;
+  var desc=document.getElementById('custo-desc').value.trim();
+  var valor=parseFloat(document.getElementById('custo-valor').value)||0;
+  if(!projId||!desc||!valor){toast('Preencha todos os campos','warn');return;}
+  var user=CURRENT_USER?(CURRENT_USER.name||CURRENT_USER.email):'Sistema';
+  proj_custos.push({
+    id:nextId(proj_custos),
+    projeto_id:parseInt(projId),
+    tipo:document.getElementById('custo-tipo').value,
+    descricao:desc,
+    valor:valor,
+    data:document.getElementById('custo-data').value||fd(td),
+    created_by:user,
+    created_at:new Date().toISOString()
+  });
+  saveProj(); renderCustos(); toast('Custo lançado!','ok');
+  document.getElementById('custo-desc').value='';
+  document.getElementById('custo-valor').value='';
+}
+
+function renderCustos(){
+  var fp=document.getElementById('custo-filtro-proj').value;
+  var list=proj_custos.filter(function(c){return!fp||c.projeto_id==fp;})
+    .sort(function(a,b){return(b.created_at||'').localeCompare(a.created_at||'');});
+  if(!list.length){document.getElementById('custo-body').innerHTML='<tr><td colspan="6"><div class="empty">Nenhum custo lançado</div></td></tr>';return;}
+  var html='';
+  list.forEach(function(c){
+    var p=projetos.find(function(x){return x.id===c.projeto_id;});
+    var tipoLbl={material:'Material',espelho:'Espelho',outros:'Outros',mdo:'Mão de Obra'}[c.tipo]||c.tipo;
+    html+='<tr><td>'+(p?p.nome:'')+'</td><td><span class="tag cat">'+tipoLbl+'</span></td><td>'+c.descricao+'</td><td>'+dp(c.data)+'</td><td style="font-family:var(--fm)">'+fmt(c.valor)+'</td>'+
+      '<td><button class="ibt" onclick="delCusto('+c.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+  });
+  document.getElementById('custo-body').innerHTML=html;
+}
+
+function delCusto(id){
+  proj_custos=proj_custos.filter(function(x){return x.id!==id;});
+  saveProj(); renderCustos(); toast('Custo removido','info');
+}
+
+function dashProjeto(id){
+  document.getElementById('dash-proj-sel').value=id;
+  projTab('dash',document.getElementById('proj-tab-dash'));
+  renderDashProjeto();
+}
+
+function renderDashProjeto(){
+  var id=document.getElementById('dash-proj-sel').value;
+  if(!id){document.getElementById('dash-proj-content').innerHTML='<div class="empty">Selecione um projeto</div>';return;}
+  var p=projetos.find(function(x){return x.id==id;}); if(!p) return;
+  var est={material:parseFloat(p.est_material||0),mdo:parseFloat(p.est_mdo||0),espelho:parseFloat(p.est_espelho||0),outros:parseFloat(p.est_outros||0)};
+  var estTotal=est.material+est.mdo+est.espelho+est.outros;
+  var real=getProjetoReal(id);
+  var margem=estTotal-real.total;
+  var cl=clientes.find(function(x){return x.id==p.cliente_id;});
+  var pct=estTotal>0?Math.min(100,Math.round((real.total/estTotal)*100)):0;
+  var st={orcamento:'Orçamento',andamento:'Em Andamento',concluido:'Concluído',cancelado:'Cancelado'}[p.status]||p.status;
+
+  var cats=[
+    {lbl:'Material',est:est.material,real:real.material,cor:'#7A9E7E'},
+    {lbl:'Mão de Obra',est:est.mdo,real:real.mdo,cor:'#B8D8D8'},
+    {lbl:'Espelhos',est:est.espelho,real:real.espelho,cor:'#9ECECE'},
+    {lbl:'Outros',est:est.outros,real:real.outros,cor:'#8C8C8C'}
+  ];
+
+  var barsHtml=cats.map(function(cat){
+    var maxVal=Math.max(cat.est,cat.real,1);
+    var hE=Math.max(4,Math.round((cat.est/maxVal)*80));
+    var hR=Math.max(4,Math.round((cat.real/maxVal)*80));
+    return '<div style="flex:1;text-align:center">'+
+      '<div style="display:flex;gap:4px;align-items:flex-end;height:80px;justify-content:center">'+
+      '<div style="width:20px;background:'+cat.cor+';border-radius:3px 3px 0 0;height:'+hE+'px" title="Estimado: '+fmt(cat.est)+'"></div>'+
+      '<div style="width:20px;background:'+(cat.real>cat.est?'var(--red)':'var(--sage)')+';border-radius:3px 3px 0 0;height:'+hR+'px" title="Real: '+fmt(cat.real)+'"></div>'+
+      '</div><div style="font-size:10px;color:var(--t3);margin-top:4px">'+cat.lbl+'</div></div>';
+  }).join('');
+
+  var rowsHtml=cats.map(function(cat){
+    var diff=cat.est-cat.real;
+    return '<tr><td>'+cat.lbl+'</td><td style="font-family:var(--fm)">'+fmt(cat.est)+'</td><td style="font-family:var(--fm)">'+fmt(cat.real)+'</td><td style="font-family:var(--fm);color:'+(diff>=0?'var(--green)':'var(--red)')+'">'+fmt(diff)+'</td></tr>';
+  }).join('');
+
+  document.getElementById('dash-proj-content').innerHTML=
+    '<div class="stats mb16"><div class="stat"><div class="sn">'+fmt(estTotal)+'</div><div class="sl">Total Estimado</div></div>'+
+    '<div class="stat red"><div class="sn">'+fmt(real.total)+'</div><div class="sl">Custo Real</div></div>'+
+    '<div class="stat '+(margem>=0?'green':'red')+'"><div class="sn">'+fmt(margem)+'</div><div class="sl">'+(margem>=0?'Margem':'Prejuízo')+'</div></div>'+
+    '<div class="stat amber"><div class="sn">'+pct+'%</div><div class="sl">Execução</div></div></div>'+
+    '<div class="g2 mb16">'+
+    '<div class="card"><div class="ch">'+p.nome+'</div>'+
+    '<div style="font-size:12px;color:var(--t2);line-height:2">'+
+    '<div><b>Cliente:</b> '+(cl?cl.nome:'-')+'</div>'+
+    '<div><b>Status:</b> '+st+'</div>'+
+    '<div><b>Início:</b> '+dp(p.inicio)+' | <b>Entrega:</b> '+dp(p.entrega)+'</div>'+
+    '<div><b>Descrição:</b> '+(p.descricao||'-')+'</div>'+
+    '</div>'+
+    '<div style="margin-top:14px;background:var(--bg3);border-radius:var(--r);height:10px;overflow:hidden">'+
+    '<div style="background:'+(margem>=0?'var(--sage)':'var(--red)')+';height:100%;width:'+pct+'%;transition:width .4s;border-radius:var(--r)"></div></div>'+
+    '<div style="font-size:10px;color:var(--t3);margin-top:4px">'+pct+'% executado com base no custo</div></div>'+
+    '<div class="card"><div class="ch">Gráfico por Categoria</div>'+
+    '<div style="display:flex;gap:8px;align-items:flex-end;padding:10px 0">'+barsHtml+'</div>'+
+    '<div style="display:flex;gap:16px;margin-top:8px"><div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)"><div style="width:10px;height:10px;background:var(--sage2);border-radius:2px"></div>Estimado</div>'+
+    '<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)"><div style="width:10px;height:10px;background:var(--sage);border-radius:2px"></div>Real (ok)</div>'+
+    '<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)"><div style="width:10px;height:10px;background:var(--red);border-radius:2px"></div>Acima est.</div></div></div></div>'+
+    '<div class="card"><div class="ch">Estimado vs Real por Categoria</div>'+
+    '<table class="tbl"><thead><tr><th>Categoria</th><th>Estimado</th><th>Real</th><th>Diferença</th></tr></thead><tbody>'+rowsHtml+
+    '<tr style="font-weight:700;background:var(--bg3)"><td>TOTAL</td><td style="font-family:var(--fm)">'+fmt(estTotal)+'</td><td style="font-family:var(--fm)">'+fmt(real.total)+'</td><td style="font-family:var(--fm);color:'+(margem>=0?'var(--green)':'var(--red)')+'">'+fmt(margem)+'</td></tr>'+
+    '</tbody></table></div>';
+}
+
+function pdfProjeto(id){
+  var p=projetos.find(function(x){return x.id===id;}); if(!p) return;
+  var cfg=getCfg();
+  var cl=clientes.find(function(x){return x.id==p.cliente_id;});
+  var est={material:parseFloat(p.est_material||0),mdo:parseFloat(p.est_mdo||0),espelho:parseFloat(p.est_espelho||0),outros:parseFloat(p.est_outros||0)};
+  var estTotal=est.material+est.mdo+est.espelho+est.outros;
+  var real=getProjetoReal(id);
+  var margem=estTotal-real.total;
+  var custosList=proj_custos.filter(function(c){return c.projeto_id==id;});
+  var st={orcamento:'Orçamento',andamento:'Em Andamento',concluido:'Concluído',cancelado:'Cancelado'}[p.status]||p.status;
+
+  var html='<html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px}.h{text-align:center;border-bottom:2px solid #2C2C2C;padding-bottom:10px;margin-bottom:16px}.h h1{font-size:18px;margin:0}.h p{margin:2px 0;color:#666;font-size:10px}table{width:100%;border-collapse:collapse;margin-bottom:14px}th{background:#2C2C2C;color:#fff;padding:6px 8px;text-align:left;font-size:10px}td{padding:5px 8px;border-bottom:1px solid #eee}.sec{font-size:12px;font-weight:700;margin:14px 0 6px;border-bottom:1px solid #B8D8D8;padding-bottom:3px}.kpis{display:flex;gap:10px;margin-bottom:14px}.kpi{flex:1;border:1px solid #ddd;padding:10px;border-radius:6px;text-align:center}.kpi .v{font-size:16px;font-weight:700;margin:3px 0}.kpi .l{font-size:9px;color:#999;text-transform:uppercase}.ft{margin-top:14px;border-top:1px solid #ccc;padding-top:6px;font-size:9px;color:#999;display:flex;justify-content:space-between}</style></head><body>';
+  html+='<div class="h"><h1>'+(cfg.razao||'Conexão Design')+'</h1><p>CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+' | '+(cfg.cidade||'Aparecida de Goiânia/GO')+'</p><p>Relatório do Projeto | '+new Date().toLocaleDateString('pt-BR')+'</p></div>';
+  html+='<div class="sec">'+p.nome+'</div>';
+  html+='<table><tbody><tr><td><b>Cliente:</b> '+(cl?cl.nome:'-')+'</td><td><b>Status:</b> '+st+'</td><td><b>Início:</b> '+dp(p.inicio)+'</td><td><b>Entrega:</b> '+dp(p.entrega)+'</td></tr></tbody></table>';
+  html+='<div class="kpis"><div class="kpi"><div class="l">Estimado</div><div class="v">'+fmt(estTotal)+'</div></div><div class="kpi"><div class="l">Real</div><div class="v">'+fmt(real.total)+'</div></div><div class="kpi"><div class="l">'+(margem>=0?'Margem':'Prejuízo')+'</div><div class="v" style="color:'+(margem>=0?'#2E7D52':'#C0392B')+'">'+fmt(margem)+'</div></div></div>';
+  html+='<div class="sec">Estimado vs Real por Categoria</div>';
+  html+='<table><thead><tr><th>Categoria</th><th>Estimado</th><th>Real</th><th>Diferença</th></tr></thead><tbody>';
+  [['Material',est.material,real.material],['Mão de Obra',est.mdo,real.mdo],['Espelhos',est.espelho,real.espelho],['Outros',est.outros,real.outros]].forEach(function(r){
+    var d=r[1]-r[2];
+    html+='<tr><td>'+r[0]+'</td><td>'+fmt(r[1])+'</td><td>'+fmt(r[2])+'</td><td style="color:'+(d>=0?'#2E7D52':'#C0392B')+'">'+fmt(d)+'</td></tr>';
+  });
+  html+='<tr style="font-weight:700;background:#f0f0f0"><td>TOTAL</td><td>'+fmt(estTotal)+'</td><td>'+fmt(real.total)+'</td><td style="color:'+(margem>=0?'#2E7D52':'#C0392B')+'">'+fmt(margem)+'</td></tr></tbody></table>';
+  if(custosList.length){
+    html+='<div class="sec">Custos Reais Detalhados</div><table><thead><tr><th>Tipo</th><th>Descrição</th><th>Data</th><th>Valor</th></tr></thead><tbody>';
+    custosList.forEach(function(c){html+='<tr><td>'+c.tipo+'</td><td>'+c.descricao+'</td><td>'+dp(c.data)+'</td><td>'+fmt(c.valor)+'</td></tr>';});
+    html+='</tbody></table>';
+  }
+  html+='<div class="ft"><span>'+(cfg.razao||'Conexão Design')+'</span><span>'+new Date().toLocaleDateString('pt-BR')+'</span></div></body></html>';
+  showPrint('Projeto: '+p.nome, html);
+}
+
+// Update syncToSheets to include projetos
 // -- INIT --------------------------------------------------
 document.getElementById('cx-data').value=fd(td);
 document.getElementById('pt-data').value=fd(td);
@@ -2208,6 +2744,19 @@ populateCargos();
 var _cfg=getCfg();
 // Show auth screen - renderDash called after login
 </script>
+
+<!-- MODAL TIPOS FUNCIONÁRIO -->
+<div class="mbg" id="m-tipos">
+  <div class="mbox" style="max-width:360px">
+    <button class="ibt mclose" onclick="document.getElementById('m-tipos').classList.remove('show')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <h3>Tipos de Funcionário</h3><p>Gerencie os tipos de vínculo.</p>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <input type="text" class="fi" id="new-tipo" placeholder="Novo tipo..." style="flex:1" onkeydown="if(event.key==='Enter')addTipo()">
+      <button class="btn mint" onclick="addTipo()">+ Add</button>
+    </div>
+    <div id="tipos-list"></div>
+  </div>
+</div>
 
 <!-- PRINT MODAL -->
 <div class="print-modal" id="print-modal">
