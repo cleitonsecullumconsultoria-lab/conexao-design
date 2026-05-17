@@ -526,6 +526,17 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="fgroup" style="flex:2"><label class="flabel">Observação</label><input type="text" class="fi" id="pg-obs" placeholder="Observação opcional..."></div>
         <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="addConta()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar</button></div>
       </div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500">
+          <input type="checkbox" id="pg-ratear" onchange="toggleRateioConta()">
+          Ratear esta despesa em projetos
+        </label>
+        <div id="pg-rateio-section" style="display:none;margin-top:10px">
+          <div id="pg-rateio-rows" style="display:flex;flex-direction:column;gap:8px"></div>
+          <button class="btn sm" onclick="addRateioContaRow()" style="margin-top:8px">+ Adicionar projeto</button>
+          <div style="margin-top:8px;font-size:12px;color:var(--t3)">Total rateado: <span id="pg-rateio-total" style="font-weight:600;color:var(--charcoal)">0%</span></div>
+        </div>
+      </div>
     </div>
     <div class="card">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
@@ -656,6 +667,7 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="fgroup"><label class="flabel">Tipo</label><div style="display:flex;gap:4px"><select class="fi" id="fn-tipo" onchange="toggleFnTipo()" style="flex:1"></select><button class="btn sm" onclick="abrirTipos()" style="padding:8px 10px" title="Gerenciar tipos">⚙️</button></div></div>
         <div class="fgroup" id="fn-diaria-wrap"><label class="flabel">Valor Diária (R$)</label><input type="number" class="fi" id="fn-diaria" placeholder="0,00" step="0.01"></div>
         <div class="fgroup" id="fn-salario-wrap" style="display:none"><label class="flabel">Salário Mensal (R$)</label><input type="number" class="fi" id="fn-salario" placeholder="0,00" step="0.01"></div>
+        <div class="fgroup" id="fn-benef-wrap" style="display:none"><label class="flabel">Benefícios/mês (R$)</label><input type="number" class="fi" id="fn-beneficios" placeholder="VT+VR+outros" step="0.01"></div>
         <div class="fgroup" id="fn-hextra-wrap"><label class="flabel">Valor Hora Extra (R$)</label><input type="number" class="fi" id="fn-hora-extra" placeholder="0,00" step="0.01"></div>
         <div class="fgroup"><label class="flabel">PIX / Banco</label><input type="text" class="fi" id="fn-pix" placeholder="Chave PIX..."></div>
         <div class="fgroup"><label class="flabel">Data Admissão</label><input type="date" class="fi" id="fn-admissao"></div>
@@ -700,6 +712,7 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="ch" style="flex:1;margin:0">Folha Semanal</div>
         <input type="week" class="fi" id="fl-semana" onchange="renderFolha()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
         <button class="btn" onclick="marcarPago()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>Marcar Pagos</button>
+        <button class="btn" onclick="abrirRateioFolha()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Ratear Projetos</button>
         <button class="btn sm" onclick="pdfFolha()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PDF</button>
         <button class="btn sm" onclick="exportFolha()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Excel</button>
       </div>
@@ -723,6 +736,17 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="fgroup"><label class="flabel">Refeição</label><select class="fi" id="rf-tipo"><option value="almoco">Almoço</option><option value="janta">Jantar</option><option value="lanche">Lanche</option></select></div>
         <div class="fgroup"><label class="flabel">Valor (R$)</label><input type="number" class="fi" id="rf-valor" placeholder="0,00" step="0.01"></div>
         <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="addRefeicao()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Registrar</button></div>
+      </div>
+      <div style="margin-top:10px;padding:10px;background:var(--bg3);border-radius:var(--r)">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--charcoal)">
+          <input type="checkbox" id="rf-ratear" onchange="toggleRateioRef()">
+          Ratear esta refeição em projeto
+        </label>
+        <div id="rf-rateio-section" style="display:none;margin-top:10px">
+          <div id="rf-rateio-rows" style="display:flex;flex-direction:column;gap:8px"></div>
+          <button class="btn sm" onclick="addRateioRefRow()" style="margin-top:8px">+ Adicionar projeto</button>
+          <div style="margin-top:6px;font-size:12px;color:var(--t3)">Rateio: <span id="rf-rateio-total" style="font-weight:600;color:var(--charcoal)">0%</span></div>
+        </div>
       </div>
     </div>
     <div class="g2 mb16">
@@ -800,14 +824,13 @@ textarea.fi{resize:vertical;min-height:72px}
           <div class="fgroup"><label class="flabel">Previsão Entrega</label><input type="date" class="fi" id="proj-entrega"></div>
           <div class="fgroup" style="flex:2"><label class="flabel">Descrição</label><input type="text" class="fi" id="proj-desc" placeholder="Descrição do projeto..."></div>
         </div>
-        <div class="ch" style="margin-top:16px">Custo Estimado por Categoria</div>
-        <div class="frow">
-          <div class="fgroup"><label class="flabel">Material (R$)</label><input type="number" class="fi" id="proj-est-material" placeholder="0,00" step="0.01" oninput="calcEstTotal()"></div>
-          <div class="fgroup"><label class="flabel">Mão de Obra (R$)</label><input type="number" class="fi" id="proj-est-mdo" placeholder="0,00" step="0.01" oninput="calcEstTotal()"></div>
-          <div class="fgroup"><label class="flabel">Espelhos (R$)</label><input type="number" class="fi" id="proj-est-espelho" placeholder="0,00" step="0.01" oninput="calcEstTotal()"></div>
-          <div class="fgroup"><label class="flabel">Outros (R$)</label><input type="number" class="fi" id="proj-est-outros" placeholder="0,00" step="0.01" oninput="calcEstTotal()"></div>
-          <div class="fgroup"><label class="flabel">Total Estimado</label><input type="text" class="fi" id="proj-est-total" readonly style="background:var(--bg3);font-weight:600"></div>
-          <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="saveProjeto()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Salvar</button></div>
+        <div style="margin-top:16px;display:flex;align-items:center;justify-content:space-between">
+          <div class="ch" style="margin:0">Custo Estimado por Categoria</div>
+          <span style="font-size:12px;color:var(--t2)">Total: <b id="proj-est-total" style="font-family:var(--fm)">R$ 0,00</b></span>
+        </div>
+        <div id="proj-est-cats" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
+        <div style="margin-top:14px;display:flex;justify-content:flex-end">
+          <button class="btn mint" onclick="saveProjeto()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Salvar Projeto</button>
         </div>
       </div>
     </div>
@@ -1242,6 +1265,7 @@ async function syncToSheets(type){
     funcionarios:{data:funcionarios,sheet:'Funcionarios',row:rowFuncionario},
     projetos:{data:projetos,sheet:'Projetos',row:function(p){return[p.id,p.nome,p.cliente_id,p.status,p.inicio,p.entrega,p.descricao,p.est_material,p.est_mdo,p.est_espelho,p.est_outros,p.created_at,p.created_by];}},
     proj_custos:{data:proj_custos,sheet:'ProjetoCustos',row:function(c){return[c.id,c.projeto_id,c.tipo,c.descricao,c.valor,c.data,c.created_by];}},
+    proj_rateio:{data:proj_rateio,sheet:'ProjetoRateio',row:function(r){return[r.id,r.projeto_id,r.origem,r.origem_id||'',r.funcionario_id||'',r.semana||'',r.mes||'',r.percentual,r.valor_rateado,r.data,r.categoria_id||''];}},
     pontos:{data:pontos,sheet:'Pontos',row:rowPonto},
     refeicoes:{data:refeicoes,sheet:'Refeicoes',row:rowRefeicao}
   };
@@ -1286,7 +1310,7 @@ function go(v){
   if(v==='folha')renderFolha();
   if(v==='refeicoes'){populateFuncSelect('rf-func');populateFornSelect('rf-forn');populateFuncSelect('rf-filtro-func');renderRefeicoes();}
   if(v==='contas')renderContasBancarias();
-  if(v==='projetos'){renderProjetos();populateClienteSelect('proj-cliente');populateProjetoSelects();}  
+  if(v==='projetos'){renderProjetos();populateClienteSelect('proj-cliente');populateProjetoSelects();renderEstCats();}  
   if(v==='configuracoes')renderConfig();
   if(v==='usuarios')renderLog();
   closeSb();
@@ -1446,6 +1470,17 @@ function addConta(){
   var venc=document.getElementById('pg-venc').value;
   if(!desc||!valor||!venc){toast('Preencha todos os campos','warn');return;}
   contas_pagar.push({id:nextId(contas_pagar),descricao:desc,fornecedor_id:document.getElementById('pg-forn').value,categoria_id:document.getElementById('pg-cat').value,valor:valor,vencimento:venc,status:'pendente',obs:document.getElementById('pg-obs').value,created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
+  var contaId=nextId(contas_pagar)-1;
+  // Save rateio if checked
+  if(document.getElementById('pg-ratear')&&document.getElementById('pg-ratear').checked){
+    var rrows=collectRateioRows('pg-rateio-rows',valor);
+    rrows.forEach(function(r){
+      proj_rateio.push({id:nextId(proj_rateio),projeto_id:r.projeto_id,origem:'conta_pagar',origem_id:contaId,funcionario_id:null,semana:null,mes:null,percentual:r.percentual,valor_rateado:r.valor_rateado,data:fd(td),categoria_id:document.getElementById('pg-cat').value});
+    });
+    if(ACCESS_TOKEN)syncToSheets('proj_rateio');
+    document.getElementById('pg-ratear').checked=false;
+    toggleRateioConta();
+  }
   save();syncToSheets('contas_pagar');logActivity('Nova conta a pagar: '+desc+' ('+fmt(valor)+')');renderPagar();toast('Conta adicionada!','ok');
   document.getElementById('pg-desc').value='';document.getElementById('pg-valor').value='';document.getElementById('pg-venc').value='';
   document.getElementById('badge-pagar').textContent=contas_pagar.filter(function(c){return c.status!=='pago';}).length;
@@ -1551,7 +1586,7 @@ function addFuncionario(){
   var nome=document.getElementById('fn-nome').value.trim();
   if(!nome){toast('Informe o nome','warn');return;}
   var fnTipo=document.getElementById('fn-tipo').value;
-  funcionarios.push({id:nextId(funcionarios),nome:nome,tipo:fnTipo,cargo:document.getElementById('fn-cargo').value,telefone:document.getElementById('fn-tel').value,cpf:document.getElementById('fn-cpf').value,diaria:parseFloat(document.getElementById('fn-diaria').value)||0,salario:parseFloat(document.getElementById('fn-salario').value)||0,hora_extra:parseFloat(document.getElementById('fn-hora-extra').value)||0,pix:document.getElementById('fn-pix').value,admissao:document.getElementById('fn-admissao').value,ativo:true,created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
+  funcionarios.push({id:nextId(funcionarios),nome:nome,tipo:fnTipo,cargo:document.getElementById('fn-cargo').value,telefone:document.getElementById('fn-tel').value,cpf:document.getElementById('fn-cpf').value,diaria:parseFloat(document.getElementById('fn-diaria').value)||0,salario:parseFloat(document.getElementById('fn-salario').value)||0,beneficios:parseFloat(document.getElementById('fn-beneficios')&&document.getElementById('fn-beneficios').value||0)||0,hora_extra:parseFloat(document.getElementById('fn-hora-extra').value)||0,pix:document.getElementById('fn-pix').value,admissao:document.getElementById('fn-admissao').value,ativo:true,created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
   save();syncToSheets('funcionarios');logActivity('Novo funcionário: '+nome);renderFuncionarios();toast('Funcionário salvo!','ok');
   ['fn-nome','fn-cargo','fn-tel','fn-cpf','fn-diaria','fn-hora-extra','fn-pix','fn-admissao'].forEach(function(id){document.getElementById(id).value='';});
 }
@@ -1562,7 +1597,7 @@ function renderFuncionarios(){
     var tipoClass={diarista:'tipo-diarista',mensalista:'tipo-mensalista',prolabore:'tipo-prolabore'}[f.tipo||'diarista']||'tipo-diarista';
 var tipoLbl={diarista:'Diarista',mensalista:'Mensalista',prolabore:'Pró-labore'}[f.tipo||'diarista']||'Diarista';
 var valLbl=f.tipo==='diarista'?fmt(f.diaria)+'/dia':(f.tipo==='mensalista'||f.tipo==='prolabore')?fmt(f.salario||0)+'/mês':fmt(f.diaria)+'/dia';
-html+='<tr><td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td><td><span class="tipo-tag '+tipoClass+'">'+tipoLbl+'</span></td><td>'+f.telefone+'</td><td style="font-family:var(--fm)">'+valLbl+'</td><td style="font-family:var(--fm)">'+fmt(f.hora_extra)+'/h</td><td>'+f.pix+'</td><td><span class="tag '+(f.ativo?'ativo':'inativo')+'">'+(f.ativo?'Ativo':'Inativo')+'</span></td><td style="display:flex;gap:4px"><button class="ibt" onclick="toggleAtivo(\'funcionarios\','+f.id+')" title="Ativar/Inativar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button><button class="ibt" onclick="delItem(\'funcionarios\','+f.id+',\'Funcionário: '+f.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+html+='<tr><td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td><td><span class="tipo-tag '+tipoClass+'">'+tipoLbl+'</span></td><td>'+f.telefone+'</td><td style="font-family:var(--fm)">'+valLbl+'</td><td style="font-family:var(--fm)">'+fmt(f.hora_extra)+'/h</td><td>'+f.pix+'</td><td><span class="tag '+(f.ativo?'ativo':'inativo')+'">'+(f.ativo?'Ativo':'Inativo')+'</span></td><td style="display:flex;gap:4px"><button class="ibt" onclick="editFnForm('+f.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ibt" onclick="toggleAtivo(\'funcionarios\','+f.id+')" title="Ativar/Inativar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button><button class="ibt" onclick="delItem(\'funcionarios\','+f.id+',\'Funcionário: '+f.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
   });
   document.getElementById('fn-body').innerHTML=html;
 }
@@ -1635,24 +1670,63 @@ function renderFolha(){
   var sem=getSemana();
   if(!sem.si){document.getElementById('fl-body').innerHTML='<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--t3)">Selecione uma semana</td></tr>';return;}
   var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
-  var html='';var totalGeral=0;
-  funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
-    var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
-    var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
-    var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-    var hrVal=parseFloat(f.hora_extra)||0;
-    var totD=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
-    var totH=hExt*hrVal;
-    var total=totD+totH;
-    totalGeral+=total;
-    var pkey=sem.key+'_'+f.id;
-    var pago=folha_paga[pkey];
-    html+='<tr><td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td><td>'+dias+'</td><td>'+meio+'</td><td>'+hExt.toFixed(1)+'h</td><td style="font-family:var(--fm)">'+fmt(totD)+'</td><td style="font-family:var(--fm)">'+fmt(totH)+'</td><td style="font-family:var(--fm);font-weight:600">'+fmt(total)+'</td><td><span class="tag '+(pago?'pago':'pend')+'">'+(pago?'Pago':'Pendente')+'</span></td><td><button class="ibt" onclick="togglePagamento(\''+pkey+'\')" title="Marcar pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button></td></tr>';
-  });
+  var rows=[];var totalGeral=0;
+  var diaristas=funcionarios.filter(function(f){return f.ativo!==false&&(!f.tipo||f.tipo==='diarista');});
+  var mensalistas=funcionarios.filter(function(f){return f.ativo!==false&&(f.tipo==='mensalista'||f.tipo==='prolabore');});
+  var html='';
+  if(diaristas.length){
+    html+='<tr style="background:var(--bg3)"><td colspan="10" style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px">Diaristas</td></tr>';
+    diaristas.forEach(function(f){
+      var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
+      var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
+      var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
+      var hrVal=parseFloat(f.hora_extra)||0;
+      var totD=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
+      var totH=hExt*hrVal;
+      var total=totD+totH;
+      totalGeral+=total;
+      var pkey=sem.key+'_'+f.id;
+      var pago=folha_paga[pkey];
+      html+='<tr>';
+      html+='<td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td>';
+      html+='<td>'+dias+'</td><td>'+meio+'</td><td>'+hExt.toFixed(1)+'h</td>';
+      html+='<td style="font-family:var(--fm)">'+fmt(totD)+'</td>';
+      html+='<td style="font-family:var(--fm)">'+fmt(totH)+'</td>';
+      html+='<td style="font-family:var(--fm);font-weight:600">'+fmt(total)+'</td>';
+      html+='<td><span class="tag '+(pago?'pago':'pend')+'">'+(pago?'Pago':'Pendente')+'</span></td>';
+      html+='<td style="display:flex;gap:3px">';
+      html+='<button class="ibt" data-key="'+pkey+'" onclick="togglePagamento(this.dataset.key)" title="Marcar pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>';
+      html+='<button class="ibt" data-fn="'+f.id+'" data-sem="'+sem.key+'" data-tot="'+total+'" onclick="abrirRateioDiarista(+this.dataset.fn,this.dataset.sem,+this.dataset.tot)" title="Ratear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg></button>';
+      html+='</td></tr>';
+    });
+  }
+  if(mensalistas.length){
+    html+='<tr style="background:rgba(184,216,216,0.1)"><td colspan="10" style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px">Mensalistas / Pro-labore</td></tr>';
+    mensalistas.forEach(function(f){
+      var salario=parseFloat(f.salario||0);
+      var benef=parseFloat(f.beneficios||0);
+      var totalMes=salario+benef;
+      totalGeral+=totalMes;
+      var pkey=sem.key+'_'+f.id;
+      var pago=folha_paga[pkey];
+      var tl={mensalista:'Mensalista',prolabore:'Pro-labore'}[f.tipo]||f.tipo;
+      html+='<tr style="background:rgba(184,216,216,0.03)">';
+      html+='<td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td>';
+      html+='<td colspan="3"><span class="tipo-tag tipo-'+(f.tipo||'mensalista')+'">'+tl+'</span></td>';
+      html+='<td style="font-family:var(--fm)">'+fmt(salario)+'</td>';
+      html+='<td style="font-family:var(--fm);color:var(--t2);font-size:11px">+'+fmt(benef)+'</td>';
+      html+='<td style="font-family:var(--fm);font-weight:600">'+fmt(totalMes)+'</td>';
+      html+='<td><span class="tag '+(pago?'pago':'pend')+'">'+(pago?'Pago':'Pendente')+'</span></td>';
+      html+='<td style="display:flex;gap:3px">';
+      html+='<button class="ibt" data-key="'+pkey+'" onclick="togglePagamento(this.dataset.key)" title="Marcar pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>';
+      html+='<button class="ibt" data-fn="'+f.id+'" data-sem="'+sem.key+'" data-tot="'+totalMes+'" onclick="abrirRateioMensalista(+this.dataset.fn,this.dataset.sem,+this.dataset.tot)" title="Ratear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg></button>';
+      html+='</td></tr>';
+    });
+  }
   document.getElementById('fl-body').innerHTML=html||'<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--t3)">Nenhum registro nesta semana</td></tr>';
   document.getElementById('fl-total').textContent=fmt(totalGeral);
 }
-function togglePagamento(key){folha_paga[key]=!folha_paga[key];save();renderFolha();toast('Status atualizado!','ok');}
+function togglePagamento(key){if(!key)return;folha_paga[key]=!folha_paga[key];save();renderFolha();toast('Status atualizado!','ok');}
 function marcarPago(){var sem=getSemana();if(!sem.key)return;funcionarios.forEach(function(f){folha_paga[sem.key+'_'+f.id]=true;});save();renderFolha();toast('Todos marcados como pagos!','ok');}
 function pdfFolha(){
   var sem=getSemana(); if(!sem.si){toast('Selecione uma semana','warn');return;}
@@ -1721,6 +1795,16 @@ function addRefeicao(){
   var valor=parseFloat(document.getElementById('rf-valor').value);
   if(!fid||!data||!valor){toast('Preencha os campos obrigatórios','warn');return;}
   refeicoes.push({id:nextId(refeicoes),funcionario_id:parseInt(fid),fornecedor_id:forn,data:data,tipo:document.getElementById('rf-tipo').value,valor:valor});
+  var refId=nextId(refeicoes)-1;
+  if(document.getElementById('rf-ratear')&&document.getElementById('rf-ratear').checked){
+    var rfrows=collectRateioRows('rf-rateio-rows',valor);
+    rfrows.forEach(function(r){
+      proj_rateio.push({id:nextId(proj_rateio),projeto_id:r.projeto_id,origem:'refeicao',origem_id:refId,funcionario_id:parseInt(fid),semana:null,mes:null,percentual:r.percentual,valor_rateado:r.valor_rateado,data:data,categoria_id:null});
+    });
+    if(ACCESS_TOKEN)syncToSheets('proj_rateio');
+    document.getElementById('rf-ratear').checked=false;
+    toggleRateioRef();
+  }
   save();syncToSheets('refeicoes');renderRefeicoes();toast('Refeição registrada!','ok');
   document.getElementById('rf-valor').value='';
 }
@@ -1919,10 +2003,11 @@ function renderConfig(){
 
 // -- TOGGLE TIPO FUNCIONARIO -------------------------------
 function toggleFnTipo(){
-  var tipo=document.getElementById('fn-tipo').value;
+  var tipo=document.getElementById('fn-tipo')?document.getElementById('fn-tipo').value:'diarista';
   document.getElementById('fn-diaria-wrap').style.display=tipo==='diarista'?'flex':'none';
   document.getElementById('fn-salario-wrap').style.display=(tipo==='mensalista'||tipo==='prolabore')?'flex':'none';
-  document.getElementById('fn-hextra-wrap').style.display=tipo==='diarista'?'flex':'none';
+  var bw=document.getElementById('fn-benef-wrap');if(bw)bw.style.display=tipo==='mensalista'?'flex':'none';
+  document.getElementById('fn-hextra-wrap').style.display=tipo!=='prolabore'?'flex':'none';
 }
 
 // -- ACTIVITY LOG ------------------------------------------
@@ -2377,7 +2462,7 @@ var tipos_func = JSON.parse(localStorage.getItem('cd_tipos_func')||'null')||['Di
 function saveTipos(){ localStorage.setItem('cd_tipos_func',JSON.stringify(tipos_func)); }
 function populateTiposFn(){
   var sel=document.getElementById('fn-tipo'); if(!sel) return;
-  var cur=sel.value;
+  var cur=sel.value||'diarista';
   sel.innerHTML=tipos_func.map(function(t){
     var val=t.toLowerCase().replace('-','').replace(' ','').replace('ó','o').replace('ô','o');
     return '<option value="'+val+'"'+(val===cur?' selected':'')+'>'+t+'</option>';
@@ -2397,6 +2482,27 @@ function addTipo(){
 }
 
 // -- EDIT FUNCIONÁRIO -----------------------------------------
+function editFnForm(id){
+  var f=funcionarios.find(function(x){return x.id===id;}); if(!f) return;
+  window._editFnId=id;
+  populateTiposFn();
+  populateCargos();
+  document.getElementById('fn-nome').value=f.nome||'';
+  var tipoEl=document.getElementById('fn-tipo');
+  if(tipoEl) tipoEl.value=f.tipo||'diarista';
+  toggleFnTipo();
+  document.getElementById('fn-cargo').value=f.cargo||'';
+  document.getElementById('fn-tel').value=f.telefone||'';
+  document.getElementById('fn-cpf').value=f.cpf||'';
+  if(document.getElementById('fn-diaria'))document.getElementById('fn-diaria').value=f.diaria||'';
+  if(document.getElementById('fn-salario'))document.getElementById('fn-salario').value=f.salario||'';
+  if(document.getElementById('fn-beneficios'))document.getElementById('fn-beneficios').value=f.beneficios||'';
+  if(document.getElementById('fn-hora-extra'))document.getElementById('fn-hora-extra').value=f.hora_extra||'';
+  document.getElementById('fn-pix').value=f.pix||'';
+  document.getElementById('fn-admissao').value=f.admissao||'';
+  toast('Editando '+f.nome+' - altere e clique Salvar','info');
+  document.querySelector('#view-funcionarios .card').scrollIntoView({behavior:'smooth'});
+}
 function editFuncionario(id){
   var f=funcionarios.find(function(x){return x.id===id;}); if(!f) return;
   document.getElementById('fn-nome').value=f.nome||'';
@@ -2430,8 +2536,9 @@ var proj_rateio = JSON.parse(localStorage.getItem('cd_proj_rateio')||'null')||[]
 
 function saveProj(){
   localStorage.setItem('cd_projetos',JSON.stringify(projetos));
-  localStorage.setItem('cd_proj_custos',JSON.stringify(proj_custos));
   localStorage.setItem('cd_proj_rateio',JSON.stringify(proj_rateio));
+  localStorage.setItem('cd_proj_custos',JSON.stringify(proj_custos));
+  
   if(ACCESS_TOKEN){
     syncToSheets('projetos');
     syncToSheets('proj_custos');
@@ -2469,12 +2576,32 @@ function populateClienteSelect(selId){
   sel.innerHTML='<option value="">Selecione...</option>'+clientes.map(function(cl){return'<option value="'+cl.id+'">'+cl.nome+'</option>';}).join('');
 }
 
+function renderEstCats(){
+  var cats=categorias.filter(function(cat){return cat.tipo==='saida'||!cat.tipo;});
+  if(!cats.length){
+    // Fallback: show default categories
+    cats=[{id:'mat',nome:'Material (madeira, ferragens)'},{id:'mdo',nome:'Mão de Obra'},{id:'esp',nome:'Espelhos/Vidros'},{id:'out',nome:'Outros'}];
+  }
+  var html=cats.map(function(cat){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bg3)">'+
+      '<div style="flex:1;font-size:13px">'+cat.nome+'</div>'+
+      '<div style="display:flex;align-items:center;gap:6px">'+
+        '<span style="font-size:11px;color:var(--t3)">R$</span>'+
+        '<input type="number" class="fi" data-cat="'+cat.id+'" placeholder="0,00" step="0.01" oninput="calcEstTotal()" style="width:120px;text-align:right">'+
+      '</div></div>';
+  }).join('');
+  var el=document.getElementById('proj-est-cats');
+  if(el) el.innerHTML=html;
+  calcEstTotal();
+}
+
 function calcEstTotal(){
-  var m=parseFloat(document.getElementById('proj-est-material').value)||0;
-  var mo=parseFloat(document.getElementById('proj-est-mdo').value)||0;
-  var e=parseFloat(document.getElementById('proj-est-espelho').value)||0;
-  var o=parseFloat(document.getElementById('proj-est-outros').value)||0;
-  document.getElementById('proj-est-total').value=fmt(m+mo+e+o);
+  var total=0;
+  document.querySelectorAll('#proj-est-cats input[data-cat]').forEach(function(el){
+    total+=parseFloat(el.value)||0;
+  });
+  var t=document.getElementById('proj-est-total');
+  if(t) t.textContent=fmt(total);
 }
 
 function saveProjeto(){
@@ -2482,6 +2609,13 @@ function saveProjeto(){
   if(!nome){toast('Informe o nome do projeto','warn');return;}
   var editId=window._editProjId;
   var user=CURRENT_USER?(CURRENT_USER.name||CURRENT_USER.email):'Sistema';
+  // Collect dynamic estimativas
+  var estimativas=[];
+  document.querySelectorAll('#proj-est-cats input[data-cat]').forEach(function(el){
+    var val=parseFloat(el.value)||0;
+    if(val>0) estimativas.push({categoria_id:el.getAttribute('data-cat'),valor:val});
+  });
+  var estTotal=estimativas.reduce(function(s,e){return s+e.valor;},0);
   var dados={
     nome:nome,
     cliente_id:document.getElementById('proj-cliente').value,
@@ -2489,10 +2623,10 @@ function saveProjeto(){
     inicio:document.getElementById('proj-inicio').value,
     entrega:document.getElementById('proj-entrega').value,
     descricao:document.getElementById('proj-desc').value,
-    est_material:parseFloat(document.getElementById('proj-est-material').value)||0,
-    est_mdo:parseFloat(document.getElementById('proj-est-mdo').value)||0,
-    est_espelho:parseFloat(document.getElementById('proj-est-espelho').value)||0,
-    est_outros:parseFloat(document.getElementById('proj-est-outros').value)||0,
+    estimativas:JSON.stringify(estimativas),
+    est_total:estTotal,
+    // Fallback fields for compatibility
+    est_material:0, est_mdo:0, est_espelho:0, est_outros:0,
     updated_by:user,
     updated_at:new Date().toISOString()
   };
@@ -2534,11 +2668,34 @@ function editProjeto(id){
 
 function getProjetoReal(projId){
   var custos=proj_custos.filter(function(c){return c.projeto_id==projId;});
-  var mat=custos.filter(function(c){return c.tipo==='material';}).reduce(function(s,c){return s+parseFloat(c.valor||0);},0);
-  var esp=custos.filter(function(c){return c.tipo==='espelho';}).reduce(function(s,c){return s+parseFloat(c.valor||0);},0);
-  var out=custos.filter(function(c){return c.tipo==='outros';}).reduce(function(s,c){return s+parseFloat(c.valor||0);},0);
-  var mdo=proj_rateio.filter(function(r){return r.projeto_id==projId;}).reduce(function(s,r){return s+parseFloat(r.custo_rateado||0);},0);
-  return{material:mat,espelho:esp,outros:out,mdo:mdo,total:mat+esp+out+mdo};
+  var rateios=proj_rateio.filter(function(r){return r.projeto_id==projId;});
+  // Group custos by tipo
+  var byTipo={};
+  custos.forEach(function(c){byTipo[c.tipo]=(byTipo[c.tipo]||0)+parseFloat(c.valor||0);});
+  // Add rateios
+  var rateioTotal=rateios.reduce(function(s,r){return s+parseFloat(r.valor_rateado||0);},0);
+  var custoTotal=custos.reduce(function(s,c){return s+parseFloat(c.valor||0);},0);
+  return{byTipo:byTipo,rateio:rateioTotal,custoTotal:custoTotal,total:custoTotal+rateioTotal};
+}
+
+function getProjetoEst(p){
+  // Return estimativas as array [{nome, valor}]
+  if(p.estimativas){
+    try{
+      var arr=JSON.parse(p.estimativas);
+      return arr.map(function(e){
+        var cat=categorias.find(function(c){return c.id==e.categoria_id||c.id===e.categoria_id;});
+        return{nome:cat?cat.nome:e.categoria_id,valor:e.valor,categoria_id:e.categoria_id};
+      });
+    }catch(e){}
+  }
+  // Fallback to old fields
+  var list=[];
+  if(p.est_material>0)list.push({nome:'Material',valor:parseFloat(p.est_material)});
+  if(p.est_mdo>0)list.push({nome:'Mão de Obra',valor:parseFloat(p.est_mdo)});
+  if(p.est_espelho>0)list.push({nome:'Espelhos',valor:parseFloat(p.est_espelho)});
+  if(p.est_outros>0)list.push({nome:'Outros',valor:parseFloat(p.est_outros)});
+  return list;
 }
 
 function renderProjetos(){
@@ -2556,7 +2713,7 @@ function renderProjetos(){
   };
   var html='';
   list.forEach(function(p){
-    var est=parseFloat(p.est_material||0)+parseFloat(p.est_mdo||0)+parseFloat(p.est_espelho||0)+parseFloat(p.est_outros||0);
+    var est=parseFloat(p.est_total||0)||(parseFloat(p.est_material||0)+parseFloat(p.est_mdo||0)+parseFloat(p.est_espelho||0)+parseFloat(p.est_outros||0));
     var real=getProjetoReal(p.id);
     var margem=est-real.total;
     var margemCls=margem>0?'color:var(--green)':margem<0?'color:var(--red)':'color:var(--t3)';
@@ -2730,6 +2887,235 @@ function pdfProjeto(id){
 }
 
 // Update syncToSheets to include projetos
+// -- RATEIO HELPERS ------------------------------------------
+function projOpts(selId, emptyLbl){
+  var opts='<option value="">'+( emptyLbl||'Selecione projeto...')+'</option>';
+  projetos.filter(function(p){return p.status!=='cancelado'&&p.status!=='concluido';}).forEach(function(p){
+    opts+='<option value="'+p.id+'">'+p.nome+'</option>';
+  });
+  return opts;
+}
+
+function makeRateioRow(containerId, pctId){
+  var s='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">';
+  s+='<select class="fi" style="flex:2;min-width:140px" data-pctid="'+pctId+'" onchange="calcRateioPct(this.getAttribute(\'data-pctid\'))">'+projOpts()+'</select>';
+  s+='<input type="number" class="fi" placeholder="%" min="0" max="100" style="width:70px" data-pctid="'+pctId+'" oninput="calcRateioPct(this.getAttribute(\'data-pctid\'))">';
+  s+='<span style="font-family:var(--fm);font-size:12px;color:var(--t2);white-space:nowrap" class="rateio-val">R$ 0,00</span>';
+  s+='<button class="ibt" data-pctid="'+pctId+'" onclick="var p=this.getAttribute(\'data-pctid\');this.closest(\'div\').remove();calcRateioPct(p)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+  s+='</div>';
+  return s;
+}
+
+function calcRateioPct(pctId){
+  var container=document.getElementById(pctId.replace('-pct','-rows'));
+  if(!container) return;
+  var base=window['_rateio_base_'+pctId]||0;
+  var total=0;
+  container.querySelectorAll('div').forEach(function(row){
+    var inp=row.querySelector('input[type="number"]');
+    var pct=inp?parseFloat(inp.value)||0:0;
+    var val=(base*pct)/100;
+    total+=pct;
+    var valEl=row.querySelector('.rateio-val');
+    if(valEl) valEl.textContent='R$ '+val.toFixed(2);
+  });
+  var pctEl=document.getElementById(pctId);
+  if(pctEl){
+    pctEl.textContent=total.toFixed(0)+'%';
+    pctEl.style.color=Math.abs(total-100)<0.1?'var(--green)':total>100?'var(--red)':'var(--amber)';
+  }
+}
+
+function collectRateioRows(rowsContainerId, base){
+  var rows=[];
+  var container=document.getElementById(rowsContainerId);
+  if(!container) return rows;
+  container.querySelectorAll('div').forEach(function(row){
+    var sel=row.querySelector('select');
+    var inp=row.querySelector('input');
+    if(!sel||!inp) return;
+    var projId=parseInt(sel.value);
+    var pct=parseFloat(inp.value)||0;
+    if(projId&&pct>0) rows.push({projeto_id:projId,percentual:pct,valor_rateado:(base*pct/100)});
+  });
+  return rows;
+}
+
+// -- RATEIO DIARISTA ------------------------------------------
+var _rdFnId=null, _rdSemKey=null, _rdTotal=0;
+function abrirRateioDiarista(fnId, semKey, total){
+  _rdFnId=fnId; _rdSemKey=semKey; _rdTotal=total;
+  window['_rateio_base_rateio-d-pct']=total;
+  var f=funcionarios.find(function(x){return x.id===fnId;});
+  document.getElementById('rateio-d-info').textContent=(f?f.nome:'')+' | Semana '+semKey+' | Total: '+fmt(total);
+  document.getElementById('rateio-d-rows').innerHTML='';
+  addRateioDRow();
+  document.getElementById('m-rateio-d').classList.add('show');
+}
+function addRateioDRow(){
+  var el=document.createElement('div');
+  el.innerHTML=makeRateioRow('rateio-d-rows','rateio-d-pct');
+  document.getElementById('rateio-d-rows').appendChild(el.firstChild);
+  calcRateioPct('rateio-d-pct');
+}
+function salvarRateioDiarista(){
+  var rows=collectRateioRows('rateio-d-rows',_rdTotal);
+  if(!rows.length){toast('Adicione pelo menos um projeto','warn');return;}
+  var total=rows.reduce(function(s,r){return s+r.percentual;},0);
+  if(Math.abs(total-100)>1){toast('O total deve ser 100%. Atual: '+total.toFixed(0)+'%','warn');return;}
+  rows.forEach(function(r){
+    proj_rateio.push({
+      id:nextId(proj_rateio),projeto_id:r.projeto_id,origem:'folha',
+      funcionario_id:_rdFnId,semana:_rdSemKey,mes:null,
+      percentual:r.percentual,valor_rateado:r.valor_rateado,
+      data:fd(td),categoria_id:null
+    });
+  });
+  save();if(ACCESS_TOKEN)syncToSheets('proj_rateio');
+  document.getElementById('m-rateio-d').classList.remove('show');
+  toast('Rateio salvo!','ok');
+}
+
+// -- RATEIO MENSALISTA ----------------------------------------
+var _rmFnId=null, _rmSemKey=null, _rmTotal=0;
+function abrirRateioMensalista(fnId, semKey, total){
+  _rmFnId=fnId; _rmSemKey=semKey; _rmTotal=total;
+  window['_rateio_base_rateio-m-pct']=total;
+  var f=funcionarios.find(function(x){return x.id===fnId;});
+  var mes=semKey?semKey.split('-W')[0]+'-'+String(new Date().getMonth()+1).padStart(2,'0'):fd(td).substring(0,7);
+  document.getElementById('rateio-m-info').textContent=(f?f.nome:'')+' | '+mes+' | Total: '+fmt(total);
+  document.getElementById('rateio-m-rows').innerHTML='';
+  addRateioMRow();
+  document.getElementById('m-rateio-m').classList.add('show');
+}
+function addRateioMRow(){
+  var el=document.createElement('div');
+  el.innerHTML=makeRateioRow('rateio-m-rows','rateio-m-pct');
+  document.getElementById('rateio-m-rows').appendChild(el.firstChild);
+  calcRateioPct('rateio-m-pct');
+}
+function salvarRateioMensalista(){
+  var rows=collectRateioRows('rateio-m-rows',_rmTotal);
+  if(!rows.length){toast('Adicione pelo menos um projeto','warn');return;}
+  var total=rows.reduce(function(s,r){return s+r.percentual;},0);
+  if(Math.abs(total-100)>1){toast('Total deve ser 100%. Atual: '+total.toFixed(0)+'%','warn');return;}
+  var mes=fd(td).substring(0,7);
+  rows.forEach(function(r){
+    proj_rateio.push({
+      id:nextId(proj_rateio),projeto_id:r.projeto_id,origem:'mensalista',
+      funcionario_id:_rmFnId,semana:_rmSemKey,mes:mes,
+      percentual:r.percentual,valor_rateado:r.valor_rateado,
+      data:fd(td),categoria_id:null
+    });
+  });
+  save();if(ACCESS_TOKEN)syncToSheets('proj_rateio');
+  document.getElementById('m-rateio-m').classList.remove('show');
+  toast('Rateio do mensalista salvo!','ok');
+}
+
+// -- RATEIO FOLHA COMPLETA ------------------------------------
+var _rfSemKey=null;
+function abrirRateioFolha(){
+  var sem=getSemana();
+  if(!sem.si){toast('Selecione uma semana','warn');return;}
+  _rfSemKey=sem.key;
+  var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
+  var diaristas=funcionarios.filter(function(f){
+    return f.ativo!==false&&(!f.tipo||f.tipo==='diarista')&&ptSem.some(function(p){return p.funcionario_id===f.id;});
+  });
+  if(!diaristas.length){toast('Nenhum diarista com registro nesta semana','warn');return;}
+  var html='';
+  diaristas.forEach(function(f){
+    var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
+    var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
+    var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
+    var total=(dias*parseFloat(f.diaria||0))+(meio*parseFloat(f.diaria||0)/2)+(hExt*(parseFloat(f.hora_extra)||0));
+    window['_rateio_base_rf-pct-'+f.id]=total;
+    html+='<div style="background:var(--bg3);border-radius:var(--r);padding:12px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+        '<b>'+f.nome+'</b><span style="font-family:var(--fm);font-size:13px">'+fmt(total)+'</span>'+
+      '</div>'+
+      '<div id="rf-rows-'+f.id+'" style="display:flex;flex-direction:column;gap:6px"></div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">'+
+        '<button class="btn sm" onclick="addRateioFRow('+f.id+')">+ Projeto</button>'+
+        '<span style="font-size:11px;color:var(--t3)">Total: <span id="rf-pct-'+f.id+'" style="font-weight:600">0%</span></span>'+
+      '</div>'+
+    '</div>';
+  });
+  document.getElementById('rateio-f-content').innerHTML=html;
+  // Add first row for each
+  diaristas.forEach(function(f){ addRateioFRow(f.id); });
+  document.getElementById('m-rateio-f').classList.add('show');
+}
+function addRateioFRow(fnId){
+  var el=document.createElement('div');
+  el.innerHTML=makeRateioRow('rf-rows-'+fnId,'rf-pct-'+fnId);
+  document.getElementById('rf-rows-'+fnId).appendChild(el.firstChild);
+  calcRateioPct('rf-pct-'+fnId);
+}
+function salvarRateioFolha(){
+  var sem=getSemana();
+  var erros=[];
+  var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
+  var diaristas=funcionarios.filter(function(f){
+    return f.ativo!==false&&(!f.tipo||f.tipo==='diarista')&&ptSem.some(function(p){return p.funcionario_id===f.id;});
+  });
+  diaristas.forEach(function(f){
+    var base=window['_rateio_base_rf-pct-'+f.id]||0;
+    var rows=collectRateioRows('rf-rows-'+f.id,base);
+    if(!rows.length) return;
+    var total=rows.reduce(function(s,r){return s+r.percentual;},0);
+    if(Math.abs(total-100)>1){erros.push(f.nome+': '+total.toFixed(0)+'%');return;}
+    rows.forEach(function(r){
+      proj_rateio.push({
+        id:nextId(proj_rateio),projeto_id:r.projeto_id,origem:'folha',
+        funcionario_id:f.id,semana:_rfSemKey,mes:null,
+        percentual:r.percentual,valor_rateado:r.valor_rateado,
+        data:fd(td),categoria_id:null
+      });
+    });
+  });
+  if(erros.length){toast('Total deve ser 100%: '+erros.join(', '),'warn');return;}
+  save();if(ACCESS_TOKEN)syncToSheets('proj_rateio');
+  document.getElementById('m-rateio-f').classList.remove('show');
+  toast('Rateios da folha salvos!','ok');
+}
+
+// -- RATEIO CONTAS A PAGAR ------------------------------------
+function toggleRateioConta(){
+  var show=document.getElementById('pg-ratear').checked;
+  document.getElementById('pg-rateio-section').style.display=show?'block':'none';
+  if(show&&!document.getElementById('pg-rateio-rows').children.length) addRateioContaRow();
+}
+function addRateioContaRow(){
+  var valor=parseFloat(document.getElementById('pg-valor').value)||0;
+  window['_rateio_base_pg-rateio-total']=valor;
+  var el=document.createElement('div');
+  el.innerHTML=makeRateioRow('pg-rateio-rows','pg-rateio-total');
+  document.getElementById('pg-rateio-rows').appendChild(el.firstChild);
+  calcRateioPct('pg-rateio-total');
+}
+function calcRateioContaTotal(){
+  var valor=parseFloat(document.getElementById('pg-valor').value)||0;
+  window['_rateio_base_pg-rateio-total']=valor;
+  calcRateioPct('pg-rateio-total');
+}
+
+// -- RATEIO REFEIÇÕES -----------------------------------------
+function toggleRateioRef(){
+  var show=document.getElementById('rf-ratear').checked;
+  document.getElementById('rf-rateio-section').style.display=show?'block':'none';
+  if(show&&!document.getElementById('rf-rateio-rows').children.length) addRateioRefRow();
+}
+function addRateioRefRow(){
+  var valor=parseFloat(document.getElementById('rf-valor').value)||0;
+  window['_rateio_base_rf-rateio-total']=valor;
+  var el=document.createElement('div');
+  el.innerHTML=makeRateioRow('rf-rateio-rows','rf-rateio-total');
+  document.getElementById('rf-rateio-rows').appendChild(el.firstChild);
+  calcRateioPct('rf-rateio-total');
+}
+
 // -- INIT --------------------------------------------------
 document.getElementById('cx-data').value=fd(td);
 document.getElementById('pt-data').value=fd(td);
@@ -2755,6 +3141,56 @@ var _cfg=getCfg();
       <button class="btn mint" onclick="addTipo()">+ Add</button>
     </div>
     <div id="tipos-list"></div>
+  </div>
+</div>
+
+<!-- MODAL RATEIO DIARISTA -->
+<div class="mbg" id="m-rateio-d">
+  <div class="mbox" style="max-width:480px">
+    <button class="ibt mclose" onclick="document.getElementById('m-rateio-d').classList.remove('show')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <h3>Ratear por Projeto</h3>
+    <p id="rateio-d-info" style="font-size:12px;color:var(--t2);margin-bottom:14px"></p>
+    <div id="rateio-d-rows" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div>
+    <button class="btn sm" onclick="addRateioDRow()">+ Adicionar projeto</button>
+    <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--t3)">Total: <span id="rateio-d-pct" style="font-weight:600">0%</span></span>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="document.getElementById('m-rateio-d').classList.remove('show')">Cancelar</button>
+        <button class="btn mint" onclick="salvarRateioDiarista()">Salvar Rateio</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RATEIO MENSALISTA -->
+<div class="mbg" id="m-rateio-m">
+  <div class="mbox" style="max-width:480px">
+    <button class="ibt mclose" onclick="document.getElementById('m-rateio-m').classList.remove('show')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <h3>Ratear Mensalista por Projeto</h3>
+    <p id="rateio-m-info" style="font-size:12px;color:var(--t2);margin-bottom:14px"></p>
+    <div id="rateio-m-rows" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"></div>
+    <button class="btn sm" onclick="addRateioMRow()">+ Adicionar projeto</button>
+    <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--t3)">Total: <span id="rateio-m-pct" style="font-weight:600">0%</span></span>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="document.getElementById('m-rateio-m').classList.remove('show')">Cancelar</button>
+        <button class="btn mint" onclick="salvarRateioMensalista()">Salvar Rateio</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RATEIO FOLHA SEMANAL -->
+<div class="mbg" id="m-rateio-f">
+  <div class="mbox" style="max-width:560px">
+    <button class="ibt mclose" onclick="document.getElementById('m-rateio-f').classList.remove('show')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <h3>Ratear Folha por Projetos</h3>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:14px">Distribua o custo de cada diarista entre os projetos da semana.</p>
+    <div id="rateio-f-content" style="display:flex;flex-direction:column;gap:14px"></div>
+    <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn" onclick="document.getElementById('m-rateio-f').classList.remove('show')">Cancelar</button>
+      <button class="btn mint" onclick="salvarRateioFolha()">Salvar Todos os Rateios</button>
+    </div>
   </div>
 </div>
 
