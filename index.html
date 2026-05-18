@@ -541,6 +541,11 @@ textarea.fi{resize:vertical;min-height:72px}
     <div class="card">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
         <div class="ch" style="flex:1;margin:0">Contas</div>
+        <label style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">De</label>
+        <input type="date" class="fi" id="pg-filtro-ini" onchange="renderPagar()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+        <label style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">Até</label>
+        <input type="date" class="fi" id="pg-filtro-fim" onchange="renderPagar()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+        <button class="btn sm" onclick="limparFiltroPagar()" title="Limpar filtro de período"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Limpar filtro</button>
         <select class="fi" id="pg-filtro" onchange="renderPagar()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
           <option value="todas">Todas</option><option value="pendente">Pendentes</option><option value="vencido">Vencidas</option><option value="pago">Pagas</option>
         </select>
@@ -549,7 +554,7 @@ textarea.fi{resize:vertical;min-height:72px}
           PDF
         </button>
       </div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Vencimento</th><th>Descrição</th><th>Fornecedor</th><th>Categoria</th><th>Valor</th><th>Status</th><th></th></tr></thead><tbody id="pg-body"></tbody></table></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Vencimento</th><th>Descrição</th><th>Fornecedor</th><th>Categoria</th><th>Valor</th><th>Status</th><th>Origem</th><th></th></tr></thead><tbody id="pg-body"></tbody></table></div>
     </div>
   </div>
 
@@ -614,6 +619,15 @@ textarea.fi{resize:vertical;min-height:72px}
       <div class="ch">Novo Fornecedor</div>
       <div class="frow">
         <div class="fgroup" style="flex:2;min-width:180px"><label class="flabel">Nome / Razão Social</label><input type="text" class="fi" id="fr-nome" placeholder="Nome do fornecedor..."></div>
+        <div class="fgroup"><label class="flabel">O que fornece (Segmento)</label><select class="fi" id="fr-seg">
+          <option value="">Selecione...</option>
+          <option value="refeicoes">Refeições / Alimentação</option>
+          <option value="material_escritorio">Material de escritório</option>
+          <option value="servicos_ti">Serviços de TI</option>
+          <option value="limpeza_higiene">Limpeza e higiene</option>
+          <option value="logistica_transporte">Logística e transporte</option>
+          <option value="outros">Outros</option>
+        </select></div>
         <div class="fgroup"><label class="flabel">Categoria Financeira</label><select class="fi" id="fr-cat"><option value="">Selecione...</option></select></div>
         <div class="fgroup"><label class="flabel">Telefone</label><input type="text" class="fi" id="fr-tel" placeholder="(62) 99999-9999" oninput="maskPhone(this)"></div>
         <div class="fgroup"><label class="flabel">CNPJ / CPF</label><div class="cnpj-wrap"><input type="text" class="fi" id="fr-doc" placeholder="00.000.000/0001-00"><button class="cnpj-btn" onclick="buscarCNPJ('fr')">🔍</button></div></div>
@@ -632,7 +646,7 @@ textarea.fi{resize:vertical;min-height:72px}
     </div>
     <div class="card">
       <div class="ch">Fornecedores</div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nome</th><th>Categoria</th><th>Produto/Serviço</th><th>Telefone</th><th>PIX/Banco</th><th>Prazo</th><th></th></tr></thead><tbody id="fr-body"></tbody></table></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nome</th><th>Segmento</th><th>Categoria</th><th>Produto/Serviço</th><th>Telefone</th><th>PIX/Banco</th><th>Prazo</th><th></th></tr></thead><tbody id="fr-body"></tbody></table></div>
     </div>
   </div>
 
@@ -697,7 +711,11 @@ textarea.fi{resize:vertical;min-height:72px}
     <div class="card mb16">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
         <div class="ch" style="flex:1;margin:0">Registros de Ponto</div>
-        <input type="week" class="fi" id="pt-filtro-semana" onchange="renderPonto()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+        <label style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">De</label>
+        <input type="date" class="fi" id="pt-filtro-ini" onchange="renderPonto()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+        <label style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">Até</label>
+        <input type="date" class="fi" id="pt-filtro-fim" onchange="renderPonto()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+        <button class="btn sm" onclick="limparFiltroPonto()" title="Limpar filtro de período"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Limpar</button>
         <select class="fi" id="pt-filtro-func" onchange="renderPonto()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px"><option value="">Todos</option></select>
       </div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Data</th><th>Funcionário</th><th>Tipo</th><th>Valor</th><th>Lançado em</th><th>Obs</th><th></th></tr></thead><tbody id="pt-body"></tbody></table></div>
@@ -710,7 +728,12 @@ textarea.fi{resize:vertical;min-height:72px}
     <div class="card mb16">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <div class="ch" style="flex:1;margin:0">Folha Semanal</div>
-        <input type="week" class="fi" id="fl-semana" onchange="renderFolha()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+        <input type="week" class="fi" id="fl-semana" onchange="onChangeSemanaFolha()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px" title="Selecione a semana base">
+        <label style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">De</label>
+        <input type="date" class="fi" id="fl-filtro-ini" onchange="renderFolha()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+        <label style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">Até</label>
+        <input type="date" class="fi" id="fl-filtro-fim" onchange="renderFolha()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+        <button class="btn sm" onclick="limparFiltroFolha()" title="Limpar período"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Limpar</button>
         <button class="btn" onclick="marcarPago()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>Marcar Pagos</button>
         <button class="btn" onclick="abrirRateioFolha()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Ratear Projetos</button>
         <button class="btn sm" onclick="pdfFolha()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PDF</button>
@@ -1157,9 +1180,9 @@ async function initSheets(){
   toast('Conectando ao Google Sheets...','info');
   var headers = {
     Transacoes:['id','descricao','data','valor','tipo','conta','categoria_id'],
-    ContasPagar:['id','descricao','fornecedor_id','categoria_id','valor','vencimento','status','pago_em'],
+    ContasPagar:['id','descricao','fornecedor_id','categoria_id','valor','vencimento','status','pago_em','obs','origem','created_at','created_by'],
     Clientes:['id','nome','telefone','documento','endereco','cidade','email','ativo'],
-    Fornecedores:['id','nome','categoria_id','telefone','documento','produto','pix','prazo','ativo'],
+    Fornecedores:['id','nome','segmento','categoria_id','telefone','documento','produto','pix','prazo','endereco','bairro','cidade','ativo'],
     Categorias:['id','nome','tipo','cor'],
     Funcionarios:['id','nome','cargo','telefone','cpf','diaria','hora_extra','pix','admissao','ativo'],
     Pontos:['id','funcionario_id','data','tipo','horas','obs'],
@@ -1214,9 +1237,9 @@ async function loadAllData(){
 
 // Row parsers
 function parseTransacao(r){ return {id:+r[0],descricao:r[1]||'',data:r[2]||'',valor:+r[3]||0,tipo:r[4]||'',conta:r[5]||'',categoria_id:r[6]||''}; }
-function parseContaPagar(r){ return {id:+r[0],descricao:r[1]||'',fornecedor_id:r[2]||'',categoria_id:r[3]||'',valor:+r[4]||0,vencimento:r[5]||'',status:r[6]||'pendente',pago_em:r[7]||''}; }
+function parseContaPagar(r){ return {id:+r[0],descricao:r[1]||'',fornecedor_id:r[2]||'',categoria_id:r[3]||'',valor:+r[4]||0,vencimento:r[5]||'',status:r[6]||'pendente',pago_em:r[7]||'',obs:r[8]||'',origem:r[9]||'manual',created_at:r[10]||'',created_by:r[11]||''}; }
 function parseCliente(r){ return {id:+r[0],nome:r[1]||'',telefone:r[2]||'',documento:r[3]||'',endereco:r[4]||'',cidade:r[5]||'',email:r[6]||'',ativo:r[7]!=='false'}; }
-function parseFornecedor(r){ return {id:+r[0],nome:r[1]||'',categoria_id:r[2]||'',telefone:r[3]||'',documento:r[4]||'',produto:r[5]||'',pix:r[6]||'',prazo:r[7]||'',ativo:r[8]!=='false'}; }
+function parseFornecedor(r){ return {id:+r[0],nome:r[1]||'',segmento:r[2]||'',categoria_id:r[3]||'',telefone:r[4]||'',documento:r[5]||'',produto:r[6]||'',pix:r[7]||'',prazo:r[8]||'',endereco:r[9]||'',bairro:r[10]||'',cidade:r[11]||'',ativo:r[12]!=='false'}; }
 function parseCategoria(r){ return {id:+r[0],nome:r[1]||'',tipo:r[2]||'',cor:r[3]||'#7A9E7E'}; }
 function parseFuncionario(r){ return {id:+r[0],nome:r[1]||'',cargo:r[2]||'',telefone:r[3]||'',cpf:r[4]||'',diaria:+r[5]||0,hora_extra:+r[6]||0,pix:r[7]||'',admissao:r[8]||'',ativo:r[9]!=='false'}; }
 function parsePonto(r){ return {id:+r[0],funcionario_id:+r[1],data:r[2]||'',tipo:r[3]||'',horas:+r[4]||0,obs:r[5]||''}; }
@@ -1224,9 +1247,9 @@ function parseRefeicao(r){ return {id:+r[0],funcionario_id:+r[1],fornecedor_id:r
 
 // Row serializers
 function rowTransacao(t){ return [t.id,t.descricao,t.data,t.valor,t.tipo,t.conta,t.categoria_id]; }
-function rowContaPagar(c){ return [c.id,c.descricao,c.fornecedor_id,c.categoria_id,c.valor,c.vencimento,c.status,c.pago_em||'']; }
+function rowContaPagar(c){ return [c.id,c.descricao,c.fornecedor_id,c.categoria_id,c.valor,c.vencimento,c.status,c.pago_em||'',c.obs||'',c.origem||'manual',c.created_at||'',c.created_by||'']; }
 function rowCliente(c){ return [c.id,c.nome,c.telefone,c.documento,c.endereco,c.cidade,c.email,c.ativo]; }
-function rowFornecedor(f){ return [f.id,f.nome,f.categoria_id,f.telefone,f.documento,f.produto,f.pix,f.prazo,f.ativo]; }
+function rowFornecedor(f){ return [f.id,f.nome,f.segmento||'',f.categoria_id,f.telefone,f.documento,f.produto,f.pix,f.prazo,f.endereco||'',f.bairro||'',f.cidade||'',f.ativo]; }
 function rowCategoria(c){ return [c.id,c.nome,c.tipo,c.cor]; }
 function rowFuncionario(f){ return [f.id,f.nome,f.cargo,f.telefone,f.cpf,f.diaria,f.hora_extra,f.pix,f.admissao,f.ativo]; }
 function rowPonto(p){ return [p.id,p.funcionario_id,p.data,p.tipo,p.horas,p.obs]; }
@@ -1308,7 +1331,7 @@ function go(v){
   if(v==='funcionarios')renderFuncionarios();
   if(v==='ponto'){populateFuncSelect('pt-func');populateFuncSelect('pt-filtro-func');renderPonto();}
   if(v==='folha')renderFolha();
-  if(v==='refeicoes'){populateFuncSelect('rf-func');populateFornSelect('rf-forn');populateFuncSelect('rf-filtro-func');renderRefeicoes();}
+  if(v==='refeicoes'){populateFuncSelect('rf-func');populateFornSelect('rf-forn','refeicoes');populateFuncSelect('rf-filtro-func');renderRefeicoes();}
   if(v==='contas')renderContasBancarias();
   if(v==='projetos'){renderProjetos();populateClienteSelect('proj-cliente');populateProjetoSelects();renderEstCats();}  
   if(v==='configuracoes')renderConfig();
@@ -1327,10 +1350,12 @@ function populateCatSelect(id){
   var cur=sel.value;
   sel.innerHTML='<option value="">Selecione...</option>'+categorias.map(function(c){return'<option value="'+c.id+'"'+(c.id==cur?' selected':'')+'>'+c.nome+'</option>';}).join('');
 }
-function populateFornSelect(id){
+function populateFornSelect(id,segmentoFiltro){
   var sel=document.getElementById(id);if(!sel)return;
   var cur=sel.value;
-  sel.innerHTML='<option value="">Selecione...</option>'+fornecedores.map(function(f){return'<option value="'+f.id+'"'+(f.id==cur?' selected':'')+'>'+f.nome+'</option>';}).join('');
+  var list=fornecedores;
+  if(segmentoFiltro){list=list.filter(function(f){return f.segmento===segmentoFiltro;});}
+  sel.innerHTML='<option value="">Selecione...</option>'+list.map(function(f){return'<option value="'+f.id+'"'+(f.id==cur?' selected':'')+'>'+f.nome+'</option>';}).join('');
 }
 function populateFuncSelect(id){
   var sel=document.getElementById(id);if(!sel)return;
@@ -1469,7 +1494,7 @@ function addConta(){
   var valor=parseFloat(document.getElementById('pg-valor').value);
   var venc=document.getElementById('pg-venc').value;
   if(!desc||!valor||!venc){toast('Preencha todos os campos','warn');return;}
-  contas_pagar.push({id:nextId(contas_pagar),descricao:desc,fornecedor_id:document.getElementById('pg-forn').value,categoria_id:document.getElementById('pg-cat').value,valor:valor,vencimento:venc,status:'pendente',obs:document.getElementById('pg-obs').value,created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
+  contas_pagar.push({id:nextId(contas_pagar),descricao:desc,fornecedor_id:document.getElementById('pg-forn').value,categoria_id:document.getElementById('pg-cat').value,valor:valor,vencimento:venc,status:'pendente',obs:document.getElementById('pg-obs').value,origem:'manual',created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
   var contaId=nextId(contas_pagar)-1;
   // Save rateio if checked
   if(document.getElementById('pg-ratear')&&document.getElementById('pg-ratear').checked){
@@ -1493,21 +1518,55 @@ function pagarConta(id){
   document.getElementById('badge-pagar').textContent=contas_pagar.filter(function(c){return c.status!=='pago';}).length;
 }
 
+// Helper: determina se um lançamento é protegido (vem de outro módulo)
+function isContaProtegida(c){
+  var origem=c&&c.origem?String(c.origem).toLowerCase():'manual';
+  return origem==='refeicao'||origem==='refeicoes'||origem==='folha'||origem==='funcionarios';
+}
+// Helper: rótulo amigável da origem
+function origemLabel(c){
+  var o=c&&c.origem?String(c.origem).toLowerCase():'manual';
+  var labels={manual:'Manual',refeicao:'Refeições',refeicoes:'Refeições',folha:'Folha',funcionarios:'Folha'};
+  return labels[o]||(o?(o.charAt(0).toUpperCase()+o.slice(1)):'Manual');
+}
+
+function limparFiltroPagar(){
+  document.getElementById('pg-filtro-ini').value='';
+  document.getElementById('pg-filtro-fim').value='';
+  document.getElementById('pg-filtro').value='todas';
+  renderPagar();
+}
+
 function renderPagar(){
   var hoje=fd(td);
   var f=document.getElementById('pg-filtro').value;
+  var ini=document.getElementById('pg-filtro-ini')?document.getElementById('pg-filtro-ini').value:'';
+  var fim=document.getElementById('pg-filtro-fim')?document.getElementById('pg-filtro-fim').value:'';
   var list=contas_pagar.filter(function(c){
-    if(f==='pendente')return c.status==='pendente';
-    if(f==='vencido')return c.status!=='pago'&&c.vencimento<hoje;
-    if(f==='pago')return c.status==='pago';
+    if(f==='pendente'&&c.status!=='pendente')return false;
+    if(f==='vencido'&&!(c.status!=='pago'&&c.vencimento<hoje))return false;
+    if(f==='pago'&&c.status!=='pago')return false;
+    // Filtro por período (sobre data de vencimento)
+    if(ini&&c.vencimento<ini)return false;
+    if(fim&&c.vencimento>fim)return false;
     return true;
   }).sort(function(a,b){return a.vencimento.localeCompare(b.vencimento);});
   var html='';
-  if(!list.length){html='<tr><td colspan="7"><div class="empty">Nenhuma conta encontrada</div></td></tr>';}
+  if(!list.length){html='<tr><td colspan="8"><div class="empty">Nenhuma conta encontrada</div></td></tr>';}
   else list.forEach(function(c){
     var st=c.status==='pago'?'pago':c.vencimento<hoje?'venc':'pend';
     var stLbl=c.status==='pago'?'Pago':c.vencimento<hoje?'Vencida':'Pendente';
-    html+='<tr><td>'+dp(c.vencimento)+'</td><td>'+c.descricao+(c.obs?'<br><span style="font-size:10px;color:var(--t3)">'+c.obs+'</span>':'')+'</td><td>'+fornNome(c.fornecedor_id)+'</td><td><span class="tag cat">'+catNome(c.categoria_id)+'</span></td><td style="font-family:var(--fm)">'+fmt(c.valor)+'</td><td><span class="tag '+st+'">'+stLbl+'</span></td><td style="display:flex;gap:4px">'+(c.status!=='pago'?'<button class="ibt" onclick="pagarConta('+c.id+')" title="Marcar como pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>':'')+'<button class="ibt" onclick="delItem(\'contas_pagar\','+c.id+',\'Conta: '+c.descricao.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+    var protegida=isContaProtegida(c);
+    var origemHtml=protegida
+      ?'<span class="tag" style="background:rgba(140,140,140,0.15);color:var(--gray2);font-size:10px" title="Lançamento gerado automaticamente por outro módulo">🔒 '+origemLabel(c)+'</span>'
+      :'<span style="font-size:10px;color:var(--t3)">'+origemLabel(c)+'</span>';
+    var btnPagar=c.status!=='pago'
+      ?'<button class="ibt" onclick="pagarConta('+c.id+')" title="Marcar como pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>'
+      :'';
+    var btnDel=protegida
+      ?'<button class="ibt" disabled title="Lançamento gerado automaticamente — não pode ser excluído aqui" style="opacity:.35;cursor:not-allowed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>'
+      :'<button class="ibt" onclick="delItem(\'contas_pagar\','+c.id+',\'Conta: '+c.descricao.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>';
+    html+='<tr><td>'+dp(c.vencimento)+'</td><td>'+c.descricao+(c.obs?'<br><span style="font-size:10px;color:var(--t3)">'+c.obs+'</span>':'')+'</td><td>'+fornNome(c.fornecedor_id)+'</td><td><span class="tag cat">'+catNome(c.categoria_id)+'</span></td><td style="font-family:var(--fm)">'+fmt(c.valor)+'</td><td><span class="tag '+st+'">'+stLbl+'</span></td><td>'+origemHtml+'</td><td style="display:flex;gap:4px">'+btnPagar+btnDel+'</td></tr>';
   });
   document.getElementById('pg-body').innerHTML=html;
 }
@@ -1530,18 +1589,29 @@ function renderClientes(){
 }
 
 // -- FORNECEDORES ------------------------------------------
+// Mapa de labels de segmento (usado em diversos lugares)
+var SEGMENTO_LABELS={
+  refeicoes:'Refeições / Alimentação',
+  material_escritorio:'Material de escritório',
+  servicos_ti:'Serviços de TI',
+  limpeza_higiene:'Limpeza e higiene',
+  logistica_transporte:'Logística e transporte',
+  outros:'Outros'
+};
+function segmentoLabel(s){return SEGMENTO_LABELS[s]||(s?s:'');}
 function addFornecedor(){
   var nome=document.getElementById('fr-nome').value.trim();
   if(!nome){toast('Informe o nome','warn');return;}
-  fornecedores.push({id:nextId(fornecedores),nome:nome,categoria_id:document.getElementById('fr-cat').value,telefone:document.getElementById('fr-tel').value,documento:document.getElementById('fr-doc').value,produto:document.getElementById('fr-prod').value,pix:document.getElementById('fr-pix').value,endereco:document.getElementById('fr-end').value,bairro:document.getElementById('fr-bairro').value,cidade:document.getElementById('fr-cidade').value,prazo:document.getElementById('fr-prazo').value,ativo:true,created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
+  fornecedores.push({id:nextId(fornecedores),nome:nome,segmento:document.getElementById('fr-seg').value,categoria_id:document.getElementById('fr-cat').value,telefone:document.getElementById('fr-tel').value,documento:document.getElementById('fr-doc').value,produto:document.getElementById('fr-prod').value,pix:document.getElementById('fr-pix').value,endereco:document.getElementById('fr-end').value,bairro:document.getElementById('fr-bairro').value,cidade:document.getElementById('fr-cidade').value,prazo:document.getElementById('fr-prazo').value,ativo:true,created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
   save();syncToSheets('fornecedores');logActivity('Novo fornecedor: '+nome);renderFornecedores();toast('Fornecedor salvo!','ok');
-  ['fr-nome','fr-tel','fr-doc','fr-prod','fr-pix','fr-prazo'].forEach(function(id){document.getElementById(id).value='';});
+  ['fr-nome','fr-tel','fr-doc','fr-prod','fr-pix','fr-prazo','fr-end','fr-bairro','fr-cidade'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('fr-seg').value='';
 }
 function renderFornecedores(){
   var html='';
-  if(!fornecedores.length){html='<tr><td colspan="7"><div class="empty">Nenhum fornecedor cadastrado</div></td></tr>';}
+  if(!fornecedores.length){html='<tr><td colspan="8"><div class="empty">Nenhum fornecedor cadastrado</div></td></tr>';}
   else fornecedores.forEach(function(f){
-    html+='<tr><td><b>'+f.nome+'</b></td><td><span class="tag cat">'+catNome(f.categoria_id)+'</span></td><td>'+f.produto+'</td><td>'+f.telefone+'</td><td>'+f.pix+'</td><td>'+(f.prazo?f.prazo+' dias':'')+'</td><td style="display:flex;gap:4px"><button class="ibt" onclick="editRec(\'fornecedores\','+f.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ibt" onclick="delItem(\'fornecedores\','+f.id+',\'Fornecedor: '+f.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+    html+='<tr><td><b>'+f.nome+'</b></td><td>'+(f.segmento?'<span class="tag cat">'+segmentoLabel(f.segmento)+'</span>':'<span style="color:var(--t3);font-size:11px">—</span>')+'</td><td><span class="tag cat">'+catNome(f.categoria_id)+'</span></td><td>'+f.produto+'</td><td>'+f.telefone+'</td><td>'+f.pix+'</td><td>'+(f.prazo?f.prazo+' dias':'')+'</td><td style="display:flex;gap:4px"><button class="ibt" onclick="editRec(\'fornecedores\','+f.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ibt" onclick="delItem(\'fornecedores\','+f.id+',\'Fornecedor: '+f.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
   });
   document.getElementById('fr-body').innerHTML=html;
 }
@@ -1618,15 +1688,25 @@ function addPonto(){
   save();syncToSheets('pontos');logActivity('Ponto registrado: '+funcNome(parseInt(document.getElementById('pt-func').value)));renderPonto();toast('Ponto registrado!','ok');
   document.getElementById('pt-horas').value='';document.getElementById('pt-obs').value='';
 }
+function limparFiltroPonto(){
+  document.getElementById('pt-filtro-ini').value='';
+  document.getElementById('pt-filtro-fim').value='';
+  document.getElementById('pt-filtro-func').value='';
+  renderPonto();
+}
 function renderPonto(){
-  var fw=document.getElementById('pt-filtro-semana').value;
+  var ini=document.getElementById('pt-filtro-ini')?document.getElementById('pt-filtro-ini').value:'';
+  var fim=document.getElementById('pt-filtro-fim')?document.getElementById('pt-filtro-fim').value:'';
   var ff=document.getElementById('pt-filtro-func').value;
+  // Filtro aplicado: por período (data) e por funcionário
   var list=pontos.filter(function(p){
     if(ff&&p.funcionario_id!=ff)return false;
+    if(ini&&p.data<ini)return false;
+    if(fim&&p.data>fim)return false;
     return true;
   }).sort(function(a,b){return b.data.localeCompare(a.data);});
   var html='';
-  if(!list.length){html='<tr><td colspan="7"><div class="empty">Nenhum registro de ponto</div></td></tr>';}
+  if(!list.length){html='<tr><td colspan="7"><div class="empty">Nenhum registro de ponto'+(ini||fim?' no período':'')+'</div></td></tr>';}
   else list.slice(0,50).forEach(function(p){
     var f=funcionarios.find(function(x){return x.id===p.funcionario_id;});
     var val=p.tipo==='diaria'?(f?f.diaria:0):p.tipo==='meio'?(f?f.diaria/2:0):p.tipo==='extra'?(p.horas*(f?f.hora_extra:0)):0;
@@ -1639,23 +1719,71 @@ function renderPonto(){
     html+='<tr><td>'+dp(p.data)+'</td><td>'+funcNome(p.funcionario_id)+'</td><td><span class="tag '+(p.tipo==='falta'?'venc':p.tipo==='extra'?'pend':'pago')+'">'+ tipoLbl+'</span></td><td>'+(p.horas||'-')+'</td><td style="font-family:var(--fm)">'+fmt(val)+'</td><td style="font-size:10px;color:var(--t3)">'+(ptCreated?ptCreated+'<br>'+ptBy:'')+'</td><td>'+p.obs+'</td><td><button class="ibt" onclick="delItem(\'pontos\','+p.id+',\'Registro de ponto?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
   });
   document.getElementById('pt-body').innerHTML=html;
-  // Cards resumo
+  // Cards resumo — quando há período selecionado, mostrar apenas funcionários com ponto no intervalo
   var cards='';
-  funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
-    var mes=td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0');
-    var ptMes=pontos.filter(function(p){return p.funcionario_id===f.id&&p.data.startsWith(mes);});
-    var dias=ptMes.filter(function(p){return p.tipo==='diaria';}).length;
-    var hExt=ptMes.filter(function(p){return p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-    var total=(dias*f.diaria)+(hExt*f.hora_extra);
-    cards+='<div class="ponto-card"><div class="ponto-name">'+f.nome+'</div><div class="ponto-cargo">'+f.cargo+'</div><div style="display:flex;gap:16px;margin-top:10px"><div><div class="ponto-dias">'+dias+'</div><div class="ponto-val">diárias no mês</div></div><div><div class="ponto-dias" style="color:var(--amber)">'+hExt.toFixed(1)+'h</div><div class="ponto-val">horas extras</div></div><div><div class="ponto-dias" style="color:var(--charcoal)">'+fmt(total)+'</div><div class="ponto-val">total mês</div></div></div></div>';
-  });
+  var periodoAtivo=!!(ini||fim);
+  var funcsAtivos=funcionarios.filter(function(f){return f.ativo!==false;});
+  if(periodoAtivo){
+    // Apenas funcionários com algum ponto no período
+    var idsComPonto={};
+    pontos.forEach(function(p){
+      if(ini&&p.data<ini)return;
+      if(fim&&p.data>fim)return;
+      idsComPonto[p.funcionario_id]=true;
+    });
+    funcsAtivos=funcsAtivos.filter(function(f){return idsComPonto[f.id];});
+    funcsAtivos.forEach(function(f){
+      var ptPer=pontos.filter(function(p){
+        if(p.funcionario_id!==f.id)return false;
+        if(ini&&p.data<ini)return false;
+        if(fim&&p.data>fim)return false;
+        return true;
+      });
+      var dias=ptPer.filter(function(p){return p.tipo==='diaria';}).length;
+      var hExt=ptPer.filter(function(p){return p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
+      var total=(dias*(parseFloat(f.diaria)||0))+(hExt*(parseFloat(f.hora_extra)||0));
+      var periodoLbl=(ini?dp(ini):'…')+' a '+(fim?dp(fim):'…');
+      cards+='<div class="ponto-card"><div class="ponto-name">'+f.nome+'</div><div class="ponto-cargo">'+f.cargo+'</div><div style="display:flex;gap:16px;margin-top:10px"><div><div class="ponto-dias">'+dias+'</div><div class="ponto-val">diárias no período</div></div><div><div class="ponto-dias" style="color:var(--amber)">'+hExt.toFixed(1)+'h</div><div class="ponto-val">horas extras</div></div><div><div class="ponto-dias" style="color:var(--charcoal)">'+fmt(total)+'</div><div class="ponto-val">total período</div></div></div><div style="font-size:10px;color:var(--t3);margin-top:6px">'+periodoLbl+'</div></div>';
+    });
+    if(!funcsAtivos.length){
+      cards='<div class="empty" style="grid-column:1/-1">Nenhum funcionário com ponto no período selecionado</div>';
+    }
+  } else {
+    // Sem filtro: comportamento original (mês corrente)
+    funcsAtivos.forEach(function(f){
+      var mes=td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0');
+      var ptMes=pontos.filter(function(p){return p.funcionario_id===f.id&&p.data.startsWith(mes);});
+      var dias=ptMes.filter(function(p){return p.tipo==='diaria';}).length;
+      var hExt=ptMes.filter(function(p){return p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
+      var total=(dias*f.diaria)+(hExt*f.hora_extra);
+      cards+='<div class="ponto-card"><div class="ponto-name">'+f.nome+'</div><div class="ponto-cargo">'+f.cargo+'</div><div style="display:flex;gap:16px;margin-top:10px"><div><div class="ponto-dias">'+dias+'</div><div class="ponto-val">diárias no mês</div></div><div><div class="ponto-dias" style="color:var(--amber)">'+hExt.toFixed(1)+'h</div><div class="ponto-val">horas extras</div></div><div><div class="ponto-dias" style="color:var(--charcoal)">'+fmt(total)+'</div><div class="ponto-val">total mês</div></div></div></div>';
+    });
+  }
   document.getElementById('ponto-cards').innerHTML=cards;
 }
 
 // -- FOLHA SEMANAL -----------------------------------------
+// Wrapper: ao trocar a semana, limpa o período custom (semana e período são mutuamente exclusivos)
+function onChangeSemanaFolha(){
+  var elIni=document.getElementById('fl-filtro-ini'); if(elIni) elIni.value='';
+  var elFim=document.getElementById('fl-filtro-fim'); if(elFim) elFim.value='';
+  renderFolha();
+}
+function limparFiltroFolha(){
+  var elIni=document.getElementById('fl-filtro-ini'); if(elIni) elIni.value='';
+  var elFim=document.getElementById('fl-filtro-fim'); if(elFim) elFim.value='';
+  renderFolha();
+}
+// Retorna {si, sf, key, custom} respeitando período custom se preenchido
 function getSemana(){
+  var ini=document.getElementById('fl-filtro-ini')?document.getElementById('fl-filtro-ini').value:'';
+  var fim=document.getElementById('fl-filtro-fim')?document.getElementById('fl-filtro-fim').value:'';
+  // Se há qualquer data preenchida, considera período custom
+  if(ini||fim){
+    return {si:ini||'0000-01-01', sf:fim||'9999-12-31', key:'custom_'+(ini||'i')+'_'+(fim||'f'), custom:true};
+  }
   var fw=document.getElementById('fl-semana').value;
-  if(!fw)return{si:null,sf:null,key:null};
+  if(!fw)return{si:null,sf:null,key:null,custom:false};
   var parts=fw.split('-W');
   var ano=parseInt(parts[0]),sem=parseInt(parts[1]);
   var d=new Date(ano,0,1);
@@ -1664,93 +1792,161 @@ function getSemana(){
   d.setDate(d.getDate()+offset+(sem-1)*7);
   var si=fd(d);
   var sf=new Date(d);sf.setDate(d.getDate()+6);
-  return{si:si,sf:fd(sf),key:fw};
+  return{si:si,sf:fd(sf),key:fw,custom:false};
+}
+// Conta quantas semanas (em frações) o período custom cobre — para proporcionalizar salário de mensalistas
+function semanasNoPeriodo(si,sf){
+  if(!si||!sf)return 1;
+  var d1=new Date(si+'T00:00:00');
+  var d2=new Date(sf+'T00:00:00');
+  var dias=Math.round((d2-d1)/(1000*60*60*24))+1;
+  if(dias<=0)return 0;
+  return dias/7;
 }
 function renderFolha(){
   var sem=getSemana();
-  if(!sem.si){document.getElementById('fl-body').innerHTML='<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--t3)">Selecione uma semana</td></tr>';return;}
-  var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
-  var rows=[];var totalGeral=0;
-  var diaristas=funcionarios.filter(function(f){return f.ativo!==false&&(!f.tipo||f.tipo==='diarista');});
-  var mensalistas=funcionarios.filter(function(f){return f.ativo!==false&&(f.tipo==='mensalista'||f.tipo==='prolabore');});
-  var html='';
-  if(diaristas.length){
-    html+='<tr style="background:var(--bg3)"><td colspan="10" style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px">Diaristas</td></tr>';
-    diaristas.forEach(function(f){
-      var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
-      var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
-      var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-      var hrVal=parseFloat(f.hora_extra)||0;
-      var totD=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
-      var totH=hExt*hrVal;
-      var total=totD+totH;
-      totalGeral+=total;
-      var pkey=sem.key+'_'+f.id;
-      var pago=folha_paga[pkey];
-      html+='<tr>';
-      html+='<td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td>';
-      html+='<td>'+dias+'</td><td>'+meio+'</td><td>'+hExt.toFixed(1)+'h</td>';
-      html+='<td style="font-family:var(--fm)">'+fmt(totD)+'</td>';
-      html+='<td style="font-family:var(--fm)">'+fmt(totH)+'</td>';
-      html+='<td style="font-family:var(--fm);font-weight:600">'+fmt(total)+'</td>';
-      html+='<td><span class="tag '+(pago?'pago':'pend')+'">'+(pago?'Pago':'Pendente')+'</span></td>';
-      html+='<td style="display:flex;gap:3px">';
-      html+='<button class="ibt" data-key="'+pkey+'" onclick="togglePagamento(this.dataset.key)" title="Marcar pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>';
-      html+='<button class="ibt" data-fn="'+f.id+'" data-sem="'+sem.key+'" data-tot="'+total+'" onclick="abrirRateioDiarista(+this.dataset.fn,this.dataset.sem,+this.dataset.tot)" title="Ratear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg></button>';
-      html+='</td></tr>';
-    });
-  }
-  if(mensalistas.length){
-    html+='<tr style="background:rgba(184,216,216,0.1)"><td colspan="10" style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px">Mensalistas / Pro-labore</td></tr>';
-    mensalistas.forEach(function(f){
-      var salario=parseFloat(f.salario||0);
-      var benef=parseFloat(f.beneficios||0);
-      var totalMes=salario+benef;
-      totalGeral+=totalMes;
-      var pkey=sem.key+'_'+f.id;
-      var pago=folha_paga[pkey];
-      var tl={mensalista:'Mensalista',prolabore:'Pro-labore'}[f.tipo]||f.tipo;
-      html+='<tr style="background:rgba(184,216,216,0.03)">';
-      html+='<td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td>';
-      html+='<td colspan="3"><span class="tipo-tag tipo-'+(f.tipo||'mensalista')+'">'+tl+'</span></td>';
-      html+='<td style="font-family:var(--fm)">'+fmt(salario)+'</td>';
-      html+='<td style="font-family:var(--fm);color:var(--t2);font-size:11px">+'+fmt(benef)+'</td>';
-      html+='<td style="font-family:var(--fm);font-weight:600">'+fmt(totalMes)+'</td>';
-      html+='<td><span class="tag '+(pago?'pago':'pend')+'">'+(pago?'Pago':'Pendente')+'</span></td>';
-      html+='<td style="display:flex;gap:3px">';
-      html+='<button class="ibt" data-key="'+pkey+'" onclick="togglePagamento(this.dataset.key)" title="Marcar pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>';
-      html+='<button class="ibt" data-fn="'+f.id+'" data-sem="'+sem.key+'" data-tot="'+totalMes+'" onclick="abrirRateioMensalista(+this.dataset.fn,this.dataset.sem,+this.dataset.tot)" title="Ratear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg></button>';
-      html+='</td></tr>';
-    });
-  }
-  document.getElementById('fl-body').innerHTML=html||'<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--t3)">Nenhum registro nesta semana</td></tr>';
-  document.getElementById('fl-total').textContent=fmt(totalGeral);
-}
-function togglePagamento(key){if(!key)return;folha_paga[key]=!folha_paga[key];save();renderFolha();toast('Status atualizado!','ok');}
-function marcarPago(){var sem=getSemana();if(!sem.key)return;funcionarios.forEach(function(f){folha_paga[sem.key+'_'+f.id]=true;});save();renderFolha();toast('Todos marcados como pagos!','ok');}
-function pdfFolha(){
-  var sem=getSemana(); if(!sem.si){toast('Selecione uma semana','warn');return;}
-  var cfg=getCfg();
+  if(!sem.si){document.getElementById('fl-body').innerHTML='<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--t3)">Selecione uma semana ou um período</td></tr>';document.getElementById('fl-total').textContent=fmt(0);return;}
   var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
   var totalGeral=0;
-  var rows='';
-  funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
+  var diaristas=funcionarios.filter(function(f){return f.ativo!==false&&(!f.tipo||f.tipo==='diarista');});
+  var mensalistas=funcionarios.filter(function(f){return f.ativo!==false&&(f.tipo==='mensalista'||f.tipo==='prolabore');});
+  // Pré-calcular linhas para conseguir filtrar quem tem saldo a pagar
+  var linhasDiarista=[];
+  diaristas.forEach(function(f){
     var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
     var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
     var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
     var hrVal=parseFloat(f.hora_extra)||0;
     var totD=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
     var totH=hExt*hrVal;
-    var total=totD+totH; totalGeral+=total;
+    var total=totD+totH;
     var pkey=sem.key+'_'+f.id;
     var pago=folha_paga[pkey];
-    // Get individual ponto records for this week
+    // Saldo a pagar = total se ainda não pago; senão 0
+    var saldo=pago?0:total;
+    linhasDiarista.push({f:f,dias:dias,meio:meio,hExt:hExt,totD:totD,totH:totH,total:total,pkey:pkey,pago:pago,saldo:saldo});
+  });
+  var linhasMensalista=[];
+  // Para mensalistas em período custom: proporcionalizar por número de semanas. Para semana específica, mantém valor cheio (comportamento atual)
+  var fatorSemanas=sem.custom?semanasNoPeriodo(sem.si,sem.sf):1;
+  mensalistas.forEach(function(f){
+    var salarioSem=parseFloat(f.salario||0)*(sem.custom?fatorSemanas:1);
+    var benefSem=parseFloat(f.beneficios||0)*(sem.custom?fatorSemanas:1);
+    var totalMes=salarioSem+benefSem;
+    var pkey=sem.key+'_'+f.id;
+    var pago=folha_paga[pkey];
+    var saldo=pago?0:totalMes;
+    linhasMensalista.push({f:f,salario:salarioSem,benef:benefSem,total:totalMes,pkey:pkey,pago:pago,saldo:saldo});
+  });
+  // Filtrar: apenas quem tem saldo positivo a pagar (M7b)
+  var diaristasComSaldo=linhasDiarista.filter(function(l){return l.saldo>0.005;});
+  var mensalistasComSaldo=linhasMensalista.filter(function(l){return l.saldo>0.005;});
+  var html='';
+  if(diaristasComSaldo.length){
+    html+='<tr style="background:var(--bg3)"><td colspan="10" style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px">Diaristas — saldo a pagar</td></tr>';
+    diaristasComSaldo.forEach(function(l){
+      var f=l.f;
+      totalGeral+=l.total;
+      html+='<tr>';
+      html+='<td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td>';
+      html+='<td>'+l.dias+'</td><td>'+l.meio+'</td><td>'+l.hExt.toFixed(1)+'h</td>';
+      html+='<td style="font-family:var(--fm)">'+fmt(l.totD)+'</td>';
+      html+='<td style="font-family:var(--fm)">'+fmt(l.totH)+'</td>';
+      html+='<td style="font-family:var(--fm);font-weight:600">'+fmt(l.total)+'</td>';
+      html+='<td><span class="tag pend">Pendente</span></td>';
+      html+='<td style="display:flex;gap:3px">';
+      html+='<button class="ibt" data-key="'+l.pkey+'" onclick="togglePagamento(this.dataset.key)" title="Marcar pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>';
+      html+='<button class="ibt" data-fn="'+f.id+'" data-sem="'+sem.key+'" data-tot="'+l.total+'" onclick="abrirRateioDiarista(+this.dataset.fn,this.dataset.sem,+this.dataset.tot)" title="Ratear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg></button>';
+      html+='</td></tr>';
+    });
+  }
+  if(mensalistasComSaldo.length){
+    html+='<tr style="background:rgba(184,216,216,0.1)"><td colspan="10" style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px">Mensalistas / Pro-labore — saldo a pagar'+(sem.custom?' (proporcional ao período)':'')+'</td></tr>';
+    mensalistasComSaldo.forEach(function(l){
+      var f=l.f;
+      totalGeral+=l.total;
+      var tl={mensalista:'Mensalista',prolabore:'Pro-labore'}[f.tipo]||f.tipo;
+      html+='<tr style="background:rgba(184,216,216,0.03)">';
+      html+='<td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td>';
+      html+='<td colspan="3"><span class="tipo-tag tipo-'+(f.tipo||'mensalista')+'">'+tl+'</span></td>';
+      html+='<td style="font-family:var(--fm)">'+fmt(l.salario)+'</td>';
+      html+='<td style="font-family:var(--fm);color:var(--t2);font-size:11px">+'+fmt(l.benef)+'</td>';
+      html+='<td style="font-family:var(--fm);font-weight:600">'+fmt(l.total)+'</td>';
+      html+='<td><span class="tag pend">Pendente</span></td>';
+      html+='<td style="display:flex;gap:3px">';
+      html+='<button class="ibt" data-key="'+l.pkey+'" onclick="togglePagamento(this.dataset.key)" title="Marcar pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>';
+      html+='<button class="ibt" data-fn="'+f.id+'" data-sem="'+sem.key+'" data-tot="'+l.total+'" onclick="abrirRateioMensalista(+this.dataset.fn,this.dataset.sem,+this.dataset.tot)" title="Ratear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg></button>';
+      html+='</td></tr>';
+    });
+  }
+  if(!html){
+    var msg=sem.custom?'Nenhum funcionário com saldo a pagar no período selecionado':'Nenhum funcionário com saldo a pagar nesta semana';
+    html='<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--t3)">'+msg+'</td></tr>';
+  }
+  document.getElementById('fl-body').innerHTML=html;
+  document.getElementById('fl-total').textContent=fmt(totalGeral);
+}
+function togglePagamento(key){if(!key)return;folha_paga[key]=!folha_paga[key];save();renderFolha();toast('Status atualizado!','ok');}
+function marcarPago(){
+  var sem=getSemana();if(!sem.key)return;
+  // Marcar pagos apenas os funcionários que estavam pendentes no período atual
+  var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
+  var fatorSemanas=sem.custom?semanasNoPeriodo(sem.si,sem.sf):1;
+  funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
+    var pkey=sem.key+'_'+f.id;
+    if(folha_paga[pkey])return;
+    var temSaldo=false;
+    if(!f.tipo||f.tipo==='diarista'){
+      var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
+      var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
+      var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
+      var totD=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
+      var totH=hExt*(parseFloat(f.hora_extra)||0);
+      temSaldo=(totD+totH)>0.005;
+    } else if(f.tipo==='mensalista'||f.tipo==='prolabore'){
+      var sal=parseFloat(f.salario||0)*(sem.custom?fatorSemanas:1);
+      var ben=parseFloat(f.beneficios||0)*(sem.custom?fatorSemanas:1);
+      temSaldo=(sal+ben)>0.005;
+    }
+    if(temSaldo) folha_paga[pkey]=true;
+  });
+  save();renderFolha();toast('Pendentes marcados como pagos!','ok');
+}
+function pdfFolha(){
+  var sem=getSemana(); if(!sem.si){toast('Selecione uma semana ou período','warn');return;}
+  var cfg=getCfg();
+  var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
+  var fatorSemanas=sem.custom?semanasNoPeriodo(sem.si,sem.sf):1;
+  var totalGeral=0;
+  var rows='';
+  // Apenas funcionários com saldo a pagar — coerente com a tela
+  funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
+    var pkey=sem.key+'_'+f.id;
+    var pago=folha_paga[pkey];
+    if(pago) return; // ignora quem já está pago
+    var hrVal=parseFloat(f.hora_extra)||0;
+    var dias=0,meio=0,hExt=0,totD=0,totH=0,total=0;
+    if(!f.tipo||f.tipo==='diarista'){
+      dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
+      meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
+      hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
+      totD=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
+      totH=hExt*hrVal;
+      total=totD+totH;
+    } else {
+      var sal=parseFloat(f.salario||0)*(sem.custom?fatorSemanas:1);
+      var ben=parseFloat(f.beneficios||0)*(sem.custom?fatorSemanas:1);
+      total=sal+ben;
+      totD=sal;
+    }
+    if(total<=0.005) return; // sem saldo, pula
+    totalGeral+=total;
     var ptFunc=ptSem.filter(function(p){return p.funcionario_id===f.id;}).sort(function(a,b){return a.data.localeCompare(b.data);});
     rows+='<tr style="background:#f0f8f0"><td colspan="8"><b>'+f.nome+'</b> - '+f.cargo+
       ' | Diária: R$ '+parseFloat(f.diaria||0).toFixed(2)+
       ' | H.Extra: R$ '+hrVal.toFixed(2)+'/h'+
       (f.pix?' | <b>PIX: '+f.pix+'</b>':'')+
-      ' | Status: '+(pago?'<span style="color:#2E7D52">✓ PAGO</span>':'<span style="color:#C47D0A">⚠ PENDENTE</span>')+'</td></tr>';
+      ' | Status: <span style="color:#C47D0A">⚠ PENDENTE</span></td></tr>';
     ptFunc.forEach(function(p){
       var tipoLbl={diaria:'Diária',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
       var val=p.tipo==='diaria'?parseFloat(f.diaria||0):p.tipo==='meio'?parseFloat(f.diaria||0)/2:p.tipo==='extra'?(parseFloat(p.horas||0)*hrVal):0;
@@ -1759,30 +1955,43 @@ function pdfFolha(){
     });
     rows+='<tr style="background:#e8f4f4;font-weight:bold"><td colspan="3">TOTAL '+f.nome+'</td><td>R$ '+totD.toFixed(2)+'</td><td></td><td></td><td></td><td>R$ '+total.toFixed(2)+'</td></tr>';
   });
-  var semLbl=sem.si+' a '+sem.sf;
+  var semLbl=(sem.custom?(sem.si==='0000-01-01'?'…':dp(sem.si))+' a '+(sem.sf==='9999-12-31'?'…':dp(sem.sf)):dp(sem.si)+' a '+dp(sem.sf));
+  if(!rows){rows='<tr><td colspan="8" style="text-align:center;padding:20px;color:#999">Nenhum funcionário com saldo a pagar no período</td></tr>';}
   var html='<html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px}.h{text-align:center;border-bottom:2px solid #2C2C2C;padding-bottom:10px;margin-bottom:16px}.h h1{font-size:18px;margin:0}.h p{margin:2px 0;color:#666;font-size:10px}table{width:100%;border-collapse:collapse}th{background:#2C2C2C;color:#fff;padding:6px 8px;text-align:left;font-size:10px}td{padding:5px 8px;border-bottom:1px solid #eee}.ft{margin-top:20px;border-top:1px solid #ccc;padding-top:6px;font-size:9px;color:#999;display:flex;justify-content:space-between}</style></head><body>';
   html+='<div class="h"><h1>'+(cfg.razao||'Conexão Design')+'</h1>';
   html+='<p>CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+' | '+(cfg.cidade||'Aparecida de Goiânia/GO')+'</p>';
-  html+='<p>Folha Semanal: '+semLbl+' | Emitido em: '+new Date().toLocaleDateString('pt-BR')+' '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</p></div>';
+  html+='<p>Folha — '+(sem.custom?'Período':'Semanal')+': '+semLbl+' | Emitido em: '+new Date().toLocaleDateString('pt-BR')+' '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</p></div>';
   html+='<table><thead><tr><th>Data</th><th>Tipo</th><th>H.Extra</th><th>Valor</th><th>Obs</th><th>Lançado em</th><th>Por</th><th>Total</th></tr></thead><tbody>'+rows;
-  html+='<tr style="background:#2C2C2C;color:#fff;font-weight:bold"><td colspan="7">TOTAL GERAL DA SEMANA</td><td>R$ '+totalGeral.toFixed(2)+'</td></tr>';
+  html+='<tr style="background:#2C2C2C;color:#fff;font-weight:bold"><td colspan="7">TOTAL GERAL DO '+(sem.custom?'PERÍODO':'SEMANA')+'</td><td>R$ '+totalGeral.toFixed(2)+'</td></tr>';
   html+='</tbody></table><div class="ft"><span>'+(cfg.razao||'Conexão Design')+' - CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+'</span><span>'+new Date().toLocaleDateString('pt-BR')+'</span></div></body></html>';
-  showPrint('Folha Semanal - PDF', html);
+  showPrint('Folha '+(sem.custom?'Período':'Semanal')+' - PDF', html);
 }
 
 function exportFolha(){
-  var sem=getSemana();if(!sem.si){toast('Selecione uma semana','warn');return;}
+  var sem=getSemana();if(!sem.si){toast('Selecione uma semana ou período','warn');return;}
   var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
+  var fatorSemanas=sem.custom?semanasNoPeriodo(sem.si,sem.sf):1;
   var BOM='\uFEFF';
-  var hdr=['Funcionário','Cargo','Diárias','Meio Período','H. Extra','Total Diárias','Total H. Extra','Total Geral','Status'].join(';');
+  var hdr=['Funcionário','Cargo','Tipo','Diárias','Meio Período','H. Extra','Total Diárias/Salário','Total H. Extra/Benef.','Total Geral','Status'].join(';');
   var rows=[];
   funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
-    var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
-    var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
-    var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-    var totD=(dias*f.diaria)+(meio*(f.diaria/2));var totH=hExt*f.hora_extra;
     var pkey=sem.key+'_'+f.id;
-    rows.push([f.nome,f.cargo,dias,meio,hExt.toFixed(1),totD.toFixed(2),totH.toFixed(2),(totD+totH).toFixed(2),folha_paga[pkey]?'Pago':'Pendente'].join(';'));
+    var pago=folha_paga[pkey];
+    if(pago) return;
+    if(!f.tipo||f.tipo==='diarista'){
+      var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
+      var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
+      var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
+      var totD=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
+      var totH=hExt*(parseFloat(f.hora_extra)||0);
+      if((totD+totH)<=0.005) return;
+      rows.push([f.nome,f.cargo,'Diarista',dias,meio,hExt.toFixed(1),totD.toFixed(2),totH.toFixed(2),(totD+totH).toFixed(2),'Pendente'].join(';'));
+    } else {
+      var sal=parseFloat(f.salario||0)*(sem.custom?fatorSemanas:1);
+      var ben=parseFloat(f.beneficios||0)*(sem.custom?fatorSemanas:1);
+      if((sal+ben)<=0.005) return;
+      rows.push([f.nome,f.cargo,f.tipo,'-','-','-',sal.toFixed(2),ben.toFixed(2),(sal+ben).toFixed(2),'Pendente'].join(';'));
+    }
   });
   exportCSV(BOM+hdr+'\n'+rows.join('\n'),'folha_'+sem.key+'.csv');
 }
@@ -1863,8 +2072,8 @@ function exportarAtual(){
     var rows=clientes.map(function(c){return['"'+c.nome+'"',c.telefone,c.documento,'"'+c.endereco+'"',c.cidade,c.email,c.ativo?'Ativo':'Inativo'].join(';');});
     exportCSV(BOM+hdr+'\n'+rows.join('\n'),'clientes.csv');
   } else if(viewAtual==='fornecedores'){
-    var hdr=['Nome','Categoria','Produto/Serviço','Telefone','PIX/Banco','Prazo'].join(';');
-    var rows=fornecedores.map(function(f){return['"'+f.nome+'"',catNome(f.categoria_id),'"'+f.produto+'"',f.telefone,f.pix,f.prazo].join(';');});
+    var hdr=['Nome','Segmento','Categoria','Produto/Serviço','Telefone','PIX/Banco','Prazo'].join(';');
+    var rows=fornecedores.map(function(f){return['"'+f.nome+'"',segmentoLabel(f.segmento),catNome(f.categoria_id),'"'+f.produto+'"',f.telefone,f.pix,f.prazo].join(';');});
     exportCSV(BOM+hdr+'\n'+rows.join('\n'),'fornecedores.csv');
   } else if(viewAtual==='funcionarios'){
     var hdr=['Nome','Cargo','Telefone','CPF','Diária','H. Extra','PIX','Admissão','Status'].join(';');
@@ -1898,6 +2107,11 @@ function doDel(){
   if(_delArr==='fornecedores'){
     var temLanc=contas_pagar.some(function(c){return c.fornecedor_id==_delId;})||refeicoes.some(function(r){return r.fornecedor_id==_delId;});
     if(temLanc){document.getElementById('m-del').classList.remove('show');toast('Fornecedor possui lançamentos e não pode ser excluído','warn');return;}
+  }
+  // Bloquear exclusão de contas a pagar geradas por outros módulos
+  if(_delArr==='contas_pagar'){
+    var ctaProt=contas_pagar.find(function(c){return c.id===_delId;});
+    if(ctaProt&&isContaProtegida(ctaProt)){document.getElementById('m-del').classList.remove('show');toast('Lançamento gerado automaticamente — exclua na origem ('+origemLabel(ctaProt)+')','warn');return;}
   }
   var maps={transacoes:transacoes,contas_pagar:contas_pagar,clientes:clientes,fornecedores:fornecedores,categorias:categorias,funcionarios:funcionarios,pontos:pontos,refeicoes:refeicoes};
   var arr=maps[_delArr];
@@ -2042,16 +2256,21 @@ function renderLog(){
 function pdfContasPagar(){
   var cfg=getCfg();
   var f=document.getElementById('pg-filtro').value;
+  var ini=document.getElementById('pg-filtro-ini')?document.getElementById('pg-filtro-ini').value:'';
+  var fim=document.getElementById('pg-filtro-fim')?document.getElementById('pg-filtro-fim').value:'';
   var hoje=fd(td);
   var list=contas_pagar.filter(function(c){
-    if(f==='pendente')return c.status==='pendente';
-    if(f==='vencido')return c.status!=='pago'&&c.vencimento<hoje;
-    if(f==='pago')return c.status==='pago';
+    if(f==='pendente'&&c.status!=='pendente')return false;
+    if(f==='vencido'&&!(c.status!=='pago'&&c.vencimento<hoje))return false;
+    if(f==='pago'&&c.status!=='pago')return false;
+    if(ini&&c.vencimento<ini)return false;
+    if(fim&&c.vencimento>fim)return false;
     return true;
   }).sort(function(a,b){return a.vencimento.localeCompare(b.vencimento);});
   var total=list.reduce(function(s,c){return s+parseFloat(c.valor||0);},0);
+  var periodoLbl=(ini||fim)?(' | Período: '+(ini?dp(ini):'…')+' a '+(fim?dp(fim):'…')):'';
   var html='<html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px}.h{text-align:center;border-bottom:2px solid #2C2C2C;padding-bottom:10px;margin-bottom:16px}.h h1{font-size:18px;margin:0;color:#2C2C2C}.h p{margin:2px 0;color:#666;font-size:10px}table{width:100%;border-collapse:collapse}th{background:#2C2C2C;color:#fff;padding:6px 8px;text-align:left;font-size:10px}td{padding:6px 8px;border-bottom:1px solid #eee}tr:nth-child(even){background:#f9f9f9}.pago{color:#2E7D52;font-weight:600}.venc{color:#C0392B;font-weight:600}.pend{color:#C47D0A;font-weight:600}.tot{font-weight:bold;background:#f0f0f0!important}.ft{margin-top:20px;border-top:1px solid #ccc;padding-top:8px;font-size:9px;color:#999;display:flex;justify-content:space-between}</style></head><body>';
-  html+='<div class="h"><h1>'+(cfg.razao||'Conexão Design')+'</h1><p>CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+' | '+(cfg.end||'')+' - '+(cfg.cidade||'')+'</p><p>Relatório de Contas a Pagar | Emitido em: '+new Date().toLocaleDateString('pt-BR')+'</p></div>';
+  html+='<div class="h"><h1>'+(cfg.razao||'Conexão Design')+'</h1><p>CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+' | '+(cfg.end||'')+' - '+(cfg.cidade||'')+'</p><p>Relatório de Contas a Pagar'+periodoLbl+' | Emitido em: '+new Date().toLocaleDateString('pt-BR')+'</p></div>';
   html+='<table><thead><tr><th>Vencimento</th><th>Descrição</th><th>Fornecedor</th><th>Categoria</th><th>Observação</th><th>Valor</th><th>Status</th></tr></thead><tbody>';
   list.forEach(function(c){
     var st=c.status==='pago'?'pago':c.vencimento<hoje?'venc':'pend';
@@ -2119,6 +2338,11 @@ function editRec(type,id){
     var temLanc=contas_pagar.some(function(c){return c.fornecedor_id==id;})||refeicoes.some(function(r){return r.fornecedor_id==id;});
     if(temLanc){toast('Fornecedor possui lançamentos e não pode ser alterado','warn');return;}
   }
+  // Bloquear edição de contas a pagar geradas por outros módulos
+  if(type==='contas_pagar'){
+    var ctaProt=contas_pagar.find(function(c){return c.id===id;});
+    if(ctaProt&&isContaProtegida(ctaProt)){toast('Lançamento gerado automaticamente — edite na origem ('+origemLabel(ctaProt)+')','warn');return;}
+  }
   _eType=type; _eId=id;
   var cfgs={
     clientes:{title:'Editar Cliente',fields:[{l:'Nome',k:'nome',w:'full'},{l:'Telefone',k:'telefone'},{l:'CPF/CNPJ',k:'documento'},{l:'Endereço',k:'endereco',w:'full'},{l:'Cidade',k:'cidade'},{l:'E-mail',k:'email'}]},
@@ -2141,6 +2365,8 @@ function editRec(type,id){
   var html=''; var row=[];
   // Fornecedor: campo categoria com select
   if(type==='fornecedores'){
+    var segOpts=Object.keys(SEGMENTO_LABELS).map(function(k){return'<option value="'+k+'"'+(k===(item.segmento||'')?' selected':'')+'>'+SEGMENTO_LABELS[k]+'</option>';}).join('');
+    html+='<div><label class="flabel">O que fornece (Segmento)</label><select class="fi" id="ef_segmento" style="width:100%"><option value="">Selecione...</option>'+segOpts+'</select></div>';
     var catOpts=categorias.map(function(c){return'<option value="'+c.id+'"'+(c.id==item.categoria_id?' selected':'')+'>'+c.nome+'</option>';}).join('');
     html+='<div><label class="flabel">Categoria Financeira</label><select class="fi" id="ef_categoria_id" style="width:100%"><option value="">Selecione...</option>'+catOpts+'</select></div>';
   }
@@ -2161,8 +2387,11 @@ function saveEditRec(){
   var maps={clientes:clientes,fornecedores:fornecedores,funcionarios:funcionarios,contas_pagar:contas_pagar,contas_bancarias:contas_bancarias};
   var item=maps[_eType]?maps[_eType].find(function(x){ return x.id===_eId; }):null; if(!item) return;
   _eFields.forEach(function(f){ var el=document.getElementById('ef_'+f.k); if(!el) return; item[f.k]=f.t==='number'?parseFloat(el.value)||0:el.value; });
-  // Salvar categoria_id do fornecedor
-  if(_eType==='fornecedores'){var elCat=document.getElementById('ef_categoria_id');if(elCat)item.categoria_id=elCat.value;}
+  // Salvar categoria_id e segmento do fornecedor
+  if(_eType==='fornecedores'){
+    var elCat=document.getElementById('ef_categoria_id');if(elCat)item.categoria_id=elCat.value;
+    var elSeg=document.getElementById('ef_segmento');if(elSeg)item.segmento=elSeg.value;
+  }
   // Salvar tipo da conta bancária
   if(_eType==='contas_bancarias'){var elTipo=document.getElementById('ef_tipo');if(elTipo)item.tipo=elTipo.value;}
   save();
@@ -2947,7 +3176,8 @@ function abrirRateioDiarista(fnId, semKey, total){
   _rdFnId=fnId; _rdSemKey=semKey; _rdTotal=total;
   window['_rateio_base_rateio-d-pct']=total;
   var f=funcionarios.find(function(x){return x.id===fnId;});
-  document.getElementById('rateio-d-info').textContent=(f?f.nome:'')+' | Semana '+semKey+' | Total: '+fmt(total);
+  var keyLbl=semKey&&semKey.indexOf('custom_')===0?'Período personalizado':(semKey?'Semana '+semKey:'');
+  document.getElementById('rateio-d-info').textContent=(f?f.nome:'')+' | '+keyLbl+' | Total: '+fmt(total);
   document.getElementById('rateio-d-rows').innerHTML='';
   addRateioDRow();
   document.getElementById('m-rateio-d').classList.add('show');
@@ -2982,8 +3212,11 @@ function abrirRateioMensalista(fnId, semKey, total){
   _rmFnId=fnId; _rmSemKey=semKey; _rmTotal=total;
   window['_rateio_base_rateio-m-pct']=total;
   var f=funcionarios.find(function(x){return x.id===fnId;});
-  var mes=semKey?semKey.split('-W')[0]+'-'+String(new Date().getMonth()+1).padStart(2,'0'):fd(td).substring(0,7);
-  document.getElementById('rateio-m-info').textContent=(f?f.nome:'')+' | '+mes+' | Total: '+fmt(total);
+  var mesLbl;
+  if(semKey&&semKey.indexOf('custom_')===0){ mesLbl='Período personalizado'; }
+  else if(semKey&&semKey.indexOf('-W')>0){ mesLbl=semKey.split('-W')[0]+'-'+String(new Date().getMonth()+1).padStart(2,'0'); }
+  else { mesLbl=fd(td).substring(0,7); }
+  document.getElementById('rateio-m-info').textContent=(f?f.nome:'')+' | '+mesLbl+' | Total: '+fmt(total);
   document.getElementById('rateio-m-rows').innerHTML='';
   addRateioMRow();
   document.getElementById('m-rateio-m').classList.add('show');
@@ -3124,7 +3357,6 @@ document.getElementById('cx-filtro-mes').value=td.getFullYear()+'-'+String(td.ge
 document.getElementById('rf-filtro-mes').value=td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0');
 var weekStr=fd(td).slice(0,4)+'-W'+String(Math.ceil((((new Date(td.getFullYear(),td.getMonth(),td.getDate())-new Date(td.getFullYear(),0,1))/86400000)+1)/7)).padStart(2,'0');
 if(document.getElementById('fl-semana'))document.getElementById('fl-semana').value=weekStr;
-if(document.getElementById('pt-filtro-semana'))document.getElementById('pt-filtro-semana').value=weekStr;
 populateCargos();
 // Load cfg into config view when available
 var _cfg=getCfg();
