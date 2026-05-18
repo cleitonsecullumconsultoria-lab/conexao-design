@@ -830,7 +830,7 @@ textarea.fi{resize:vertical;min-height:72px}
         <div id="rf-rateio-section" style="display:none;margin-top:10px">
           <div id="rf-rateio-rows" style="display:flex;flex-direction:column;gap:8px"></div>
           <button class="btn sm" onclick="addRateioRefRow()" style="margin-top:8px">+ Adicionar projeto</button>
-          <div style="margin-top:6px;font-size:12px;color:var(--t3)">Rateio: <span id="rf-rateio-total" style="font-weight:600;color:var(--charcoal)">0%</span></div>
+          <div style="margin-top:6px;font-size:12px;color:var(--t3)">Rateio: <span id="rf-rateio-pct" style="font-weight:600;color:var(--charcoal)">0%</span></div>
         </div>
       </div>
     </div>
@@ -910,7 +910,7 @@ textarea.fi{resize:vertical;min-height:72px}
           <div class="fgroup" style="flex:2"><label class="flabel">Descrição</label><input type="text" class="fi" id="proj-desc" placeholder="Descrição do projeto..."></div>
         </div>
         <div class="frow" style="background:var(--bg2);border-radius:8px;padding:12px;margin-top:4px;border:1px solid var(--bd)">
-          <div class="fgroup"><label class="flabel">Valor do Projeto (R$) <span style="color:var(--sage)">●</span></label><input type="number" class="fi" id="proj-valor-venda" placeholder="0,00" step="0.01" oninput="calcParcelasReceber()"></div>
+          <div class="fgroup"><label class="flabel">Valor do Projeto (R$) <span style="color:var(--sage)">●</span></label><input type="number" class="fi" id="proj-valor-venda" placeholder="0,00" step="0.01" oninput="calcValorComDesconto()"></div>
           <div class="fgroup" style="flex:2"><label class="flabel">Condição de Pagamento</label>
             <div style="display:flex;gap:6px;align-items:center">
               <select class="fi" id="proj-cond-pag" onchange="onChangCondPag()" style="flex:1">
@@ -955,7 +955,29 @@ textarea.fi{resize:vertical;min-height:72px}
             </div>
           </div>
         </div>
-        <div style="margin-top:14px;display:flex;justify-content:flex-end">
+        <div style="margin-top:12px;padding:12px;background:var(--bg2);border-radius:8px;border:1px solid var(--bd)">
+          <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📄 Dados da Proposta / Contrato</div>
+          <div class="frow">
+            <div class="fgroup"><label class="flabel">Desconto (R$)</label><input type="number" class="fi" id="proj-desconto" placeholder="0,00" step="0.01" oninput="calcValorComDesconto()"></div>
+            <div class="fgroup"><label class="flabel">Valor com Desconto (R$)</label><input type="number" class="fi" id="proj-valor-final" placeholder="calculado" readonly style="background:var(--bg3);font-weight:600"></div>
+            <div class="fgroup"><label class="flabel">Prazo de Entrega (dias)</label><input type="number" class="fi" id="proj-prazo-dias" placeholder="25" min="1" value="25"></div>
+            <div class="fgroup"><label class="flabel">Garantia (meses)</label><input type="number" class="fi" id="proj-garantia" placeholder="12" min="1" value="12"></div>
+          </div>
+          <div class="frow">
+            <div class="fgroup"><label class="flabel">Frete</label><select class="fi" id="proj-frete"><option value="incluso">Incluso</option><option value="a_combinar">A combinar</option><option value="nao_incluso">Não incluso</option></select></div>
+            <div class="fgroup"><label class="flabel">Instalação</label><select class="fi" id="proj-instalacao"><option value="inclusa">Inclusa</option><option value="a_combinar">A combinar</option><option value="nao_inclusa">Não inclusa</option></select></div>
+            <div class="fgroup"><label class="flabel">Responsável / Vendedor</label><input type="text" class="fi" id="proj-responsavel" placeholder="Ex: Aurélio Lopes"></div>
+            <div class="fgroup"><label class="flabel">Link / Contato</label><input type="text" class="fi" id="proj-link-contato" placeholder="https://airgo.bio/..."></div>
+          </div>
+          <div class="frow">
+            <div class="fgroup" style="flex:1"><label class="flabel">Observações da Proposta</label><input type="text" class="fi" id="proj-obs-proposta" placeholder="Aparece na carta ao cliente..."></div>
+          </div>
+        </div>
+        <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn" id="btn-prev-proposta" style="display:none" onclick="gerarProposta(window._editProjId)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Pré-visualizar Proposta
+          </button>
           <button class="btn mint" onclick="saveProjeto()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Salvar Projeto</button>
         </div>
       </div>
@@ -1022,6 +1044,22 @@ textarea.fi{resize:vertical;min-height:72px}
           <div class="fgroup"><label class="flabel">Telefone</label><input type="text" class="fi" id="cfg-tel" placeholder="(62) 99999-9999" oninput="maskPhone(this)"></div>
           <div class="fgroup"><label class="flabel">E-mail</label><input type="email" class="fi" id="cfg-email" placeholder="email@..."></div>
           <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="saveCfg()">Salvar dados</button></div>
+        </div>
+        <div class="frow">
+          <div class="fgroup"><label class="flabel">Telefone 2 / Segundo contato</label><input type="text" class="fi" id="cfg-tel2" placeholder="(62) 99999-9999"></div>
+          <div class="fgroup"><label class="flabel">Responsável Principal</label><input type="text" class="fi" id="cfg-responsavel" placeholder="Ex: Aurélio Lopes"></div>
+          <div class="fgroup" style="flex:2"><label class="flabel">Link Bio / Site</label><input type="text" class="fi" id="cfg-link" placeholder="https://airgo.bio/conexao_design"></div>
+        </div>
+        <div style="margin-top:12px;padding:10px;background:var(--bg2);border-radius:8px;border:1px solid var(--bd)">
+          <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Dados Bancários (usados na proposta/contrato)</div>
+          <div class="frow">
+            <div class="fgroup"><label class="flabel">Nome do Banco</label><input type="text" class="fi" id="cfg-banco-nome" placeholder="PagBank"></div>
+            <div class="fgroup"><label class="flabel">Cód. Banco</label><input type="text" class="fi" id="cfg-banco-cod" placeholder="290"></div>
+            <div class="fgroup"><label class="flabel">Agência</label><input type="text" class="fi" id="cfg-banco-ag" placeholder="0001"></div>
+            <div class="fgroup"><label class="flabel">Conta</label><input type="text" class="fi" id="cfg-banco-conta" placeholder="78383508-5"></div>
+            <div class="fgroup"><label class="flabel">Tipo de Conta</label><input type="text" class="fi" id="cfg-banco-tipo" placeholder="Conta de pagamento"></div>
+            <div class="fgroup"><label class="flabel">Chave PIX</label><input type="text" class="fi" id="cfg-pix" placeholder="58.323.410/0001-53"></div>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -1740,7 +1778,7 @@ function funcNome(id){var f=funcionarios.find(function(x){return x.id==id;});ret
 // -- SALDO INICIAL DAS CONTAS (Melhorias H e I) --
 function getSaldoConta(contaId){
   var cb=contas_bancarias.find(function(c){return c.id==contaId||c.chave==contaId||c.nome==contaId;});
-  var saldoInicial=cb?parseFloat(cb.saldo_inicial||0):0;
+  var saldoInicial=cb?parseFloat(cb.saldo_inicial||cb.saldo||0):0;
   var entradas=transacoes.filter(function(t){return (t.conta==contaId||(cb&&t.conta==cb.nome))||
     (cb&&String(t.conta)===String(cb.id));}).filter(function(t){return t.tipo==='entrada';})
     .reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
@@ -2579,6 +2617,7 @@ function addRefeicao(){
   refeicoes.push({id:nextId(refeicoes),funcionario_id:parseInt(fid),fornecedor_id:forn,data:data,tipo:document.getElementById('rf-tipo').value,valor:valor});
   var refId=nextId(refeicoes)-1;
   if(document.getElementById('rf-ratear')&&document.getElementById('rf-ratear').checked){
+    window['_rateio_base_rf-rateio-pct']=valor;
     var rfrows=collectRateioRows('rf-rateio-rows',valor);
     rfrows.forEach(function(r){
       proj_rateio.push({id:nextId(proj_rateio),projeto_id:r.projeto_id,origem:'refeicao',origem_id:refId,funcionario_id:parseInt(fid),semana:null,mes:null,percentual:r.percentual,valor_rateado:r.valor_rateado,data:data,categoria_id:null});
@@ -2734,13 +2773,14 @@ function getCfg(){
   return JSON.parse(localStorage.getItem('cd_cfg')||'{}');
 }
 function saveCfg(){
+  var _gv=function(id){var el=document.getElementById(id);return el?el.value:'';};
   var cfg={
-    razao:document.getElementById('cfg-razao').value,
-    cnpj:document.getElementById('cfg-cnpj').value,
-    end:document.getElementById('cfg-end').value,
-    cidade:document.getElementById('cfg-cidade').value,
-    tel:document.getElementById('cfg-tel').value,
-    email:document.getElementById('cfg-email').value
+    razao:_gv('cfg-razao'), cnpj:_gv('cfg-cnpj'), end:_gv('cfg-end'),
+    cidade:_gv('cfg-cidade'), tel:_gv('cfg-tel'), email:_gv('cfg-email'),
+    tel2:_gv('cfg-tel2'), responsavel:_gv('cfg-responsavel'), link:_gv('cfg-link'),
+    banco_nome:_gv('cfg-banco-nome'), banco_cod:_gv('cfg-banco-cod'),
+    banco_ag:_gv('cfg-banco-ag'), banco_conta:_gv('cfg-banco-conta'),
+    banco_tipo:_gv('cfg-banco-tipo'), pix:_gv('cfg-pix')
   };
   localStorage.setItem('cd_cfg', JSON.stringify(Object.assign(getCfg(),cfg)));
   toast('Dados da empresa salvos!','ok');
@@ -2762,6 +2802,16 @@ function renderConfig(){
   document.getElementById('cfg-cidade').value=cfg.cidade||'Aparecida de Goiânia/GO';
   document.getElementById('cfg-tel').value=cfg.tel||'';
   document.getElementById('cfg-email').value=cfg.email||'conexaodesign0@gmail.com';
+  var _scv=function(id,v){var el=document.getElementById(id);if(el)el.value=v||'';};
+  _scv('cfg-tel2',cfg.tel2||'');
+  _scv('cfg-responsavel',cfg.responsavel||'Aurélio Lopes');
+  _scv('cfg-link',cfg.link||'https://airgo.bio/conexao_design');
+  _scv('cfg-banco-nome',cfg.banco_nome||'PagBank');
+  _scv('cfg-banco-cod',cfg.banco_cod||'290');
+  _scv('cfg-banco-ag',cfg.banco_ag||'0001');
+  _scv('cfg-banco-conta',cfg.banco_conta||'78383508-5');
+  _scv('cfg-banco-tipo',cfg.banco_tipo||'Conta de pagamento');
+  _scv('cfg-pix',cfg.pix||'58.323.410/0001-53');
   document.getElementById('cfg-saldo-pagbank').value=cfg.saldo_pagbank||0;
   document.getElementById('cfg-saldo-infinit').value=cfg.saldo_infinit||0;
   document.getElementById('cfg-saldo-caixa').value=cfg.saldo_caixa||0;
@@ -3016,7 +3066,7 @@ function addContaBancaria(){
     agencia:document.getElementById('cb-agencia').value,
     numero:document.getElementById('cb-numero').value,
     pix:document.getElementById('cb-pix').value,
-    saldo:parseFloat(document.getElementById('cb-saldo').value)||0,
+    saldo_inicial:parseFloat(document.getElementById('cb-saldo').value)||0,
     obs:document.getElementById('cb-obs').value,
     ativo:true,
     created_at:new Date().toISOString(),
@@ -3406,6 +3456,90 @@ function calcValorArquiteto(){
   var el=document.getElementById('proj-valor-arquiteto');
   if(el)el.value=valor.toFixed(2);
 }
+
+// ================================================================
+// PROPOSTA / CONTRATO — Conexão Design
+// ================================================================
+function calcValorComDesconto(){
+  var venda=parseFloat(document.getElementById('proj-valor-venda')?document.getElementById('proj-valor-venda').value:0)||0;
+  var desc=parseFloat(document.getElementById('proj-desconto')?document.getElementById('proj-desconto').value:0)||0;
+  var el=document.getElementById('proj-valor-final');
+  if(el) el.value=venda>0?(venda-desc).toFixed(2):'';
+  if(typeof calcParcelasReceber==='function') calcParcelasReceber();
+}
+
+function gerarProposta(projId){
+  var p=projId?projetos.find(function(x){return x.id==projId;}):null;
+  if(!p){toast('Selecione um projeto salvo para gerar a proposta','warn');return;}
+  var cfg=getCfg();
+  var cl=clientes.find(function(x){return x.id==p.cliente_id;})||{};
+
+  // Dados da empresa com fallbacks do modelo original
+  var emp={
+    razao   : cfg.razao       || 'CONEXÃO DESIGN MÓVEIS E DECORAÇÕES',
+    cnpj    : cfg.cnpj        || '58.323.410/0001-53',
+    end     : cfg.end         || 'Rua J44 QD. 09 LT 08 Setor Mansões Paraíso (anel viário)',
+    cidade  : cfg.cidade      || 'Aparecida de Goiânia/GO',
+    tel     : cfg.tel         || '62 98176-4788',
+    tel2    : cfg.tel2        || '62 994359984',
+    email   : cfg.email       || 'CONEXAODESIGN0@GMAIL.COM',
+    link    : cfg.link        || 'https://airgo.bio/conexao_design',
+    resp    : cfg.responsavel || 'AURÉLIO LOPES',
+    bnome   : cfg.banco_nome  || 'CONTA PAGBANK',
+    bcod    : cfg.banco_cod   || '290',
+    bag     : cfg.banco_ag    || '0001',
+    bconta  : cfg.banco_conta || '78383508-5',
+    btipo   : cfg.banco_tipo  || 'Conta de pagamento',
+    pix     : cfg.pix         || '58.323.410/0001-53'
+  };
+
+  // Dados do projeto
+  var valorBruto  = parseFloat(p.valor_venda||0);
+  var desconto    = parseFloat(p.desconto||0);
+  var valorFinal  = parseFloat(p.valor_final||0)||(valorBruto-desconto);
+  var prazo       = p.prazo_dias || 25;
+  var garantia    = p.garantia  || 12;
+  var freteLbl    = {incluso:'Incluso',a_combinar:'A combinar',nao_incluso:'Não incluso'}[p.frete||'incluso']||'Incluso';
+  var instLbl     = {inclusa:'Inclusa',a_combinar:'A combinar',nao_inclusa:'Não inclusa'}[p.instalacao||'inclusa']||'Inclusa';
+  var respProjeto = p.responsavel || emp.resp;
+  var linkProjeto = p.link_contato || emp.link;
+  var dataHoje    = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  var primeiroNome= (cl.nome||'Cliente').split(' ')[0];
+
+  // Parcelas formatadas
+  var parcelasHTML='';
+  if(p.cond_pag && valorFinal && typeof getParcelas==='function'){
+    var parcelas=getParcelas(p.cond_pag,valorFinal,p.data_receb||fd(td));
+    if(parcelas.length===1){
+      parcelasHTML=parcelas[0].descricao+' — <b>R$ '+parcelas[0].valor.toFixed(2).replace('.',',')+'</b>';
+    } else {
+      parcelasHTML=parcelas.map(function(pa){
+        return pa.descricao+': <b>R$ '+pa.valor.toFixed(2).replace('.',',')+'</b>'+(pa.vencimento?' ('+dp(pa.vencimento)+')':'');
+      }).join('<br>');
+    }
+  } else {
+    var condLabels={avista:'À Vista','30d':'30 dias','50_50':'50% Entrada + 50% Entrega','3x':'Parcelado 3x','6x':'Parcelado 6x'};
+    parcelasHTML=(condLabels[p.cond_pag]||p.cond_pag||'A definir');
+  }
+
+  var css=`*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:11pt;color:#1a1a1a;background:#fff}.page{width:210mm;min-height:297mm;margin:0 auto;display:flex;flex-direction:column}@media print{.page{margin:0;page-break-after:always}.page:last-child{page-break-after:auto}}.hdr{background:#b2d8d8;padding:24px 20px 16px;text-align:center;border-bottom:3px solid #7ab8b8}.hdr-inner{display:inline-flex;align-items:center;gap:14px}.hdr-line{display:inline-block;width:36px;height:2px;background:#2c2c2c;vertical-align:middle}.hdr-brand{text-align:center}.hdr-conexao{font-size:9pt;letter-spacing:8px;font-weight:700;color:#1a1a1a}.hdr-design{font-size:26pt;font-weight:900;letter-spacing:5px;color:#1a1a1a;line-height:1}.hdr-sub{font-size:7.5pt;letter-spacing:4px;color:#444;text-transform:uppercase;margin-top:3px}.body{padding:18px 22px;flex:1}.box{border:1px solid #ccc;padding:14px;margin-bottom:12px}.box-title{font-weight:700;font-size:10pt;margin-bottom:8px;text-align:center;border-bottom:1px solid #ddd;padding-bottom:5px}.dados-t{width:100%;border-collapse:collapse;margin:8px 0}.dados-t td{padding:5px 8px;border:1px solid #ddd;font-size:10pt;vertical-align:top}.dados-t td:first-child{font-weight:700;width:130px;background:#f5f5f5}.bv{text-align:center;padding:14px 8px}.bv p{margin:3px 0;font-size:10.5pt}.inv-t{width:100%;border-collapse:collapse;margin:8px 0}.inv-t td{padding:9px 12px;border:1px solid #ddd;font-size:10.5pt;vertical-align:top}.inv-t td:first-child{font-weight:700;width:190px;background:#f5f5f5}.cl{margin-bottom:10px}.cl-t{font-weight:700;font-size:10pt;margin-bottom:4px}.cl p,.cl li{font-size:9.5pt;line-height:1.65;margin-bottom:2px}.cl ul{padding-left:16px}.assin{display:flex;justify-content:space-around;margin-top:36px}.assin-ln{text-align:center;padding-top:6px;border-top:1px solid #666;width:220px}.ftr{background:#b2d8d8;padding:7px 20px;text-align:center;font-size:8pt;color:#2c2c2c}`;
+
+  // PÁGINA 1 — Capa
+  var p1='<div class="page"><div class="hdr"><div class="hdr-inner"><span class="hdr-line"></span><div class="hdr-brand"><div class="hdr-conexao">CONEXÃO</div><div class="hdr-design">DESIGN</div><div class="hdr-sub">Móveis e Decoração</div></div><span class="hdr-line"></span></div></div><div class="body"><p style="font-weight:700;font-size:10pt;margin-bottom:14px">'+emp.cidade.replace('/GO','').replace('-GO','')+', '+dataHoje+'</p><div class="box"><p><b>'+emp.razao.toUpperCase()+'</b></p><p>CNPJ: '+emp.cnpj+'</p><p>E-MAIL: <b>'+emp.email.toUpperCase()+'</b></p><p>CONTATOS: <b>'+linkProjeto+'</b></p><p>CONTATO: <b>'+emp.tel+'</b> '+respProjeto+'&nbsp;&nbsp;<b>'+emp.tel2+'</b></p></div><div class="box"><div class="box-title">DADOS</div><table class="dados-t"><tr><td>Cliente</td><td>'+(cl.nome||'').toUpperCase()+'</td></tr><tr><td>CPF / CNPJ</td><td>'+(cl.documento||'—')+'</td></tr><tr><td>Telefone</td><td>'+(cl.telefone||'—')+'</td></tr><tr><td>Endereço</td><td>'+(cl.endereco||'—')+(cl.cidade?', '+cl.cidade:'')+'</td></tr><tr><td>Projeto</td><td>'+p.nome+'</td></tr>'+(p.entrega?'<tr><td>Previsão Entrega</td><td>'+dp(p.entrega)+'</td></tr>':'')+'</table></div><div class="bv"><p>Olá, <b style="color:#2c7070">'+primeiroNome.toUpperCase()+'</b></p><p>seja bem-vindo(a) a <b>'+emp.razao+'</b></p><p><b>Agradecemos sua confiança</b></p><p>e apresentamos aqui uma proposta exclusiva para você de acordo com suas especificações.</p><p>Confira nosso orçamento e sinta-se à vontade para entrar em contato para esclarecer qualquer dúvida.</p><p><b>Estamos prontos para transformar seu projeto em realidade</b></p>'+(p.obs_proposta?'<p style="margin-top:10px;color:#555;font-style:italic">'+p.obs_proposta+'</p>':'')+'<div style="text-align:right;margin-top:14px"><p><b>Atenciosamente: '+respProjeto.toUpperCase()+'</b></p><p><b>CONTATO: '+emp.tel.replace(/\s/g,'')+'</b></p></div></div></div><div class="ftr">'+emp.razao+' &nbsp;|&nbsp; CNPJ: '+emp.cnpj+' &nbsp;|&nbsp; END: '+emp.end+' - '+emp.cidade+'</div></div>';
+
+  // PÁGINA 2 — Investimento
+  var vBrutoFmt='R$ '+valorBruto.toFixed(2).replace('.',',');
+  var vFinalFmt='R$ '+valorFinal.toFixed(2).replace('.',',');
+  var investLine=valorBruto>0?(vBrutoFmt+(desconto>0?' com desconto de R$ '+desconto.toFixed(2).replace('.',',')+'<br><b style="color:#2c7070;font-size:12pt">'+vFinalFmt+'</b>':'')):'A definir';
+  var p2='<div class="page" style="page-break-before:always"><div class="hdr"><div class="hdr-inner"><span class="hdr-line"></span><div class="hdr-brand"><div class="hdr-conexao">CONEXÃO</div><div class="hdr-design">DESIGN</div><div class="hdr-sub">Móveis e Decoração</div></div><span class="hdr-line"></span></div></div><div class="body"><div class="box"><table class="inv-t"><tr><td>INVESTIMENTO TOTAL</td><td>'+investLine+'</td></tr><tr><td>CONDIÇÃO EXCLUSIVA</td><td>'+parcelasHTML+'</td></tr><tr><td>DADOS DE PAGAMENTO</td><td><b>'+emp.bnome+'</b><br>Banco: '+emp.bcod+'<br>Agência: '+emp.bag+'<br>Número da conta: '+emp.bconta+'<br>Tipo: '+emp.btipo+'<br>CNPJ: '+emp.cnpj+'<br>Nome: '+emp.razao.toUpperCase()+'<br><b>CHAVE PIX: '+emp.pix+'</b></td></tr><tr><td>FRETE</td><td><b>'+freteLbl+'</b></td></tr><tr><td>INSTALAÇÃO</td><td><b>'+instLbl+'</b></td></tr><tr><td>PRAZO DE ENTREGA</td><td><b>'+prazo+' dias a contar da entrada</b>'+(p.entrega?' (previsão: '+dp(p.entrega)+')':'')+'</td></tr></table></div><div class="box"><p style="font-weight:700;font-size:10pt;text-decoration:underline;margin-bottom:6px">GARANTIA</p><p style="font-size:10.5pt;font-weight:700">'+garantia+' ('+{6:'SEIS',12:'DOZE',24:'VINTE E QUATRO'}[garantia]||(garantia+' MESES')+') meses contra defeito de fabricação a partir da data de entrega.</p></div></div><div class="ftr">'+emp.razao+' &nbsp;|&nbsp; CNPJ: '+emp.cnpj+' &nbsp;|&nbsp; END: '+emp.end+' - '+emp.cidade+'</div></div>';
+
+  // PÁGINA 3 — Contrato
+  var comarca=emp.cidade.split('/')[0].split('-')[0].trim();
+  var p3='<div class="page" style="page-break-before:always"><div class="hdr"><div class="hdr-inner"><span class="hdr-line"></span><div class="hdr-brand"><div class="hdr-conexao">CONEXÃO</div><div class="hdr-design">DESIGN</div><div class="hdr-sub">Móveis e Decoração</div></div><span class="hdr-line"></span></div></div><div class="body"><div class="cl"><p class="cl-t">Responsabilidade da Contratante</p><ul><li>a) <b>Efetuar os pagamentos conforme previstos.</b></li><li>b) <b>Após entregue o serviço, é de total responsabilidade do contratante seguir com as orientações passadas para a conservação das peças;</b></li><li>c) <b>É de responsabilidade financeira da contratante qualquer acréscimo de outros itens que não estejam descritos no Quadro de Custos.</b></li></ul></div><div class="cl"><p class="cl-t">Responsabilidade da Contratada</p><ul><li>d) <b>Entrega de todos os itens conforme descrito nos custos.</b></li><li>e) <b>Entrega de peças de qualidade e tamanho descritos na Cláusula Primeira;</b></li><li>f) <b>Não é de responsabilidade da contratada, após revisado e entregue o serviço, repor peças.</b></li></ul></div><div class="cl"><p class="cl-t">Prazo</p><p><b>O presente instrumento terá início na data de sua assinatura e encerrar-se-á '+prazo+' dias a contar da entrada.</b></p></div><div class="cl"><p class="cl-t">Da Rescisão</p><p><b>Caso o Contratante desista da execução da fabricação, este deverá fazê-lo em um pronunciamento por escrito e, como multa rescisória, 10% do valor deste contrato.</b></p><p style="margin-top:6px"><b>As partes elegem o foro da Comarca de '+comarca+', para dirimir quaisquer dúvidas oriundas do presente instrumento, com expressa renúncia a qualquer outro, por mais privilegiado que seja.</b></p><p style="margin-top:6px"><b>Assim, justas e acertadas, assinam as partes o presente instrumento em duas vias de igual teor e validade.</b></p></div><p style="margin-top:18px;font-weight:700">'+emp.cidade.replace('/GO','').replace('-GO','')+', '+dataHoje+'</p><div class="assin"><div><div class="assin-ln"><div style="font-size:9pt">'+((cl.nome)||'').toUpperCase()+'</div><div style="font-size:8.5pt;color:#666">Assinatura do Cliente</div></div></div><div><div class="assin-ln"><div style="font-size:9pt">'+respProjeto.toUpperCase()+'</div><div style="font-size:8.5pt;color:#666">'+emp.razao+'</div></div></div></div></div><div class="ftr">'+emp.razao+' &nbsp;|&nbsp; CNPJ: '+emp.cnpj+' &nbsp;|&nbsp; END: '+emp.end+' - '+emp.cidade+'</div></div>';
+
+  var html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Proposta - '+p.nome+'</title><style>'+css+'</style></head><body>'+p1+p2+p3+'</body></html>';
+  showPrint('Proposta - '+p.nome, html);
+}
 function saveProjeto(){
   var nome=document.getElementById('proj-nome').value.trim();
   if(!nome){toast('Informe o nome do projeto','warn');return;}
@@ -3437,6 +3571,15 @@ function saveProjeto(){
     cond_pag:(document.getElementById('proj-cond-pag')?document.getElementById('proj-cond-pag').value:''),
     data_receb:(document.getElementById('proj-data-receb')?document.getElementById('proj-data-receb').value:''),
     status_receb:(document.getElementById('proj-status-receb')?document.getElementById('proj-status-receb').value:'pendente'),
+    prazo_dias:parseInt(document.getElementById('proj-prazo-dias')?document.getElementById('proj-prazo-dias').value:25)||25,
+    desconto:parseFloat(document.getElementById('proj-desconto')?document.getElementById('proj-desconto').value:0)||0,
+    valor_final:parseFloat(document.getElementById('proj-valor-final')?document.getElementById('proj-valor-final').value:0)||0,
+    frete:(document.getElementById('proj-frete')?document.getElementById('proj-frete').value:'incluso'),
+    instalacao:(document.getElementById('proj-instalacao')?document.getElementById('proj-instalacao').value:'inclusa'),
+    garantia:parseInt(document.getElementById('proj-garantia')?document.getElementById('proj-garantia').value:12)||12,
+    responsavel:(document.getElementById('proj-responsavel')?document.getElementById('proj-responsavel').value:''),
+    link_contato:(document.getElementById('proj-link-contato')?document.getElementById('proj-link-contato').value:''),
+    obs_proposta:(document.getElementById('proj-obs-proposta')?document.getElementById('proj-obs-proposta').value:''),
     updated_by:user,
     updated_at:new Date().toISOString()
   };
@@ -3464,23 +3607,54 @@ function saveProjeto(){
   var elCPag=document.getElementById('proj-cond-pag');if(elCPag)elCPag.value='';
   var elStRec=document.getElementById('proj-status-receb');if(elStRec)elStRec.value='pendente';
   var prev=document.getElementById('proj-parcelas-preview');if(prev)prev.style.display='none';
+  ['proj-desconto','proj-valor-final','proj-prazo-dias','proj-responsavel','proj-link-contato','proj-obs-proposta'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var elGar=document.getElementById('proj-garantia');if(elGar)elGar.value='12';
+  var elPrev=document.getElementById('btn-prev-proposta');if(elPrev)elPrev.style.display='none';
+  window._editProjId=null;
 }
 
 function editProjeto(id){
   var p=projetos.find(function(x){return x.id===id;}); if(!p) return;
   window._editProjId=id;
   document.getElementById('proj-form-title').textContent='Editar Projeto';
-  document.getElementById('proj-nome').value=p.nome||'';
-  document.getElementById('proj-cliente').value=p.cliente_id||'';
-  document.getElementById('proj-status').value=p.status||'orcamento';
-  document.getElementById('proj-inicio').value=p.inicio||'';
-  document.getElementById('proj-entrega').value=p.entrega||'';
-  document.getElementById('proj-desc').value=p.descricao||'';
-  document.getElementById('proj-est-material').value=p.est_material||0;
-  document.getElementById('proj-est-mdo').value=p.est_mdo||0;
-  document.getElementById('proj-est-espelho').value=p.est_espelho||0;
-  document.getElementById('proj-est-outros').value=p.est_outros||0;
+  // Helper seguro para setar valor
+  var _sv=function(elId,val){var el=document.getElementById(elId);if(el)el.value=(val!==undefined&&val!==null)?val:'';};
+  // Campos base
+  _sv('proj-nome',p.nome);
+  _sv('proj-cliente',p.cliente_id);
+  var elSt=document.getElementById('proj-status');if(elSt)elSt.value=p.status||'orcamento';
+  _sv('proj-inicio',p.inicio);
+  _sv('proj-entrega',p.entrega);
+  _sv('proj-desc',p.descricao);
+  _sv('proj-est-material',p.est_material||0);
+  _sv('proj-est-mdo',p.est_mdo||0);
+  _sv('proj-est-espelho',p.est_espelho||0);
+  _sv('proj-est-outros',p.est_outros||0);
+  // Campos de proposta e pagamento
+  _sv('proj-valor-venda',p.valor_venda||'');
+  _sv('proj-desconto',p.desconto||'');
+  _sv('proj-valor-final',p.valor_final||'');
+  _sv('proj-data-receb',p.data_receb||'');
+  _sv('proj-prazo-dias',p.prazo_dias||25);
+  _sv('proj-garantia',p.garantia||12);
+  _sv('proj-responsavel',p.responsavel||'');
+  _sv('proj-link-contato',p.link_contato||'');
+  _sv('proj-obs-proposta',p.obs_proposta||'');
+  var elFrete=document.getElementById('proj-frete');if(elFrete)elFrete.value=p.frete||'incluso';
+  var elInst=document.getElementById('proj-instalacao');if(elInst)elInst.value=p.instalacao||'inclusa';
+  var elCond=document.getElementById('proj-cond-pag');if(elCond)elCond.value=p.cond_pag||'';
+  var elStR=document.getElementById('proj-status-receb');if(elStR)elStR.value=p.status_receb||'pendente';
+  // Arquiteto
+  var elChk=document.getElementById('proj-teve-arquiteto');
+  if(elChk){elChk.checked=!!(p.teve_arquiteto);if(typeof toggleArquiteto==='function')toggleArquiteto();}
+  _sv('proj-nome-arquiteto',p.nome_arquiteto);
+  _sv('proj-pct-arquiteto',p.percentual_arquiteto||'');
+  _sv('proj-valor-arquiteto',p.valor_arquiteto||'');
   calcEstTotal();
+  if(typeof calcParcelasReceber==='function') calcParcelasReceber();
+  // Mostrar botão pré-visualizar proposta se existir
+  var btnPrev=document.getElementById('btn-prev-proposta');
+  if(btnPrev) btnPrev.style.display='';
   projTab('novo',document.getElementById('proj-tab-novo'));
 }
 
@@ -3531,7 +3705,7 @@ function renderProjetos(){
   };
   var html='';
   list.forEach(function(p){
-    var est=parseFloat(p.est_total||0)||(parseFloat(p.est_material||0)+parseFloat(p.est_mdo||0)+parseFloat(p.est_espelho||0)+parseFloat(p.est_outros||0));
+    var est=parseFloat(p.est_total||0); if(!est) est=parseFloat(p.est_material||0)+parseFloat(p.est_mdo||0)+parseFloat(p.est_espelho||0)+parseFloat(p.est_outros||0);
     var real=getProjetoReal(p.id);
     var margem=est-real.total;
     var margemCls=margem>0?'color:var(--green)':margem<0?'color:var(--red)':'color:var(--t3)';
@@ -3552,7 +3726,8 @@ function renderProjetos(){
       '<td style="display:flex;gap:4px">'+
         '<button class="ibt" onclick="editProjeto('+p.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'+
         '<button class="ibt" onclick="dashProjeto('+p.id+')" title="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>'+
-        '<button class="ibt" onclick="pdfProjeto('+p.id+')" title="PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></button>'+
+        '<button class="ibt" style="color:var(--sage)" onclick="gerarProposta('+p.id+')" title="Gerar Proposta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></button>'+
+        '<button class="ibt" onclick="pdfProjeto('+p.id+')" title="PDF Interno"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></button>'+
         '<button class="ibt" onclick="delProjeto('+p.id+')" title="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>'+
       '</td></tr>';
   });
@@ -3617,20 +3792,29 @@ function renderDashProjeto(){
   var id=document.getElementById('dash-proj-sel').value;
   if(!id){document.getElementById('dash-proj-content').innerHTML='<div class="empty">Selecione um projeto</div>';return;}
   var p=projetos.find(function(x){return x.id==id;}); if(!p) return;
-  var est={material:parseFloat(p.est_material||0),mdo:parseFloat(p.est_mdo||0),espelho:parseFloat(p.est_espelho||0),outros:parseFloat(p.est_outros||0)};
-  var estTotal=est.material+est.mdo+est.espelho+est.outros;
+  // Bug 3 fix: usar est_total do novo sistema, com fallback nos campos legados
+  var estTotal=parseFloat(p.est_total||0);
+  if(!estTotal) estTotal=parseFloat(p.est_material||0)+parseFloat(p.est_mdo||0)+parseFloat(p.est_espelho||0)+parseFloat(p.est_outros||0);
+  // Montar cats: usar estimativas dinâmicas se existirem
+  var cats=[];
+  var estimativasArr=[];
+  if(p.estimativas){try{estimativasArr=JSON.parse(p.estimativas);}catch(e){}}
+  var CORES_DASH=['#7A9E7E','#B8D8D8','#9ECECE','#8C8C8C','#C47D0A','#7AB8B8','#5C825F','#2E7D52'];
+  if(estimativasArr.length){
+    estimativasArr.forEach(function(e,i){
+      var nomeC=catNome(e.categoria_id)||('Categoria '+e.categoria_id);
+      var realC=proj_custos.filter(function(c){return c.projeto_id==id&&String(c.tipo)===String(e.categoria_id);}).reduce(function(s,c){return s+parseFloat(c.valor||0);},0);
+      cats.push({lbl:nomeC,est:parseFloat(e.valor||0),real:realC,cor:CORES_DASH[i%CORES_DASH.length]});
+    });
+  } else {
+    var est={material:parseFloat(p.est_material||0),mdo:parseFloat(p.est_mdo||0),espelho:parseFloat(p.est_espelho||0),outros:parseFloat(p.est_outros||0)};
+    cats=[{lbl:'Material',est:est.material,real:real.material,cor:'#7A9E7E'},{lbl:'Mão de Obra',est:est.mdo,real:real.mdo,cor:'#B8D8D8'},{lbl:'Espelhos',est:est.espelho,real:real.espelho,cor:'#9ECECE'},{lbl:'Outros',est:est.outros,real:real.outros,cor:'#8C8C8C'}];
+  }
   var real=getProjetoReal(id);
   var margem=estTotal-real.total;
   var cl=clientes.find(function(x){return x.id==p.cliente_id;});
   var pct=estTotal>0?Math.min(100,Math.round((real.total/estTotal)*100)):0;
   var st={orcamento:'Orçamento',andamento:'Em Andamento',concluido:'Concluído',cancelado:'Cancelado'}[p.status]||p.status;
-
-  var cats=[
-    {lbl:'Material',est:est.material,real:real.material,cor:'#7A9E7E'},
-    {lbl:'Mão de Obra',est:est.mdo,real:real.mdo,cor:'#B8D8D8'},
-    {lbl:'Espelhos',est:est.espelho,real:real.espelho,cor:'#9ECECE'},
-    {lbl:'Outros',est:est.outros,real:real.outros,cor:'#8C8C8C'}
-  ];
 
   var barsHtml=cats.map(function(cat){
     var maxVal=Math.max(cat.est,cat.real,1);
@@ -3679,8 +3863,8 @@ function pdfProjeto(id){
   var p=projetos.find(function(x){return x.id===id;}); if(!p) return;
   var cfg=getCfg();
   var cl=clientes.find(function(x){return x.id==p.cliente_id;});
+  var estTotal=parseFloat(p.est_total||0); if(!estTotal) estTotal=parseFloat(p.est_material||0)+parseFloat(p.est_mdo||0)+parseFloat(p.est_espelho||0)+parseFloat(p.est_outros||0);
   var est={material:parseFloat(p.est_material||0),mdo:parseFloat(p.est_mdo||0),espelho:parseFloat(p.est_espelho||0),outros:parseFloat(p.est_outros||0)};
-  var estTotal=est.material+est.mdo+est.espelho+est.outros;
   var real=getProjetoReal(id);
   var margem=estTotal-real.total;
   var custosList=proj_custos.filter(function(c){return c.projeto_id==id;});
@@ -3930,15 +4114,17 @@ function calcRateioContaTotal(){
 function toggleRateioRef(){
   var show=document.getElementById('rf-ratear').checked;
   document.getElementById('rf-rateio-section').style.display=show?'block':'none';
+  var _rfValor=parseFloat(document.getElementById('rf-valor').value)||0;
+  window['_rateio_base_rf-rateio-pct']=_rfValor;
   if(show&&!document.getElementById('rf-rateio-rows').children.length) addRateioRefRow();
 }
 function addRateioRefRow(){
   var valor=parseFloat(document.getElementById('rf-valor').value)||0;
-  window['_rateio_base_rf-rateio-total']=valor;
+  window['_rateio_base_rf-rateio-pct']=valor;
   var el=document.createElement('div');
-  el.innerHTML=makeRateioRow('rf-rateio-rows','rf-rateio-total');
+  el.innerHTML=makeRateioRow('rf-rateio-rows','rf-rateio-pct');
   document.getElementById('rf-rateio-rows').appendChild(el.firstChild);
-  calcRateioPct('rf-rateio-total');
+  calcRateioPct('rf-rateio-pct');
 }
 
 // -- INIT --------------------------------------------------
