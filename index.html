@@ -732,7 +732,8 @@ textarea.fi{resize:vertical;min-height:72px}
       </div>
       <div class="frow">
         <div class="fgroup"><label class="flabel">Tipo</label><div style="display:flex;gap:4px"><select class="fi" id="fn-tipo" onchange="toggleFnTipo()" style="flex:1"></select><button class="btn sm" onclick="abrirTipos()" style="padding:8px 10px" title="Gerenciar tipos">⚙️</button></div></div>
-        <div class="fgroup" id="fn-diaria-wrap"><label class="flabel">Valor Diária (R$)</label><input type="number" class="fi" id="fn-diaria" placeholder="0,00" step="0.01"></div>
+        <div class="fgroup" id="fn-diaria-wrap"><label class="flabel">Diária Diurna (R$)</label><input type="number" class="fi" id="fn-diaria" placeholder="0,00" step="0.01"></div>
+        <div class="fgroup" id="fn-diaria-not-wrap"><label class="flabel">Diária Noturna (R$)</label><input type="number" class="fi" id="fn-diaria-noturna" placeholder="0,00" step="0.01"></div>
         <div class="fgroup" id="fn-salario-wrap" style="display:none"><label class="flabel">Salário Mensal (R$)</label><input type="number" class="fi" id="fn-salario" placeholder="0,00" step="0.01"></div>
         <div class="fgroup" id="fn-benef-wrap" style="display:none"><label class="flabel">Benefícios/mês (R$)</label><input type="number" class="fi" id="fn-beneficios" placeholder="VT+VR+outros" step="0.01"></div>
         <div class="fgroup" id="fn-hextra-wrap"><label class="flabel">Valor Hora Extra (R$)</label><input type="number" class="fi" id="fn-hora-extra" placeholder="0,00" step="0.01"></div>
@@ -754,7 +755,7 @@ textarea.fi{resize:vertical;min-height:72px}
       <div class="frow">
         <div class="fgroup"><label class="flabel">Funcionário</label><select class="fi" id="pt-func"><option value="">Selecione...</option></select></div>
         <div class="fgroup"><label class="flabel">Data</label><input type="date" class="fi" id="pt-data"></div>
-        <div class="fgroup"><label class="flabel">Tipo</label><select class="fi" id="pt-tipo"><option value="diaria">Diária</option><option value="meio">Meio período</option><option value="extra">Hora extra</option><option value="falta">Falta</option></select></div>
+        <div class="fgroup"><label class="flabel">Tipo</label><select class="fi" id="pt-tipo"><option value="diaria">Diária Diurna</option><option value="noturna">Diária Noturna</option><option value="meio">Meio período</option><option value="extra">Hora extra</option><option value="falta">Falta</option></select></div>
         <div class="fgroup"><label class="flabel">Qtd Horas Extra</label><input type="number" class="fi" id="pt-horas" placeholder="0" step="0.5" min="0"></div>
         <div class="fgroup"><label class="flabel">Qtd de Obras <span style="color:var(--red)">*</span></label><input type="number" class="fi" id="pt-obras" placeholder="1" min="0"></div>
         <div class="fgroup"><label class="flabel">Observação <span style="color:var(--red)">*</span></label><input type="text" class="fi" id="pt-obs" placeholder="Observação obrigatória..."></div>
@@ -1113,8 +1114,9 @@ textarea.fi{resize:vertical;min-height:72px}
       <div style="display:flex;gap:8px">
         <div style="flex:1"><label class="flabel">Tipo</label>
           <select class="fi" id="ep-tipo" onchange="calcEpValor()">
-            <option value="diaria">Diaria</option>
-            <option value="meio">Meio periodo</option>
+            <option value="diaria">Diária Diurna</option>
+            <option value="noturna">Diária Noturna</option>
+            <option value="meio">Meio período</option>
             <option value="extra">Hora extra</option>
             <option value="falta">Falta</option>
           </select>
@@ -1180,7 +1182,7 @@ var dp=function(s){if(!s)return'';var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[
 
 // -- CONFIG ------------------------------------------------
 var GOOGLE_CLIENT_ID = '715814366188-vv7eh5m7nkd9k9ns1vn50pl16ejt3a0e.apps.googleusercontent.com';
-var SHEET_ID = '13_-41g9zGtMoeUCtSc-BLkSwvRKOcrQZgZnLO4jLDeY';
+var SHEET_ID = '1-Pp1HK249I8H0gGnkBF5H4GbtX2l2bNP5b6sZ4NOq9s';
 var ACCESS_TOKEN = null;
 var CURRENT_USER = null;
 var SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets/';
@@ -1343,7 +1345,8 @@ async function initSheets(){
     Funcionarios:['id','nome','cargo','telefone','cpf','diaria','hora_extra','pix','admissao','ativo'],
     Pontos:['id','funcionario_id','data','tipo','horas','obs'],
     Refeicoes:['id','funcionario_id','fornecedor_id','data','tipo','valor'],
-    ContasReceber:['id','projeto_id','descricao','valor','vencimento','status','recebido_em','conta_id']
+    ContasReceber:['id','projeto_id','descricao','valor','vencimento','status','recebido_em','conta_id'],
+    Log:['id','ts','user','action']
   };
   // Check each sheet and create header if empty
   for(var sheet in headers){
@@ -1369,7 +1372,8 @@ async function loadAllData(){
       {key:'funcionarios', sheet:'Funcionarios', parser: parseFuncionario},
       {key:'pontos', sheet:'Pontos', parser: parsePonto},
       {key:'refeicoes', sheet:'Refeicoes', parser: parseRefeicao},
-      {key:'contas_receber', sheet:'ContasReceber', parser: parseContaReceber}
+      {key:'contas_receber', sheet:'ContasReceber', parser: parseContaReceber},
+      {key:'log', sheet:'Log', parser: parseLog}
     ];
     for(var i=0; i<loaders.length; i++){
       var l = loaders[i];
@@ -1385,12 +1389,23 @@ async function loadAllData(){
         else if(l.key === 'pontos') pontos = data;
         else if(l.key === 'refeicoes') refeicoes = data;
         else if(l.key === 'contas_receber') contas_receber = data;
+        else if(l.key === 'log'){ 
+          // Merge: manter logs locais + trazer do Sheets (sem duplicar por ts+user)
+          if(data.length){
+            var tsKeys=new Set(actLog.map(function(x){return x.ts+'|'+x.user;}));
+            data.forEach(function(l2){if(l2.ts&&!tsKeys.has(l2.ts+'|'+l2.user))actLog.push(l2);});
+            actLog.sort(function(a,b){return(b.ts||'').localeCompare(a.ts||'');});
+            saveLog();
+          }
+        }
       }
     }
     populateCatSelect('cx-cat');
     renderDash();
     updateBadgeReceber();
     toast('Dados carregados!','ok');
+    // Sincronizar log em lote (não bloqueia, fire-and-forget)
+    if(ACCESS_TOKEN) syncToSheets('log');
   } catch(e){ console.error('loadAllData error:',e); toast('Erro ao carregar dados. Verifique permissoes do Sheets.','warn'); }
   finally{ syncEnd(); }
 }
@@ -1401,18 +1416,20 @@ function parseContaPagar(r){ return {id:+r[0],descricao:r[1]||'',fornecedor_id:r
 function parseCliente(r){ return {id:+r[0],nome:r[1]||'',telefone:r[2]||'',documento:r[3]||'',endereco:r[4]||'',cidade:r[5]||'',email:r[6]||'',ativo:r[7]!=='false'}; }
 function parseFornecedor(r){ return {id:+r[0],nome:r[1]||'',segmento:r[2]||'',categoria_id:r[3]||'',telefone:r[4]||'',documento:r[5]||'',produto:r[6]||'',pix:r[7]||'',prazo:r[8]||'',endereco:r[9]||'',bairro:r[10]||'',cidade:r[11]||'',ativo:r[12]!=='false',tipo_fornecedor:r[13]||''}; }
 function parseCategoria(r){ return {id:+r[0],nome:r[1]||'',tipo:r[2]||'',cor:r[3]||'#7A9E7E'}; }
-function parseFuncionario(r){ return {id:+r[0],nome:r[1]||'',cargo:r[2]||'',telefone:r[3]||'',cpf:r[4]||'',diaria:+r[5]||0,hora_extra:+r[6]||0,pix:r[7]||'',admissao:r[8]||'',ativo:r[9]!=='false'}; }
-function parsePonto(r){ return {id:+r[0],funcionario_id:+r[1],data:r[2]||'',tipo:r[3]||'',horas:+r[4]||0,obs:r[5]||''}; }
+function parseFuncionario(r){ return {id:+r[0],nome:r[1]||'',cargo:r[2]||'',telefone:r[3]||'',cpf:r[4]||'',diaria:+r[5]||0,hora_extra:+r[6]||0,pix:r[7]||'',admissao:r[8]||'',ativo:r[9]!=='false',diaria_noturna:+r[10]||0}; }
+function parsePonto(r){ return {id:+r[0],funcionario_id:+r[1],data:r[2]||'',tipo:r[3]||'',horas:+r[4]||0,obs:r[5]||'',created_at:r[6]||'',created_by:r[7]||''}; }
 function parseRefeicao(r){ return {id:+r[0],funcionario_id:+r[1],fornecedor_id:r[2]||'',data:r[3]||'',tipo:r[4]||'',valor:+r[5]||0}; }
 
 // Row serializers
 function rowTransacao(t){ return [t.id,t.descricao,t.data,t.valor,t.tipo,t.conta,t.categoria_id]; }
 function rowContaPagar(c){ return [c.id,c.descricao,c.fornecedor_id,c.categoria_id,c.valor,c.vencimento,c.status,c.pago_em||'',c.obs||'',c.origem||'manual',c.created_at||'',c.created_by||'']; }
 function rowCliente(c){ return [c.id,c.nome,c.telefone,c.documento,c.endereco,c.cidade,c.email,c.ativo]; }
-function rowFornecedor(f){ return [f.id,f.nome,f.segmento||'',f.categoria_id,f.telefone,f.documento,f.produto,f.pix,f.prazo,f.endereco||'',f.bairro||'',f.cidade||'',f.ativo,f.tipo_fornecedor||'']; }
+function rowFornecedor(f){ return [f.id,f.nome,f.segmento||'',f.categoria_id,f.telefone,f.documento,f.produto,f.pix,f.prazo,f.endereco||'',f.bairro||'',f.cidade||'',f.ativo,f.tipo_fornecedor||'',f.created_at||'',f.created_by||'']; }
 function rowCategoria(c){ return [c.id,c.nome,c.tipo,c.cor]; }
-function rowFuncionario(f){ return [f.id,f.nome,f.cargo,f.telefone,f.cpf,f.diaria,f.hora_extra,f.pix,f.admissao,f.ativo]; }
-function rowPonto(p){ return [p.id,p.funcionario_id,p.data,p.tipo,p.horas,p.obs]; }
+function rowFuncionario(f){ return [f.id,f.nome,f.cargo,f.telefone,f.cpf,f.diaria,f.hora_extra,f.pix,f.admissao,f.ativo,f.diaria_noturna||0]; }
+function rowPonto(p){ return [p.id,p.funcionario_id,p.data,p.tipo,p.horas,p.obs,p.created_at||'',p.created_by||'']; }
+function rowLog(l){ return [l.id||'',l.ts||'',l.user||'',l.action||'']; }
+function parseLog(r){ return {id:r[0]||'',ts:r[1]||'',user:r[2]||'',action:r[3]||''}; }
 function rowRefeicao(r){ return [r.id,r.funcionario_id,r.fornecedor_id,r.data,r.tipo,r.valor]; }
 
 // -- STATE -------------------------------------------------
@@ -1549,38 +1566,70 @@ function updateBadgeReceber(){
 
 // Marcar parcela como recebida + lançar no caixa
 function receberParcela(id){
-  var c=contas_receber.find(function(x){return x.id===id;}); if(!c) return;
-  var hoje=fd(td);
-  // Selecionar conta bancária se houver
-  var contaOpts=contas_bancarias.length
-    ?contas_bancarias.map(function(cb){return '<option value="'+cb.id+'">'+cb.nome+'</option>';}).join('')
-    :'<option value="pagbank">PagBank</option><option value="infinit">Infinit</option><option value="caixa">Caixa</option>';
-  // Modal simples via confirm + prompt
-  var dataPag=prompt('Data de recebimento (AAAA-MM-DD):', hoje);
-  if(!dataPag) return;
-  var contaId=contas_bancarias.length?contas_bancarias[0].id:'caixa';
-  c.status='recebido';
-  c.recebido_em=dataPag;
-  c.conta_id=contaId;
-  // Lançar no Caixa como entrada
-  var projNome=c.descricao;
-  transacoes.push({
-    id:nextId(transacoes),
-    descricao:'Recebimento: '+projNome,
-    data:dataPag,
-    valor:c.valor,
-    tipo:'entrada',
-    conta:String(contaId),
-    categoria_id:'',
-    origem:'receber',
-    origem_id:c.id
-  });
+  // Abre modal de edição já com status recebido preenchido
+  editParcelaReceber(id);
+  var stSel=document.getElementById('ep-rec-status');
+  if(stSel) stSel.value='recebido';
+  var elData=document.getElementById('ep-rec-recebido');
+  if(elData&&!elData.value) elData.value=fd(td);
+}
+
+// -- EDITAR PARCELA A RECEBER ---------------------------------
+var _editParcelaId=null;
+function editParcelaReceber(id){
+  var cr=contas_receber.find(function(x){return x.id===id;}); if(!cr) return;
+  _editParcelaId=id;
+  document.getElementById('ep-rec-desc').value=cr.descricao||'';
+  document.getElementById('ep-rec-valor').value=cr.valor||0;
+  document.getElementById('ep-rec-venc').value=cr.vencimento||'';
+  var stSel=document.getElementById('ep-rec-status');if(stSel)stSel.value=cr.status||'pendente';
+  document.getElementById('ep-rec-recebido').value=cr.recebido_em||'';
+  var contaOpts='<option value="">Selecione...</option>';
+  if(contas_bancarias.length){
+    contaOpts+=contas_bancarias.map(function(cb){return'<option value="'+cb.id+'"'+(cb.id==cr.conta_id?' selected':'')+'>'+cb.nome+'</option>';}).join('');
+  } else {
+    contaOpts+='<option value="pagbank"'+(cr.conta_id==='pagbank'?' selected':'')+'>PagBank</option>';
+    contaOpts+='<option value="infinit"'+(cr.conta_id==='infinit'?' selected':'')+'>Infinit</option>';
+    contaOpts+='<option value="caixa"'+(cr.conta_id==='caixa'?' selected':'')+'>Caixa</option>';
+  }
+  document.getElementById('ep-rec-conta').innerHTML=contaOpts;
+  document.getElementById('m-edit-parcela').classList.add('show');
+}
+
+function saveEditParcela(){
+  if(!_editParcelaId) return;
+  var cr=contas_receber.find(function(x){return x.id===_editParcelaId;}); if(!cr) return;
+  var novoStatus=document.getElementById('ep-rec-status').value;
+  cr.descricao=document.getElementById('ep-rec-desc').value;
+  cr.valor=parseFloat(document.getElementById('ep-rec-valor').value)||0;
+  cr.vencimento=document.getElementById('ep-rec-venc').value;
+  cr.recebido_em=document.getElementById('ep-rec-recebido').value;
+  cr.conta_id=document.getElementById('ep-rec-conta').value;
+  // Lançar no caixa ao marcar como recebido (apenas uma vez)
+  if(novoStatus==='recebido'&&cr.status!=='recebido'&&cr.recebido_em){
+    transacoes.push({
+      id:nextId(transacoes),
+      descricao:'Recebimento: '+cr.descricao,
+      data:cr.recebido_em,
+      valor:cr.valor,
+      tipo:'entrada',
+      conta:String(cr.conta_id||(contas_bancarias.length?contas_bancarias[0].id:'caixa')),
+      categoria_id:'',
+      origem:'receber',
+      origem_id:cr.id
+    });
+    syncToSheets('transacoes');
+  }
+  cr.status=novoStatus;
   save();
   saveReceber();
-  if(ACCESS_TOKEN){syncToSheets('contas_receber');syncToSheets('transacoes');}
+  if(ACCESS_TOKEN) syncToSheets('contas_receber');
+  document.getElementById('m-edit-parcela').classList.remove('show');
   renderReceber();
   updateBadgeReceber();
-  toast('Recebimento registrado e lançado no Caixa!','ok');
+  renderDash();
+  toast('Parcela atualizada!','ok');
+  _editParcelaId=null;
 }
 
 // Render tabela contas a receber
@@ -1613,6 +1662,7 @@ function renderReceber(){
     var btnReceber=c.status!=='recebido'
       ?'<button class="ibt" onclick="receberParcela('+c.id+')" title="Marcar como recebido" style="color:var(--sage)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>'
       :'';
+    var btnEdit='<button class="ibt" onclick="editParcelaReceber('+c.id+')" title="Editar parcela"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
     var btnDel='<button class="ibt" onclick="delContaReceber('+c.id+')" title="Remover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>';
     html+='<tr>'+
       '<td>'+dp(c.vencimento)+'</td>'+
@@ -1622,7 +1672,7 @@ function renderReceber(){
       '<td style="font-family:var(--fm);font-weight:600">'+fmt(c.valor)+'</td>'+
       '<td><span class="tag '+st+'">'+stLbl+'</span></td>'+
       '<td style="font-size:11px;color:var(--t3)">'+(c.recebido_em?dp(c.recebido_em):'')+'</td>'+
-      '<td style="display:flex;gap:4px">'+btnReceber+btnDel+'</td></tr>';
+      '<td style="display:flex;gap:4px">'+btnEdit+btnReceber+btnDel+'</td></tr>';
   });
   document.getElementById('rec-body').innerHTML=html;
   var elPend=document.getElementById('rec-total-pendente');
@@ -1683,9 +1733,18 @@ async function syncToSheets(type){
     fornecedores:{data:fornecedores,sheet:'Fornecedores',row:rowFornecedor},
     categorias:{data:categorias,sheet:'Categorias',row:rowCategoria},
     funcionarios:{data:funcionarios,sheet:'Funcionarios',row:rowFuncionario},
-    projetos:{data:projetos,sheet:'Projetos',row:function(p){return[p.id,p.nome,p.cliente_id,p.status,p.inicio,p.entrega,p.descricao,p.est_material,p.est_mdo,p.est_espelho,p.est_outros,p.created_at,p.created_by];}},
+    projetos:{data:projetos,sheet:'Projetos',row:function(p){return[
+    p.id,p.nome,p.cliente_id||'',p.status||'',p.inicio||'',p.entrega||'',p.descricao||'',
+    p.est_material||0,p.est_mdo||0,p.est_espelho||0,p.est_outros||0,
+    p.created_at||'',p.created_by||'',
+    p.valor_venda||'',p.cond_pag||'',p.data_receb||'',p.status_receb||'',
+    p.teve_arquiteto||false,p.nome_arquiteto||'',p.percentual_arquiteto||0,p.valor_arquiteto||0,
+    p.estimativas||'',p.est_total||0,
+    p.updated_by||'',p.updated_at||''
+  ];}},
     proj_custos:{data:proj_custos,sheet:'ProjetoCustos',row:function(c){return[c.id,c.projeto_id,c.tipo,c.descricao,c.valor,c.data,c.created_by];}},
     proj_rateio:{data:proj_rateio,sheet:'ProjetoRateio',row:function(r){return[r.id,r.projeto_id,r.origem,r.origem_id||'',r.funcionario_id||'',r.semana||'',r.mes||'',r.percentual,r.valor_rateado,r.data,r.categoria_id||''];}},
+    log:{data:actLog.slice().reverse(),sheet:'Log',row:rowLog},
     pontos:{data:pontos,sheet:'Pontos',row:rowPonto},
     refeicoes:{data:refeicoes,sheet:'Refeicoes',row:rowRefeicao},
     contas_receber:{data:contas_receber,sheet:'ContasReceber',row:rowContaReceber}
@@ -2100,6 +2159,9 @@ function saveEditRec(){
 function addCliente(){
   var nome=document.getElementById('cl-nome').value.trim();
   if(!nome){toast('Informe o nome','warn');return;}
+  var _docCl=document.getElementById('cl-doc').value;
+  var _dupCl=checkDocDuplicado(_docCl);
+  if(_dupCl){toast('CPF/CNPJ já cadastrado no sistema como '+_dupCl.tipo+': '+_dupCl.nome+'. Verifique os registros existentes antes de realizar um novo cadastro.','warn');return;}
   clientes.push({id:nextId(clientes),nome:nome,telefone:document.getElementById('cl-tel').value,documento:document.getElementById('cl-doc').value,endereco:document.getElementById('cl-end').value,cidade:document.getElementById('cl-cidade').value,email:document.getElementById('cl-email').value,ativo:true});
   save();syncToSheets('clientes');logActivity('Novo cliente: '+document.getElementById('cl-nome').value);renderClientes();toast('Cliente salvo!','ok');
   ['cl-nome','cl-tel','cl-doc','cl-end','cl-cidade','cl-email'].forEach(function(id){document.getElementById(id).value='';});
@@ -2136,6 +2198,9 @@ function addFornecedor(){
   if(!nome){toast('Informe o nome','warn');return;}
   var tipoForn=document.getElementById('fr-tipo-forn').value;
   if(!tipoForn){toast('Selecione o tipo de fornecedor','warn');return;}
+  var _docFr=document.getElementById('fr-doc').value;
+  var _dupFr=checkDocDuplicado(_docFr);
+  if(_dupFr){toast('CPF/CNPJ já cadastrado no sistema como '+_dupFr.tipo+': '+_dupFr.nome+'. Verifique os registros existentes antes de realizar um novo cadastro.','warn');return;}
   fornecedores.push({id:nextId(fornecedores),nome:nome,tipo_fornecedor:tipoForn,segmento:document.getElementById('fr-seg').value,categoria_id:document.getElementById('fr-cat').value,telefone:document.getElementById('fr-tel').value,documento:document.getElementById('fr-doc').value,produto:document.getElementById('fr-prod').value,pix:document.getElementById('fr-pix').value,endereco:document.getElementById('fr-end').value,bairro:document.getElementById('fr-bairro').value,cidade:document.getElementById('fr-cidade').value,prazo:document.getElementById('fr-prazo').value,ativo:true,created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
   save();syncToSheets('fornecedores');logActivity('Novo fornecedor: '+nome);renderFornecedores();toast('Fornecedor salvo!','ok');
   ['fr-nome','fr-tel','fr-doc','fr-prod','fr-pix','fr-prazo','fr-end','fr-bairro','fr-cidade'].forEach(function(id){document.getElementById(id).value='';});
@@ -2181,6 +2246,7 @@ function addFuncionario(){
       fn.telefone=document.getElementById('fn-tel').value;
       fn.cpf=document.getElementById('fn-cpf').value;
       fn.diaria=parseFloat(document.getElementById('fn-diaria').value)||fn.diaria;
+      fn.diaria_noturna=parseFloat(document.getElementById('fn-diaria-noturna')&&document.getElementById('fn-diaria-noturna').value||0)||fn.diaria_noturna||0;
       fn.salario=parseFloat(document.getElementById('fn-salario').value)||fn.salario;
       fn.hora_extra=parseFloat(document.getElementById('fn-hora-extra').value)||fn.hora_extra;
       fn.pix=document.getElementById('fn-pix').value||fn.pix;
@@ -2191,8 +2257,11 @@ function addFuncionario(){
   }
   var nome=document.getElementById('fn-nome').value.trim();
   if(!nome){toast('Informe o nome','warn');return;}
+  var _docFn=document.getElementById('fn-cpf').value;
+  var _dupFn=checkDocDuplicado(_docFn);
+  if(_dupFn){toast('CPF/CNPJ já cadastrado no sistema como '+_dupFn.tipo+': '+_dupFn.nome+'. Verifique os registros existentes antes de realizar um novo cadastro.','warn');return;}
   var fnTipo=document.getElementById('fn-tipo').value;
-  funcionarios.push({id:nextId(funcionarios),nome:nome,tipo:fnTipo,cargo:document.getElementById('fn-cargo').value,telefone:document.getElementById('fn-tel').value,cpf:document.getElementById('fn-cpf').value,diaria:parseFloat(document.getElementById('fn-diaria').value)||0,salario:parseFloat(document.getElementById('fn-salario').value)||0,beneficios:parseFloat(document.getElementById('fn-beneficios')&&document.getElementById('fn-beneficios').value||0)||0,hora_extra:parseFloat(document.getElementById('fn-hora-extra').value)||0,pix:document.getElementById('fn-pix').value,admissao:document.getElementById('fn-admissao').value,ativo:true,created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
+  funcionarios.push({id:nextId(funcionarios),nome:nome,tipo:fnTipo,cargo:document.getElementById('fn-cargo').value,telefone:document.getElementById('fn-tel').value,cpf:document.getElementById('fn-cpf').value,diaria:parseFloat(document.getElementById('fn-diaria').value)||0,diaria_noturna:parseFloat(document.getElementById('fn-diaria-noturna')&&document.getElementById('fn-diaria-noturna').value||0)||0,salario:parseFloat(document.getElementById('fn-salario').value)||0,beneficios:parseFloat(document.getElementById('fn-beneficios')&&document.getElementById('fn-beneficios').value||0)||0,hora_extra:parseFloat(document.getElementById('fn-hora-extra').value)||0,pix:document.getElementById('fn-pix').value,admissao:document.getElementById('fn-admissao').value,ativo:true,created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
   save();syncToSheets('funcionarios');logActivity('Novo funcionário: '+nome);renderFuncionarios();toast('Funcionário salvo!','ok');
   ['fn-nome','fn-cargo','fn-tel','fn-cpf','fn-diaria','fn-hora-extra','fn-pix','fn-admissao'].forEach(function(id){document.getElementById(id).value='';});
 }
@@ -2245,14 +2314,14 @@ function renderPonto(){
   if(!list.length){html='<tr><td colspan="7"><div class="empty">Nenhum registro de ponto'+(ini||fim?' no período':'')+'</div></td></tr>';}
   else list.slice(0,50).forEach(function(p){
     var f=funcionarios.find(function(x){return x.id===p.funcionario_id;});
-    var val=p.tipo==='diaria'?(f?f.diaria:0):p.tipo==='meio'?(f?f.diaria/2:0):p.tipo==='extra'?(p.horas*(f?f.hora_extra:0)):0;
-    var tipoLbl={diaria:'Diária',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
+    var val=p.tipo==='diaria'?(f?parseFloat(f.diaria||0):0):p.tipo==='noturna'?(f?parseFloat(f.diaria_noturna||f.diaria||0):0):p.tipo==='meio'?(f?parseFloat(f.diaria||0)/2:0):p.tipo==='extra'?(p.horas*(f?f.hora_extra:0)):0;
+    var tipoLbl={diaria:'Diária Diurna',noturna:'Diária Noturna',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
     var ptCreated=p.created_at?new Date(p.created_at).toLocaleDateString('pt-BR')+' '+new Date(p.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
     var ptBy=p.created_by||'';
     var f2=funcionarios.find(function(x){return x.id===p.funcionario_id;});
-    var val=p.tipo==='diaria'?(f2?f2.diaria:0):p.tipo==='meio'?(f2?f2.diaria/2:0):p.tipo==='extra'?(parseFloat(p.horas||0)*(f2?parseFloat(f2.hora_extra)||0:0)):0;
-    var tipoLbl={diaria:'Diária',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
-    html+='<tr><td>'+dp(p.data)+'</td><td>'+funcNome(p.funcionario_id)+'</td><td><span class="tag '+(p.tipo==='falta'?'venc':p.tipo==='extra'?'pend':'pago')+'">'+ tipoLbl+'</span></td><td>'+(p.horas||'-')+'</td><td style="font-family:var(--fm)">'+fmt(val)+'</td><td style="font-size:10px;color:var(--t3)">'+(ptCreated?ptCreated+'<br>'+ptBy:'')+'</td><td>'+p.obs+'</td><td><button class="ibt" onclick="delItem(\'pontos\','+p.id+',\'Registro de ponto?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+    var val=p.tipo==='diaria'?(f2?parseFloat(f2.diaria||0):0):p.tipo==='noturna'?(f2?parseFloat(f2.diaria_noturna||f2.diaria||0):0):p.tipo==='meio'?(f2?parseFloat(f2.diaria||0)/2:0):p.tipo==='extra'?(parseFloat(p.horas||0)*(f2?parseFloat(f2.hora_extra)||0:0)):0;
+    var tipoLbl={diaria:'Diária Diurna',noturna:'Diária Noturna',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
+    html+='<tr><td>'+dp(p.data)+'</td><td>'+funcNome(p.funcionario_id)+'</td><td><span class="tag '+(p.tipo==='falta'?'venc':p.tipo==='extra'?'pend':'pago')+'">'+ tipoLbl+'</span></td><td>'+(p.horas||'-')+'</td><td style="font-family:var(--fm)">'+fmt(val)+'</td><td style="font-size:10px;color:var(--t3)">'+(ptCreated?ptCreated+'<br>'+ptBy:'')+'</td><td>'+p.obs+'</td><td style="display:flex;gap:3px"><button class="ibt" onclick="editPonto('+p.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ibt" onclick="delItem(\'pontos\','+p.id+',\'Registro de ponto?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
   });
   document.getElementById('pt-body').innerHTML=html;
   // Cards resumo — quando há período selecionado, mostrar apenas funcionários com ponto no intervalo
@@ -2313,8 +2382,8 @@ function renderPontoGrid(){
   var ini=document.getElementById('pt-filtro-ini')?document.getElementById('pt-filtro-ini').value:'';
   var fim=document.getElementById('pt-filtro-fim')?document.getElementById('pt-filtro-fim').value:'';
   var ff=document.getElementById('pt-filtro-func').value;
-  var TIPO_ICON={diaria:'D',meio:'M',extra:'E',falta:'F'};
-  var TIPO_COLOR={diaria:'var(--sage)',meio:'var(--mint3)',extra:'var(--amber)',falta:'var(--red)'};
+  var TIPO_ICON={diaria:'D',noturna:'N',meio:'M',extra:'E',falta:'F'};
+  var TIPO_COLOR={diaria:'var(--sage)',noturna:'#5C6BC0',meio:'var(--mint3)',extra:'var(--amber)',falta:'var(--red)'};
   function diaSemIdx(dateStr){var d=new Date(dateStr+'T12:00:00');var wd=d.getDay();return wd===0?6:wd-1;}
   var ptFiltrado=pontos.filter(function(p){
     if(ff&&p.funcionario_id!=ff)return false;
@@ -2331,7 +2400,7 @@ function renderPontoGrid(){
     funcMap[fid].dias[idx].push(p);
   });
   var html='';
-  var TIPO_LBL={diaria:'Diaria',meio:'Meio periodo',extra:'H. Extra',falta:'Falta'};
+  var TIPO_LBL={diaria:'Diurna',noturna:'Noturna',meio:'Meio periodo',extra:'H. Extra',falta:'Falta'};
   Object.keys(funcMap).forEach(function(fid){
     var f=funcionarios.find(function(x){return x.id==fid;});
     if(!f)return;
@@ -2341,7 +2410,7 @@ function renderPontoGrid(){
       if(!cel||!cel.length)return'<td style="text-align:center;color:var(--t3);font-size:11px">-</td>';
       var icons=cel.map(function(p){
         var tipo=p.tipo||'diaria';
-        var val=tipo==='diaria'?(parseFloat(f.diaria)||0):tipo==='meio'?((parseFloat(f.diaria)||0)/2):tipo==='extra'?((parseFloat(p.horas||0))*(parseFloat(f.hora_extra)||0)):0;
+        var val=tipo==='diaria'?(parseFloat(f.diaria)||0):tipo==='noturna'?(parseFloat(f.diaria_noturna||f.diaria)||0):tipo==='meio'?((parseFloat(f.diaria)||0)/2):tipo==='extra'?((parseFloat(p.horas||0))*(parseFloat(f.hora_extra)||0)):0;
         totalVal+=val;
         if(tipo==='diaria')totalDias+=1;
         else if(tipo==='meio')totalDias+=0.5;
@@ -2407,17 +2476,20 @@ function renderFolha(){
   var linhasDiarista=[];
   diaristas.forEach(function(f){
     var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
+    var noturnas=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='noturna';}).length;
     var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
     var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
     var hrVal=parseFloat(f.hora_extra)||0;
-    var totD=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
+    var diariaVal=parseFloat(f.diaria||0);
+    var notVal=parseFloat(f.diaria_noturna||f.diaria||0);
+    var totD=(dias*diariaVal)+(noturnas*notVal)+(meio*(diariaVal/2));
     var totH=hExt*hrVal;
     var total=totD+totH;
     var pkey=sem.key+'_'+f.id;
     var pago=folha_paga[pkey];
     // Saldo a pagar = total se ainda não pago; senão 0
     var saldo=pago?0:total;
-    linhasDiarista.push({f:f,dias:dias,meio:meio,hExt:hExt,totD:totD,totH:totH,total:total,pkey:pkey,pago:pago,saldo:saldo});
+    linhasDiarista.push({f:f,dias:dias,noturnas:noturnas,meio:meio,hExt:hExt,totD:totD,totH:totH,total:total,pkey:pkey,pago:pago,saldo:saldo});
   });
   var linhasMensalista=[];
   // Para mensalistas em período custom: proporcionalizar por número de semanas. Para semana específica, mantém valor cheio (comportamento atual)
@@ -2521,9 +2593,10 @@ function pdfFolha(){
     var dias=0,meio=0,hExt=0,totD=0,totH=0,total=0;
     if(!f.tipo||f.tipo==='diarista'){
       dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
+      var noturnasPdf=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='noturna';}).length;
       meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
       hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-      totD=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
+      totD=(dias*parseFloat(f.diaria||0))+(noturnasPdf*parseFloat(f.diaria_noturna||f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
       totH=hExt*hrVal;
       total=totD+totH;
     } else {
@@ -2541,8 +2614,8 @@ function pdfFolha(){
       (f.pix?' | <b>PIX: '+f.pix+'</b>':'')+
       ' | Status: <span style="color:#C47D0A">⚠ PENDENTE</span></td></tr>';
     ptFunc.forEach(function(p){
-      var tipoLbl={diaria:'Diária',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
-      var val=p.tipo==='diaria'?parseFloat(f.diaria||0):p.tipo==='meio'?parseFloat(f.diaria||0)/2:p.tipo==='extra'?(parseFloat(p.horas||0)*hrVal):0;
+      var tipoLbl={diaria:'Diária Diurna',noturna:'Diária Noturna',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
+      var val=p.tipo==='diaria'?parseFloat(f.diaria||0):p.tipo==='noturna'?parseFloat(f.diaria_noturna||f.diaria||0):p.tipo==='meio'?parseFloat(f.diaria||0)/2:p.tipo==='extra'?(parseFloat(p.horas||0)*hrVal):0;
       var created=p.created_at?new Date(p.created_at).toLocaleDateString('pt-BR')+' '+new Date(p.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
       rows+='<tr><td>'+dp(p.data)+'</td><td>'+tipoLbl+'</td><td>'+(p.horas||'-')+'</td><td>R$ '+val.toFixed(2)+'</td><td>'+p.obs+'</td><td style="color:#999;font-size:9px">'+created+'</td><td style="color:#999;font-size:9px">'+(p.created_by||'')+'</td><td></td></tr>';
     });
@@ -2842,6 +2915,7 @@ function renderConfig(){
 function toggleFnTipo(){
   var tipo=document.getElementById('fn-tipo')?document.getElementById('fn-tipo').value:'diarista';
   document.getElementById('fn-diaria-wrap').style.display=tipo==='diarista'?'flex':'none';
+  var notWrap=document.getElementById('fn-diaria-not-wrap');if(notWrap)notWrap.style.display=tipo==='diarista'?'flex':'none';
   document.getElementById('fn-salario-wrap').style.display=(tipo==='mensalista'||tipo==='prolabore')?'flex':'none';
   var bw=document.getElementById('fn-benef-wrap');if(bw)bw.style.display=tipo==='mensalista'?'flex':'none';
   document.getElementById('fn-hextra-wrap').style.display=tipo!=='prolabore'?'flex':'none';
@@ -3033,12 +3107,13 @@ function calcEpValor(){
   var tipo=document.getElementById('ep-tipo').value;
   var horas=parseFloat(document.getElementById('ep-horas').value)||0;
   var val=tipo==='diaria'?(f?parseFloat(f.diaria||0):0)
+    :tipo==='noturna'?(f?parseFloat(f.diaria_noturna||f.diaria||0):0)
     :tipo==='meio'?(f?parseFloat(f.diaria||0)/2:0)
     :tipo==='extra'?horas*(f?parseFloat(f.hora_extra||0):0)
     :0;
   var calc=document.getElementById('ep-valor-calc');
   if(tipo==='falta'){calc.textContent='Falta - sem valor';calc.style.background='var(--red-s)';calc.style.color='var(--red)';}
-  else{var extra=tipo==='extra'?' ('+horas.toFixed(1)+'h x '+fmt(f?f.hora_extra:0)+')':'';calc.textContent='Valor calculado: '+fmt(val)+extra;calc.style.background='var(--green-s)';calc.style.color='var(--green)';}
+  else{var extra=tipo==='extra'?' ('+horas.toFixed(1)+'h x '+fmt(f?f.hora_extra:0)+')':tipo==='noturna'?' (Noturna: '+fmt(f?parseFloat(f.diaria_noturna||f.diaria||0):0)+')':'';calc.textContent='Valor calculado: '+fmt(val)+extra;calc.style.background='var(--green-s)';calc.style.color='var(--green)';}
 }
 function saveEditPonto(){
   if(!_editPontoId) return;
@@ -3333,6 +3408,7 @@ function editFnForm(id){
   document.getElementById('fn-tel').value=f.telefone||'';
   document.getElementById('fn-cpf').value=f.cpf||'';
   if(document.getElementById('fn-diaria'))document.getElementById('fn-diaria').value=f.diaria||'';
+  if(document.getElementById('fn-diaria-noturna'))document.getElementById('fn-diaria-noturna').value=f.diaria_noturna||'';
   if(document.getElementById('fn-salario'))document.getElementById('fn-salario').value=f.salario||'';
   if(document.getElementById('fn-beneficios'))document.getElementById('fn-beneficios').value=f.beneficios||'';
   if(document.getElementById('fn-hora-extra'))document.getElementById('fn-hora-extra').value=f.hora_extra||'';
@@ -4127,6 +4203,30 @@ function addRateioRefRow(){
   calcRateioPct('rf-rateio-pct');
 }
 
+// -- VALIDAÇÃO CPF/CNPJ ÚNICO --------------------------------
+function normDoc(v){
+  return (v||'').replace(/[^0-9]/g,'');
+}
+function checkDocDuplicado(doc, excludeId){
+  var d=normDoc(doc);
+  if(!d||d.length<11) return null; // campo vazio ou incompleto: não bloqueia
+  // Busca nos três cadastros
+  var encontrado=null;
+  clientes.forEach(function(x){
+    if((!excludeId||x.id!==excludeId)&&normDoc(x.documento)===d)
+      encontrado={tipo:'Cliente',nome:x.nome};
+  });
+  if(!encontrado) fornecedores.forEach(function(x){
+    if((!excludeId||x.id!==excludeId)&&normDoc(x.documento)===d)
+      encontrado={tipo:'Fornecedor',nome:x.nome};
+  });
+  if(!encontrado) funcionarios.forEach(function(x){
+    if((!excludeId||x.id!==excludeId)&&normDoc(x.cpf)===d)
+      encontrado={tipo:'Colaborador',nome:x.nome};
+  });
+  return encontrado;
+}
+
 // -- INIT --------------------------------------------------
 document.getElementById('cx-data').value=fd(td);
 document.getElementById('pt-data').value=fd(td);
@@ -4218,6 +4318,47 @@ var _cfg=getCfg();
     </button>
   </div>
   <div class="print-modal-content" id="print-content"></div>
+</div>
+
+<!-- MODAL EDITAR PARCELA A RECEBER -->
+<div class="mbg" id="m-edit-parcela">
+  <div class="mbox" style="max-width:480px">
+    <button class="ibt mclose" onclick="document.getElementById('m-edit-parcela').classList.remove('show')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <h3>Editar Parcela a Receber</h3>
+    <p>Altere os dados da parcela. Para registrar o recebimento, selecione o status "Recebido", informe a data e a conta.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
+      <div>
+        <label class="flabel">Descrição</label>
+        <input type="text" class="fi" id="ep-rec-desc" style="width:100%" placeholder="Descrição da parcela...">
+      </div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1"><label class="flabel">Valor (R$)</label><input type="number" class="fi" id="ep-rec-valor" step="0.01" placeholder="0,00"></div>
+        <div style="flex:1"><label class="flabel">Vencimento</label><input type="date" class="fi" id="ep-rec-venc"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1">
+          <label class="flabel">Status</label>
+          <select class="fi" id="ep-rec-status">
+            <option value="pendente">Pendente</option>
+            <option value="recebido">Recebido</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div style="flex:1"><label class="flabel">Data Recebimento</label><input type="date" class="fi" id="ep-rec-recebido"></div>
+      </div>
+      <div>
+        <label class="flabel">Conta Bancária</label>
+        <select class="fi" id="ep-rec-conta" style="width:100%"><option value="">Selecione...</option></select>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" onclick="document.getElementById('m-edit-parcela').classList.remove('show')" style="flex:1">Cancelar</button>
+      <button class="btn mint" onclick="saveEditParcela()" style="flex:2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+        Salvar
+      </button>
+    </div>
+  </div>
 </div>
 </body>
 </html>
