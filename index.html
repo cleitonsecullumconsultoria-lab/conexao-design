@@ -1064,7 +1064,14 @@ textarea.fi{resize:vertical;min-height:72px}
         </div>
       </div>
       <div class="card">
-        <div class="ch">Saldo Inicial de Caixa</div>
+        <div class="ch">Banco de Dados (Google Sheets)</div>
+        <p style="font-size:12px;color:var(--t2);margin-bottom:10px">Cole aqui o link completo da planilha do Google Sheets que serve como banco de dados do sistema. O ID será extraído automaticamente.</p>
+        <div class="frow">
+          <div class="fgroup" style="flex:3;min-width:240px"><label class="flabel">Link ou ID da Planilha</label><input type="text" class="fi" id="cfg-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/..."></div>
+          <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="saveSheetId()">Salvar e Reconectar</button></div>
+        </div>
+        <div style="font-size:11px;color:var(--t3);margin-top:6px">ID atual: <span id="cfg-sheet-id-atual" style="font-family:var(--fm)"></span></div>
+        <div class="ch" style="margin-top:18px">Saldo Inicial de Caixa</div>
         <p style="font-size:12px;color:var(--t2);margin-bottom:14px">Defina o saldo atual de cada conta para calcular a previsão de caixa corretamente.</p>
         <div class="frow">
           <div class="fgroup"><label class="flabel">PagBank (R$)</label><input type="number" class="fi" id="cfg-saldo-pagbank" placeholder="0,00" step="0.01"></div>
@@ -1182,7 +1189,8 @@ var dp=function(s){if(!s)return'';var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[
 
 // -- CONFIG ------------------------------------------------
 var GOOGLE_CLIENT_ID = '715814366188-vv7eh5m7nkd9k9ns1vn50pl16ejt3a0e.apps.googleusercontent.com';
-var SHEET_ID = '1-Pp1HK249I8H0gGnkBF5H4GbtX2l2bNP5b6sZ4NOq9s';
+var SHEET_ID_DEFAULT = '12U1ZpuaigO-LZH4O32yJhGaJtZ3eFln4FeErru00BE4';
+var SHEET_ID = localStorage.getItem('cd_sheet_id') || SHEET_ID_DEFAULT;
 var ACCESS_TOKEN = null;
 var CURRENT_USER = null;
 var SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets/';
@@ -2885,6 +2893,10 @@ function renderConfig(){
   _scv('cfg-banco-conta',cfg.banco_conta||'78383508-5');
   _scv('cfg-banco-tipo',cfg.banco_tipo||'Conta de pagamento');
   _scv('cfg-pix',cfg.pix||'58.323.410/0001-53');
+  var elSheetId=document.getElementById('cfg-sheet-id-atual');
+  if(elSheetId)elSheetId.textContent=SHEET_ID;
+  var elSheetUrl=document.getElementById('cfg-sheet-url');
+  if(elSheetUrl&&!elSheetUrl.value)elSheetUrl.placeholder='https://docs.google.com/spreadsheets/d/'+SHEET_ID;
   document.getElementById('cfg-saldo-pagbank').value=cfg.saldo_pagbank||0;
   document.getElementById('cfg-saldo-infinit').value=cfg.saldo_infinit||0;
   document.getElementById('cfg-saldo-caixa').value=cfg.saldo_caixa||0;
@@ -4225,6 +4237,28 @@ function checkDocDuplicado(doc, excludeId){
       encontrado={tipo:'Colaborador',nome:x.nome};
   });
   return encontrado;
+}
+
+// -- SHEET ID CONFIG ------------------------------------------
+function extractSheetId(input){
+  var v=(input||'').trim();
+  if(!v) return '';
+  // Se for URL completa, extrair o ID entre /d/ e /edit (ou fim)
+  var m=v.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if(m) return m[1];
+  // Se for só o ID (sem barras), retornar direto
+  if(/^[a-zA-Z0-9_-]{20,}$/.test(v)) return v;
+  return '';
+}
+function saveSheetId(){
+  var input=document.getElementById('cfg-sheet-url').value;
+  var id=extractSheetId(input);
+  if(!id){toast('Link ou ID inválido. Cole o link completo da planilha.','warn');return;}
+  localStorage.setItem('cd_sheet_id', id);
+  SHEET_ID=id;
+  document.getElementById('cfg-sheet-id-atual').textContent=id;
+  toast('Planilha atualizada! Recarregando dados...','ok');
+  if(ACCESS_TOKEN){ loadAllData(); }
 }
 
 // -- INIT --------------------------------------------------
