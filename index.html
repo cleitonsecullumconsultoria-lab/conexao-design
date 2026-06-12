@@ -1344,26 +1344,34 @@ async function sheetsWriteAll(sheetName, rows){
 // Initialize sheets with headers
 async function initSheets(){
   toast('Conectando ao Google Sheets...','info');
+  // Cabeçalhos de referência - usados APENAS se a aba estiver completamente vazia
+  // NUNCA sobrescreve dados existentes
   var headers = {
     Transacoes:['id','descricao','data','valor','tipo','conta','categoria_id'],
     ContasPagar:['id','descricao','fornecedor_id','categoria_id','valor','vencimento','status','pago_em','obs','origem','created_at','created_by'],
     Clientes:['id','nome','telefone','documento','endereco','cidade','email','ativo'],
-    Fornecedores:['id','nome','segmento','categoria_id','telefone','documento','produto','pix','prazo','endereco','bairro','cidade','ativo','tipo_fornecedor'],
+    Fornecedores:['id','nome','segmento','categoria_id','telefone','documento','produto','pix','prazo','endereco','bairro','cidade','ativo','tipo_fornecedor','created_at','created_by'],
     Categorias:['id','nome','tipo','cor'],
-    Funcionarios:['id','nome','cargo','telefone','cpf','diaria','hora_extra','pix','admissao','ativo'],
-    Pontos:['id','funcionario_id','data','tipo','horas','obs'],
+    Funcionarios:['id','nome','cargo','telefone','cpf','diaria','hora_extra','pix','admissao','ativo','diaria_noturna'],
+    Pontos:['id','funcionario_id','data','tipo','horas','obs','created_at','created_by'],
     Refeicoes:['id','funcionario_id','fornecedor_id','data','tipo','valor'],
     ContasReceber:['id','projeto_id','descricao','valor','vencimento','status','recebido_em','conta_id'],
+    Projetos:['id','nome','cliente_id','status','inicio','entrega','descricao','est_material','est_mdo','est_espelho','est_outros','created_at','created_by','valor_venda','cond_pag','data_receb','status_receb','teve_arquiteto','nome_arquiteto','percentual_arquiteto','valor_arquiteto','estimativas','est_total','updated_by','updated_at'],
+    ProjetoCustos:['id','projeto_id','tipo','descricao','valor','data','created_by'],
+    ProjetoRateio:['id','projeto_id','origem','origem_id','funcionario_id','semana','mes','percentual','valor_rateado','data','categoria_id'],
     Log:['id','ts','user','action']
   };
-  // Check each sheet and create header if empty
+  // Proteção: só cria cabeçalho se aba estiver COMPLETAMENTE vazia (sem nenhuma linha)
   for(var sheet in headers){
     var rows = await sheetsGet(sheet);
     if(!rows || rows.length === 0){
+      // Aba vazia ou não existe - criar cabeçalho
       await sheetsAppend(sheet, headers[sheet]);
+      console.log('initSheets: cabeçalho criado para', sheet);
     }
+    // Se rows.length > 0, aba já tem dados - NÃO tocar
   }
-  // Load all data
+  // Carregar todos os dados
   await loadAllData();
 }
 
@@ -1381,6 +1389,9 @@ async function loadAllData(){
       {key:'pontos', sheet:'Pontos', parser: parsePonto},
       {key:'refeicoes', sheet:'Refeicoes', parser: parseRefeicao},
       {key:'contas_receber', sheet:'ContasReceber', parser: parseContaReceber},
+      {key:'projetos', sheet:'Projetos', parser: function(r){return {id:+r[0],nome:r[1]||'',cliente_id:r[2]||'',status:r[3]||'orcamento',inicio:r[4]||'',entrega:r[5]||'',descricao:r[6]||'',est_material:+r[7]||0,est_mdo:+r[8]||0,est_espelho:+r[9]||0,est_outros:+r[10]||0,created_at:r[11]||'',created_by:r[12]||'',valor_venda:+r[13]||0,cond_pag:r[14]||'',data_receb:r[15]||'',status_receb:r[16]||'pendente',teve_arquiteto:r[17]==='true'||r[17]===true,nome_arquiteto:r[18]||'',percentual_arquiteto:+r[19]||0,valor_arquiteto:+r[20]||0,estimativas:r[21]||'',est_total:+r[22]||0,updated_by:r[23]||'',updated_at:r[24]||''};}},
+      {key:'proj_custos', sheet:'ProjetoCustos', parser: function(r){return {id:+r[0],projeto_id:+r[1],tipo:r[2]||'',descricao:r[3]||'',valor:+r[4]||0,data:r[5]||'',created_by:r[6]||''};}},
+      {key:'proj_rateio', sheet:'ProjetoRateio', parser: function(r){return {id:+r[0],projeto_id:+r[1],origem:r[2]||'',origem_id:r[3]||'',funcionario_id:+r[4]||0,semana:r[5]||'',mes:r[6]||'',percentual:+r[7]||0,valor_rateado:+r[8]||0,data:r[9]||'',categoria_id:r[10]||''};}},
       {key:'log', sheet:'Log', parser: parseLog}
     ];
     for(var i=0; i<loaders.length; i++){
@@ -1397,6 +1408,19 @@ async function loadAllData(){
         else if(l.key === 'pontos') pontos = data;
         else if(l.key === 'refeicoes') refeicoes = data;
         else if(l.key === 'contas_receber') contas_receber = data;
+        else if(l.key === 'projetos'){
+          // Merge: priorizar dados do Sheets sobre localStorage
+          if(data.length) projetos = data;
+          localStorage.setItem('cd_projetos', JSON.stringify(projetos));
+        }
+        else if(l.key === 'proj_custos'){
+          if(data.length) proj_custos = data;
+          localStorage.setItem('cd_proj_custos', JSON.stringify(proj_custos));
+        }
+        else if(l.key === 'proj_rateio'){
+          if(data.length) proj_rateio = data;
+          localStorage.setItem('cd_proj_rateio', JSON.stringify(proj_rateio));
+        }
         else if(l.key === 'log'){ 
           // Merge: manter logs locais + trazer do Sheets (sem duplicar por ts+user)
           if(data.length){
@@ -1411,7 +1435,9 @@ async function loadAllData(){
     populateCatSelect('cx-cat');
     renderDash();
     updateBadgeReceber();
-    toast('Dados carregados!','ok');
+    // Atualizar view atual se for projetos
+    if(typeof viewAtual!=='undefined' && viewAtual==='projetos') renderProjetos();
+    toast('Dados carregados! '+loaders.length+' tabelas sincronizadas.','ok');
     // Sincronizar log em lote (não bloqueia, fire-and-forget)
     if(ACCESS_TOKEN) syncToSheets('log');
   } catch(e){ console.error('loadAllData error:',e); toast('Erro ao carregar dados. Verifique permissoes do Sheets.','warn'); }
