@@ -571,6 +571,34 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="addConta()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar</button></div>
       </div>
       <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;margin-bottom:10px">
+          <input type="checkbox" id="pg-parcelar" onchange="toggleParcelamento()">
+          Parcelar este lançamento
+        </label>
+        <div id="pg-parcel-section" style="display:none;background:var(--bg3);border-radius:var(--r);padding:12px;margin-bottom:12px">
+          <div class="frow" style="margin-bottom:8px">
+            <div class="fgroup" style="min-width:140px"><label class="flabel">Modo</label>
+              <select class="fi" id="pg-parc-modo" onchange="toggleModoParcelamento()">
+                <option value="qtd">Quantidade de parcelas</option>
+                <option value="pct">Percentuais personalizados</option>
+              </select>
+            </div>
+            <div class="fgroup" id="pg-parc-qtd-wrap"><label class="flabel">Nº de Parcelas</label>
+              <input type="number" class="fi" id="pg-parc-qtd" min="2" max="60" placeholder="Ex: 12" oninput="previewParcelas()">
+            </div>
+            <div class="fgroup"><label class="flabel">Primeiro Vencimento</label>
+              <input type="date" class="fi" id="pg-parc-inicio" oninput="previewParcelas()">
+            </div>
+          </div>
+          <div id="pg-parc-pct-wrap" style="display:none">
+            <label class="flabel">Percentuais (um por linha, ex: 30 / 40 / 30)</label>
+            <textarea class="fi" id="pg-parc-pcts" rows="3" placeholder="30&#10;40&#10;30" oninput="previewParcelas()" style="font-family:var(--fm)"></textarea>
+          </div>
+          <div id="pg-parc-preview" style="margin-top:10px;display:none">
+            <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Preview das parcelas</div>
+            <div id="pg-parc-preview-list" style="display:flex;flex-direction:column;gap:4px"></div>
+          </div>
+        </div>
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500">
           <input type="checkbox" id="pg-ratear" onchange="toggleRateioConta()">
           Ratear esta despesa em projetos
@@ -585,18 +613,50 @@ textarea.fi{resize:vertical;min-height:72px}
     <div class="card">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
         <div class="ch" style="flex:1;margin:0">Contas</div>
-        <label style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">De</label>
-        <input type="date" class="fi" id="pg-filtro-ini" onchange="renderPagar()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
-        <label style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">Até</label>
-        <input type="date" class="fi" id="pg-filtro-fim" onchange="renderPagar()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
-        <button class="btn sm" onclick="limparFiltroPagar()" title="Limpar filtro de período"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Limpar filtro</button>
-        <select class="fi" id="pg-filtro" onchange="renderPagar()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
-          <option value="todas">Todas</option><option value="pendente">Pendentes</option><option value="vencido">Vencidas</option><option value="pago">Pagas</option>
-        </select>
-        <button class="btn sm" onclick="pdfContasPagar()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          PDF
+        <button class="btn sm" onclick="toggleFiltroPagar()" id="btn-filtro-pagar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>Filtros
         </button>
+        <button class="btn sm" onclick="limparFiltroPagar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Limpar</button>
+        <button class="btn sm" onclick="pdfContasPagar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PDF
+        </button>
+      </div>
+      <!-- PAINEL DE FILTROS AVANÇADOS -->
+      <div id="pg-filtros-panel" style="display:none;background:var(--bg3);border-radius:var(--r);padding:12px;margin-bottom:14px">
+        <div class="frow" style="margin-bottom:8px">
+          <div class="fgroup" style="min-width:120px"><label class="flabel">Status</label>
+            <select class="fi" id="pg-filtro" onchange="renderPagar()">
+              <option value="todas">Todas</option>
+              <option value="pendente">Pendentes</option>
+              <option value="vencido">Vencidas</option>
+              <option value="pago">Pagas</option>
+            </select>
+          </div>
+          <div class="fgroup" style="min-width:120px"><label class="flabel">Origem</label>
+            <select class="fi" id="pg-filtro-origem" onchange="renderPagar()">
+              <option value="">Todas</option>
+              <option value="manual">Manual</option>
+              <option value="refeicao">Refeição</option>
+              <option value="funcionarios">Funcionário</option>
+              <option value="folha">Folha</option>
+            </select>
+          </div>
+          <div class="fgroup" style="min-width:140px"><label class="flabel">Fornecedor</label>
+            <select class="fi" id="pg-filtro-forn" onchange="renderPagar()"><option value="">Todos</option></select>
+          </div>
+          <div class="fgroup" style="min-width:140px"><label class="flabel">Categoria</label>
+            <select class="fi" id="pg-filtro-cat" onchange="renderPagar()"><option value="">Todas</option></select>
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fgroup"><label class="flabel">Venc. De</label><input type="date" class="fi" id="pg-filtro-ini" onchange="renderPagar()"></div>
+          <div class="fgroup"><label class="flabel">Venc. Até</label><input type="date" class="fi" id="pg-filtro-fim" onchange="renderPagar()"></div>
+          <div class="fgroup"><label class="flabel">Pgto. De</label><input type="date" class="fi" id="pg-filtro-pgto-ini" onchange="renderPagar()"></div>
+          <div class="fgroup"><label class="flabel">Pgto. Até</label><input type="date" class="fi" id="pg-filtro-pgto-fim" onchange="renderPagar()"></div>
+          <div class="fgroup"><label class="flabel">Valor Mín.</label><input type="number" class="fi" id="pg-filtro-vmin" placeholder="0,00" step="0.01" oninput="renderPagar()"></div>
+          <div class="fgroup"><label class="flabel">Valor Máx.</label><input type="number" class="fi" id="pg-filtro-vmax" placeholder="0,00" step="0.01" oninput="renderPagar()"></div>
+          <div class="fgroup" style="flex:2"><label class="flabel">Pesquisa livre</label><input type="text" class="fi" id="pg-filtro-busca" placeholder="Descrição, fornecedor, observação..." oninput="renderPagar()"></div>
+        </div>
       </div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Vencimento</th><th>Descrição</th><th>Fornecedor</th><th>Categoria</th><th>Valor</th><th>Status</th><th>Origem</th><th></th></tr></thead><tbody id="pg-body"></tbody></table></div>
     </div>
@@ -848,8 +908,21 @@ textarea.fi{resize:vertical;min-height:72px}
     <div class="card">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
         <div class="ch" style="flex:1;margin:0">Registros</div>
+        <button class="btn sm" onclick="toggleFiltroRef()" id="btn-filtro-ref">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>Filtros
+        </button>
         <input type="month" class="fi" id="rf-filtro-mes" onchange="renderRefeicoes()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
         <select class="fi" id="rf-filtro-func" onchange="renderRefeicoes()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px"><option value="">Todos</option></select>
+      </div>
+      <!-- PAINEL FILTROS AVANÇADOS REFEIÇÕES -->
+      <div id="rf-filtros-panel" style="display:none;background:var(--bg3);border-radius:var(--r);padding:12px;margin-bottom:12px">
+        <div class="frow">
+          <div class="fgroup"><label class="flabel">Data De</label><input type="date" class="fi" id="rf-filtro-ini" onchange="renderRefeicoes()"></div>
+          <div class="fgroup"><label class="flabel">Data Até</label><input type="date" class="fi" id="rf-filtro-fim" onchange="renderRefeicoes()"></div>
+          <div class="fgroup"><label class="flabel">Fornecedor</label><select class="fi" id="rf-filtro-forn-adv" onchange="renderRefeicoes()"><option value="">Todos</option></select></div>
+          <div class="fgroup"><label class="flabel">Valor Mín.</label><input type="number" class="fi" id="rf-filtro-vmin" placeholder="0,00" step="0.01" oninput="renderRefeicoes()"></div>
+          <div class="fgroup"><label class="flabel">Valor Máx.</label><input type="number" class="fi" id="rf-filtro-vmax" placeholder="0,00" step="0.01" oninput="renderRefeicoes()"></div>
+        </div>
       </div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Data</th><th>Funcionário</th><th>Fornecedor</th><th>Refeição</th><th>Valor</th><th></th></tr></thead><tbody id="rf-body"></tbody></table></div>
     </div>
@@ -881,7 +954,7 @@ textarea.fi{resize:vertical;min-height:72px}
         </div>
         <div class="tbl-wrap">
           <table class="tbl">
-            <thead><tr><th>Projeto</th><th>Cliente</th><th>Início</th><th>Entrega</th><th>Status</th><th>Valor Venda</th><th>Estimado</th><th>Real</th><th>Margem</th><th></th></tr></thead>
+            <thead><tr><th>Projeto</th><th>Cliente</th><th>Início</th><th>Entrega</th><th>Status</th><th>Valor Venda</th><th>Cond. Pgto</th><th>Estimado</th><th>Real</th><th>Margem</th><th></th></tr></thead>
             <tbody id="proj-body"></tbody>
           </table>
         </div>
@@ -1348,11 +1421,11 @@ async function initSheets(){
   // NUNCA sobrescreve dados existentes
   var headers = {
     Transacoes:['id','descricao','data','valor','tipo','conta','categoria_id'],
-    ContasPagar:['id','descricao','fornecedor_id','categoria_id','valor','vencimento','status','pago_em','obs','origem','created_at','created_by'],
+    ContasPagar:['id','descricao','fornecedor_id','categoria_id','valor','vencimento','status','pago_em','obs','origem','created_at','created_by','grupo_parcelamento','parcela_numero','parcela_total'],
     Clientes:['id','nome','telefone','documento','endereco','cidade','email','ativo'],
     Fornecedores:['id','nome','segmento','categoria_id','telefone','documento','produto','pix','prazo','endereco','bairro','cidade','ativo','tipo_fornecedor','created_at','created_by'],
     Categorias:['id','nome','tipo','cor'],
-    Funcionarios:['id','nome','cargo','telefone','cpf','diaria','hora_extra','pix','admissao','ativo','diaria_noturna'],
+    Funcionarios:['id','nome','cargo','telefone','cpf','diaria','hora_extra','pix','admissao','ativo','diaria_noturna','tipo','salario','beneficios'],
     Pontos:['id','funcionario_id','data','tipo','horas','obs','created_at','created_by'],
     Refeicoes:['id','funcionario_id','fornecedor_id','data','tipo','valor'],
     ContasReceber:['id','projeto_id','descricao','valor','vencimento','status','recebido_em','conta_id'],
@@ -1446,21 +1519,21 @@ async function loadAllData(){
 
 // Row parsers
 function parseTransacao(r){ return {id:+r[0],descricao:r[1]||'',data:r[2]||'',valor:+r[3]||0,tipo:r[4]||'',conta:r[5]||'',categoria_id:r[6]||''}; }
-function parseContaPagar(r){ return {id:+r[0],descricao:r[1]||'',fornecedor_id:r[2]||'',categoria_id:r[3]||'',valor:+r[4]||0,vencimento:r[5]||'',status:r[6]||'pendente',pago_em:r[7]||'',obs:r[8]||'',origem:r[9]||'manual',created_at:r[10]||'',created_by:r[11]||''}; }
+function parseContaPagar(r){ return {id:+r[0],descricao:r[1]||'',fornecedor_id:r[2]||'',categoria_id:r[3]||'',valor:+r[4]||0,vencimento:r[5]||'',status:r[6]||'pendente',pago_em:r[7]||'',obs:r[8]||'',origem:r[9]||'manual',created_at:r[10]||'',created_by:r[11]||'',grupo_parcelamento:r[12]||'',parcela_numero:+r[13]||0,parcela_total:+r[14]||0}; }
 function parseCliente(r){ return {id:+r[0],nome:r[1]||'',telefone:r[2]||'',documento:r[3]||'',endereco:r[4]||'',cidade:r[5]||'',email:r[6]||'',ativo:r[7]!=='false'}; }
 function parseFornecedor(r){ return {id:+r[0],nome:r[1]||'',segmento:r[2]||'',categoria_id:r[3]||'',telefone:r[4]||'',documento:r[5]||'',produto:r[6]||'',pix:r[7]||'',prazo:r[8]||'',endereco:r[9]||'',bairro:r[10]||'',cidade:r[11]||'',ativo:r[12]!=='false',tipo_fornecedor:r[13]||''}; }
 function parseCategoria(r){ return {id:+r[0],nome:r[1]||'',tipo:r[2]||'',cor:r[3]||'#7A9E7E'}; }
-function parseFuncionario(r){ return {id:+r[0],nome:r[1]||'',cargo:r[2]||'',telefone:r[3]||'',cpf:r[4]||'',diaria:+r[5]||0,hora_extra:+r[6]||0,pix:r[7]||'',admissao:r[8]||'',ativo:r[9]!=='false',diaria_noturna:+r[10]||0}; }
+function parseFuncionario(r){ return {id:+r[0],nome:r[1]||'',cargo:r[2]||'',telefone:r[3]||'',cpf:r[4]||'',diaria:+r[5]||0,hora_extra:+r[6]||0,pix:r[7]||'',admissao:r[8]||'',ativo:r[9]!=='false',diaria_noturna:+r[10]||0,tipo:r[11]||'diarista',salario:+r[12]||0,beneficios:+r[13]||0}; }
 function parsePonto(r){ return {id:+r[0],funcionario_id:+r[1],data:r[2]||'',tipo:r[3]||'',horas:+r[4]||0,obs:r[5]||'',created_at:r[6]||'',created_by:r[7]||''}; }
 function parseRefeicao(r){ return {id:+r[0],funcionario_id:+r[1],fornecedor_id:r[2]||'',data:r[3]||'',tipo:r[4]||'',valor:+r[5]||0}; }
 
 // Row serializers
 function rowTransacao(t){ return [t.id,t.descricao,t.data,t.valor,t.tipo,t.conta,t.categoria_id]; }
-function rowContaPagar(c){ return [c.id,c.descricao,c.fornecedor_id,c.categoria_id,c.valor,c.vencimento,c.status,c.pago_em||'',c.obs||'',c.origem||'manual',c.created_at||'',c.created_by||'']; }
+function rowContaPagar(c){ return [c.id,c.descricao,c.fornecedor_id,c.categoria_id,c.valor,c.vencimento,c.status,c.pago_em||'',c.obs||'',c.origem||'manual',c.created_at||'',c.created_by||'',c.grupo_parcelamento||'',c.parcela_numero||'',c.parcela_total||'']; }
 function rowCliente(c){ return [c.id,c.nome,c.telefone,c.documento,c.endereco,c.cidade,c.email,c.ativo]; }
 function rowFornecedor(f){ return [f.id,f.nome,f.segmento||'',f.categoria_id,f.telefone,f.documento,f.produto,f.pix,f.prazo,f.endereco||'',f.bairro||'',f.cidade||'',f.ativo,f.tipo_fornecedor||'',f.created_at||'',f.created_by||'']; }
 function rowCategoria(c){ return [c.id,c.nome,c.tipo,c.cor]; }
-function rowFuncionario(f){ return [f.id,f.nome,f.cargo,f.telefone,f.cpf,f.diaria,f.hora_extra,f.pix,f.admissao,f.ativo,f.diaria_noturna||0]; }
+function rowFuncionario(f){ return [f.id,f.nome,f.cargo,f.telefone,f.cpf,f.diaria,f.hora_extra,f.pix,f.admissao,f.ativo,f.diaria_noturna||0,f.tipo||'diarista',f.salario||0,f.beneficios||0]; }
 function rowPonto(p){ return [p.id,p.funcionario_id,p.data,p.tipo,p.horas,p.obs,p.created_at||'',p.created_by||'']; }
 function rowLog(l){ return [l.id||'',l.ts||'',l.user||'',l.action||'']; }
 function parseLog(r){ return {id:r[0]||'',ts:r[1]||'',user:r[2]||'',action:r[3]||''}; }
@@ -2022,7 +2095,33 @@ function addConta(){
   var valor=parseFloat(document.getElementById('pg-valor').value);
   var venc=document.getElementById('pg-venc').value;
   if(!desc||!valor||!venc){toast('Preencha todos os campos','warn');return;}
-  contas_pagar.push({id:nextId(contas_pagar),descricao:desc,fornecedor_id:document.getElementById('pg-forn').value,categoria_id:document.getElementById('pg-cat').value,valor:valor,vencimento:venc,status:'pendente',obs:document.getElementById('pg-obs').value,origem:'manual',created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:''});
+  var parcelar=document.getElementById('pg-parcelar')&&document.getElementById('pg-parcelar').checked;
+  if(parcelar){
+    var parc_modo=document.getElementById('pg-parc-modo').value;
+    var parc_qtd=document.getElementById('pg-parc-qtd').value;
+    var parc_pcts=document.getElementById('pg-parc-pcts')?document.getElementById('pg-parc-pcts').value:'';
+    var parc_inicio=document.getElementById('pg-parc-inicio').value||venc;
+    var parcelas=gerarParcelasCalculo(valor,parc_inicio,parc_modo,parc_qtd,parc_pcts);
+    if(!parcelas.length){toast('Configure as parcelas corretamente','warn');return;}
+    var grupo='PARC-'+Date.now();
+    var user=CURRENT_USER?CURRENT_USER.name:'';
+    parcelas.forEach(function(p){
+      contas_pagar.push({
+        id:nextId(contas_pagar),
+        descricao:desc+' ('+p.num+'/'+p.total+')',
+        fornecedor_id:document.getElementById('pg-forn').value,
+        categoria_id:document.getElementById('pg-cat').value,
+        valor:p.valor,vencimento:p.vencimento,
+        status:'pendente',obs:document.getElementById('pg-obs').value,
+        origem:'manual',created_at:fd(td),created_by:user,
+        grupo_parcelamento:grupo,parcela_numero:p.num,parcela_total:p.total
+      });
+    });
+    document.getElementById('pg-parcelar').checked=false;
+    toggleParcelamento();
+  } else {
+    contas_pagar.push({id:nextId(contas_pagar),descricao:desc,fornecedor_id:document.getElementById('pg-forn').value,categoria_id:document.getElementById('pg-cat').value,valor:valor,vencimento:venc,status:'pendente',obs:document.getElementById('pg-obs').value,origem:'manual',created_at:fd(td),created_by:CURRENT_USER?CURRENT_USER.name:'',grupo_parcelamento:'',parcela_numero:0,parcela_total:0});
+  }
   var contaId=nextId(contas_pagar)-1;
   // Save rateio if checked
   if(document.getElementById('pg-ratear')&&document.getElementById('pg-ratear').checked){
@@ -2059,24 +2158,65 @@ function origemLabel(c){
 }
 
 function limparFiltroPagar(){
-  document.getElementById('pg-filtro-ini').value='';
-  document.getElementById('pg-filtro-fim').value='';
-  document.getElementById('pg-filtro').value='todas';
+  ['pg-filtro-ini','pg-filtro-fim','pg-filtro-pgto-ini','pg-filtro-pgto-fim',
+   'pg-filtro-vmin','pg-filtro-vmax','pg-filtro-busca'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  var selects=['pg-filtro','pg-filtro-origem','pg-filtro-forn','pg-filtro-cat'];
+  selects.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.value=id==='pg-filtro'?'todas':'';
+  });
   renderPagar();
+}
+
+function toggleFiltroPagar(){
+  var p=document.getElementById('pg-filtros-panel');
+  var btn=document.getElementById('btn-filtro-pagar');
+  var show=p.style.display==='none';
+  p.style.display=show?'block':'none';
+  btn.style.background=show?'var(--mint)':'';
+  // Popular selects dinâmicos
+  if(show){
+    var selForn=document.getElementById('pg-filtro-forn');
+    var curForn=selForn.value;
+    selForn.innerHTML='<option value="">Todos</option>'+fornecedores.map(function(f){return'<option value="'+f.id+'"'+(f.id==curForn?' selected':'')+'>'+f.nome+'</option>';}).join('');
+    var selCat=document.getElementById('pg-filtro-cat');
+    var curCat=selCat.value;
+    selCat.innerHTML='<option value="">Todas</option>'+categorias.map(function(cat){return'<option value="'+cat.id+'"'+(cat.id==curCat?' selected':'')+'>'+cat.nome+'</option>';}).join('');
+  }
 }
 
 function renderPagar(){
   var hoje=fd(td);
-  var f=document.getElementById('pg-filtro').value;
+  var f=document.getElementById('pg-filtro')?document.getElementById('pg-filtro').value:'todas';
   var ini=document.getElementById('pg-filtro-ini')?document.getElementById('pg-filtro-ini').value:'';
   var fim=document.getElementById('pg-filtro-fim')?document.getElementById('pg-filtro-fim').value:'';
+  var pgtoIni=document.getElementById('pg-filtro-pgto-ini')?document.getElementById('pg-filtro-pgto-ini').value:'';
+  var pgtoFim=document.getElementById('pg-filtro-pgto-fim')?document.getElementById('pg-filtro-pgto-fim').value:'';
+  var vmin=document.getElementById('pg-filtro-vmin')?parseFloat(document.getElementById('pg-filtro-vmin').value)||0:0;
+  var vmax=document.getElementById('pg-filtro-vmax')?parseFloat(document.getElementById('pg-filtro-vmax').value)||0:0;
+  var busca=(document.getElementById('pg-filtro-busca')?document.getElementById('pg-filtro-busca').value:'').toLowerCase().trim();
+  var origem=document.getElementById('pg-filtro-origem')?document.getElementById('pg-filtro-origem').value:'';
+  var filtForn=document.getElementById('pg-filtro-forn')?document.getElementById('pg-filtro-forn').value:'';
+  var filtCat=document.getElementById('pg-filtro-cat')?document.getElementById('pg-filtro-cat').value:'';
   var list=contas_pagar.filter(function(c){
     if(f==='pendente'&&c.status!=='pendente')return false;
     if(f==='vencido'&&!(c.status!=='pago'&&c.vencimento<hoje))return false;
     if(f==='pago'&&c.status!=='pago')return false;
-    // Filtro por período (sobre data de vencimento)
     if(ini&&c.vencimento<ini)return false;
     if(fim&&c.vencimento>fim)return false;
+    if(pgtoIni&&(c.pago_em||'').length&&c.pago_em<pgtoIni)return false;
+    if(pgtoFim&&(c.pago_em||'').length&&c.pago_em>pgtoFim)return false;
+    if(vmin>0&&parseFloat(c.valor||0)<vmin)return false;
+    if(vmax>0&&parseFloat(c.valor||0)>vmax)return false;
+    if(origem){var o=String(c.origem||'manual').toLowerCase();if(!o.includes(origem))return false;}
+    if(filtForn&&c.fornecedor_id!=filtForn)return false;
+    if(filtCat&&c.categoria_id!=filtCat)return false;
+    if(busca){
+      var txt=(c.descricao+' '+fornNome(c.fornecedor_id)+' '+(c.obs||'')).toLowerCase();
+      if(!txt.includes(busca))return false;
+    }
     return true;
   }).sort(function(a,b){return a.vencimento.localeCompare(b.vencimento);});
   var html='';
@@ -2097,7 +2237,8 @@ function renderPagar(){
     var btnEdit=protegida
       ?'<button class="ibt" onclick="editContaPagar('+c.id+')" title="Editar status/observação/pagamento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
       :'<button class="ibt" onclick="editContaPagar('+c.id+')" title="Editar conta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
-    html+='<tr><td>'+dp(c.vencimento)+'</td><td>'+c.descricao+(c.obs?'<br><span style="font-size:10px;color:var(--t3)">'+c.obs+'</span>':'')+'</td><td>'+fornNome(c.fornecedor_id)+'</td><td><span class="tag cat">'+catNome(c.categoria_id)+'</span></td><td style="font-family:var(--fm)">'+fmt(c.valor)+'</td><td><span class="tag '+st+'">'+stLbl+'</span></td><td>'+origemHtml+'</td><td style="display:flex;gap:4px">'+btnEdit+btnPagar+btnDel+'</td></tr>';
+    var parcBadge=c.parcela_total>0?'<span class="tag cat" style="font-size:9px;margin-left:4px">'+c.parcela_numero+'/'+c.parcela_total+'</span>':'';
+    html+='<tr><td>'+dp(c.vencimento)+'</td><td>'+c.descricao+parcBadge+(c.obs?'<br><span style="font-size:10px;color:var(--t3)">'+c.obs+'</span>':'')+'</td><td>'+fornNome(c.fornecedor_id)+'</td><td><span class="tag cat">'+catNome(c.categoria_id)+'</span></td><td style="font-family:var(--fm)">'+fmt(c.valor)+'</td><td><span class="tag '+st+'">'+stLbl+'</span></td><td>'+origemHtml+'</td><td style="display:flex;gap:4px">'+btnEdit+btnPagar+btnDel+'</td></tr>';
   });
   document.getElementById('pg-body').innerHTML=html;
 }
@@ -2739,11 +2880,11 @@ function addRefeicao(){
 function renderRefeicoes(){
   var mes=document.getElementById('rf-filtro-mes').value;
   var ff=document.getElementById('rf-filtro-func').value;
-  var list=refeicoes.filter(function(r){
+  var list=renderRefeicoesFiltrados().filter(function(r){
     if(ff&&r.funcionario_id!=ff)return false;
     if(mes&&!r.data.startsWith(mes))return false;
     return true;
-  }).sort(function(a,b){return b.data.localeCompare(a.data);});
+  });
   // Resumo por funcionário
   var byFunc={};
   list.forEach(function(r){var k=r.funcionario_id;byFunc[k]=(byFunc[k]||0)+parseFloat(r.valor||0);});
@@ -2761,7 +2902,7 @@ function renderRefeicoes(){
   if(!list.length){html='<tr><td colspan="6"><div class="empty">Nenhum registro</div></td></tr>';}
   else list.forEach(function(r){
     var tipoLbl={almoco:'Almoço',janta:'Jantar',lanche:'Lanche'}[r.tipo]||r.tipo;
-    html+='<tr><td>'+dp(r.data)+'</td><td>'+funcNome(r.funcionario_id)+'</td><td>'+fornNome(r.fornecedor_id)+'</td><td>'+tipoLbl+'</td><td style="font-family:var(--fm)">'+fmt(r.valor)+'</td><td><button class="ibt" onclick="delItem(\'refeicoes\','+r.id+',\'Refeição?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+    html+='<tr><td>'+dp(r.data)+'</td><td>'+funcNome(r.funcionario_id)+'</td><td>'+fornNome(r.fornecedor_id)+'</td><td>'+tipoLbl+'</td><td style="font-family:var(--fm)">'+fmt(r.valor)+'</td><td style="display:flex;gap:3px"><button class="ibt" onclick="editRefeicao('+r.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ibt" onclick="delItem(\'refeicoes\','+r.id+',\'Refeição?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
   });
   document.getElementById('rf-body').innerHTML=html;
 }
@@ -2825,7 +2966,7 @@ function doDel(){
   // Bloquear exclusão de fornecedor com lançamentos
   if(_delArr==='fornecedores'){
     var temLanc=contas_pagar.some(function(c){return c.fornecedor_id==_delId;})||refeicoes.some(function(r){return r.fornecedor_id==_delId;});
-    if(temLanc){document.getElementById('m-del').classList.remove('show');toast('Fornecedor possui lançamentos e não pode ser excluído','warn');return;}
+    if(temLanc){document.getElementById('m-del').classList.remove('show');toast('Fornecedor possui movimentações e não pode ser excluído.','warn');return;}
   }
   // Bloquear exclusão de contas a pagar geradas por outros módulos
   if(_delArr==='contas_pagar'){
@@ -3068,11 +3209,7 @@ async function buscarCNPJ(prefix){
 // -- EDIT RECORDS ------------------------------------------
 var _eType=null, _eId=null, _eFields=[];
 function editRec(type,id){
-  // Bloquear edição de fornecedor se tiver lançamentos vinculados
-  if(type==='fornecedores'){
-    var temLanc=contas_pagar.some(function(c){return c.fornecedor_id==id;})||refeicoes.some(function(r){return r.fornecedor_id==id;});
-    if(temLanc){toast('Fornecedor possui lançamentos e não pode ser alterado','warn');return;}
-  }
+  // Fornecedor COM movimentação: permite editar dados cadastrais, bloqueia apenas exclusão
   // Bloquear edição de contas a pagar geradas por outros módulos
   if(type==='contas_pagar'){
     var ctaProt=contas_pagar.find(function(c){return c.id===id;});
@@ -3834,6 +3971,7 @@ function renderProjetos(){
       '<td>'+dp(p.entrega)+'</td>'+
       '<td style="font-family:var(--fm);font-weight:600;color:var(--sage)">'+(p.valor_venda?fmt(p.valor_venda):'<span style="color:var(--t3)">-</span>')+'</td>'+
       '<td><span class="tag '+st.cls+'">'+st.lbl+'</span></td>'+
+      '<td style="font-size:11px">'+(p.cond_pag?({avista:'À Vista','30d':'30d','50_50':'50/50','3x':'3x','6x':'6x'}[p.cond_pag]||p.cond_pag):'-')+'</td>'+
       '<td style="font-family:var(--fm)">'+fmt(est)+'</td>'+
       '<td style="font-family:var(--fm)">'+fmt(real.total)+'</td>'+
       '<td style="font-family:var(--fm);font-weight:600;'+margemCls+'">'+fmt(margem)+'</td>'+
@@ -4287,6 +4425,150 @@ function saveSheetId(){
   if(ACCESS_TOKEN){ loadAllData(); }
 }
 
+// -- M3: PARCELAMENTO CONTAS A PAGAR -------------------------
+function toggleParcelamento(){
+  var show=document.getElementById('pg-parcelar').checked;
+  document.getElementById('pg-parcel-section').style.display=show?'block':'none';
+  if(show&&!document.getElementById('pg-parc-inicio').value)
+    document.getElementById('pg-parc-inicio').value=document.getElementById('pg-venc').value||fd(td);
+  if(show) previewParcelas();
+}
+function toggleModoParcelamento(){
+  var modo=document.getElementById('pg-parc-modo').value;
+  document.getElementById('pg-parc-qtd-wrap').style.display=modo==='qtd'?'flex':'none';
+  document.getElementById('pg-parc-pct-wrap').style.display=modo==='pct'?'block':'none';
+  previewParcelas();
+}
+function addMesData(dateStr, meses){
+  var d=new Date(dateStr+'T12:00:00');
+  d.setMonth(d.getMonth()+meses);
+  return d.toISOString().slice(0,10);
+}
+function gerarParcelasCalculo(valor, inicio, modo, qtd, pcts){
+  var parcelas=[];
+  if(modo==='qtd'){
+    var n=parseInt(qtd)||0;
+    if(n<2||!inicio) return [];
+    var base=parseFloat((valor/n).toFixed(2));
+    for(var i=0;i<n;i++){
+      parcelas.push({
+        num:i+1,total:n,
+        valor:i===n-1?parseFloat((valor-base*(n-1)).toFixed(2)):base,
+        vencimento:addMesData(inicio,i)
+      });
+    }
+  } else {
+    var lines=pcts.split('\n').map(function(l){return parseFloat(l.trim());}).filter(function(v){return !isNaN(v)&&v>0;});
+    if(!lines.length||!inicio) return [];
+    var total=lines.reduce(function(s,v){return s+v;},0);
+    lines.forEach(function(pct,i){
+      parcelas.push({
+        num:i+1,total:lines.length,
+        valor:parseFloat((valor*pct/total).toFixed(2)),
+        vencimento:addMesData(inicio,i)
+      });
+    });
+    // Ajuste centavos na última
+    var soma=parcelas.reduce(function(s,p){return s+p.valor;},0);
+    parcelas[parcelas.length-1].valor=parseFloat((parcelas[parcelas.length-1].valor+(valor-soma)).toFixed(2));
+  }
+  return parcelas;
+}
+function previewParcelas(){
+  var valor=parseFloat(document.getElementById('pg-valor').value)||0;
+  var inicio=document.getElementById('pg-parc-inicio').value;
+  var modo=document.getElementById('pg-parc-modo').value;
+  var qtd=document.getElementById('pg-parc-qtd').value;
+  var pcts=document.getElementById('pg-parc-pcts')?document.getElementById('pg-parc-pcts').value:'';
+  var prev=document.getElementById('pg-parc-preview');
+  var list=document.getElementById('pg-parc-preview-list');
+  if(!valor||!inicio){prev.style.display='none';return;}
+  var parcelas=gerarParcelasCalculo(valor,inicio,modo,qtd,pcts);
+  if(!parcelas.length){prev.style.display='none';return;}
+  prev.style.display='';
+  list.innerHTML=parcelas.map(function(p){
+    return '<div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg);border-radius:4px;font-size:12px">'+
+      '<span>Parcela '+p.num+'/'+p.total+'</span>'+
+      '<span style="display:flex;gap:16px"><span style="color:var(--t3)">'+dp(p.vencimento)+'</span>'+
+      '<span style="font-family:var(--fm);font-weight:600;color:var(--sage)">'+fmt(p.valor)+'</span></span></div>';
+  }).join('');
+}
+
+function toggleFiltroRef(){
+  var p=document.getElementById('rf-filtros-panel');
+  var btn=document.getElementById('btn-filtro-ref');
+  var show=p.style.display==='none';
+  p.style.display=show?'block':'none';
+  if(btn)btn.style.background=show?'var(--mint)':'';
+  if(show){
+    var selForn=document.getElementById('rf-filtro-forn-adv');
+    if(selForn){selForn.innerHTML='<option value="">Todos</option>'+fornecedores.filter(function(f){return f.tipo_fornecedor==='refeicao';}).map(function(f){return'<option value="'+f.id+'">'+f.nome+'</option>';}).join('');}
+  }
+}
+// -- M6: FORNECEDORES - EDIÇÃO LIBERADA ----------------------
+// (substituir bloco de bloqueio de edição por bloqueio apenas de exclusão)
+
+// -- M7: FILTROS AVANÇADOS REFEIÇÕES -------------------------
+function renderRefeicoesFiltrados(){
+  var ini=document.getElementById('rf-filtro-ini')?document.getElementById('rf-filtro-ini').value:'';
+  var fim=document.getElementById('rf-filtro-fim')?document.getElementById('rf-filtro-fim').value:'';
+  var mes=document.getElementById('rf-filtro-mes').value;
+  var ff=document.getElementById('rf-filtro-func').value;
+  var fforn=document.getElementById('rf-filtro-forn-adv')?document.getElementById('rf-filtro-forn-adv').value:'';
+  var vmin=parseFloat(document.getElementById('rf-filtro-vmin')?document.getElementById('rf-filtro-vmin').value||0:0)||0;
+  var vmax=parseFloat(document.getElementById('rf-filtro-vmax')?document.getElementById('rf-filtro-vmax').value||0:0)||0;
+  return refeicoes.filter(function(r){
+    if(ff&&r.funcionario_id!=ff)return false;
+    if(fforn&&r.fornecedor_id!=fforn)return false;
+    if(mes&&!r.data.startsWith(mes))return false;
+    if(ini&&r.data<ini)return false;
+    if(fim&&r.data>fim)return false;
+    if(vmin>0&&parseFloat(r.valor||0)<vmin)return false;
+    if(vmax>0&&parseFloat(r.valor||0)>vmax)return false;
+    return true;
+  }).sort(function(a,b){return b.data.localeCompare(a.data);});
+}
+
+// -- M8: EDIÇÃO DE REFEIÇÕES ----------------------------------
+var _editRefId=null;
+function editRefeicao(id){
+  var r=refeicoes.find(function(x){return x.id===id;}); if(!r) return;
+  _editRefId=id;
+  // Popular selects
+  populateFuncSelect('er-func');
+  populateFornSelect('er-forn','refeicoes');
+  document.getElementById('er-func').value=r.funcionario_id||'';
+  document.getElementById('er-forn').value=r.fornecedor_id||'';
+  document.getElementById('er-data').value=r.data||'';
+  var tipoSel=document.getElementById('er-tipo');if(tipoSel)tipoSel.value=r.tipo||'almoco';
+  document.getElementById('er-valor').value=r.valor||0;
+  var obsEl=document.getElementById('er-obs');if(obsEl)obsEl.value=r.obs||'';
+  document.getElementById('m-edit-ref').classList.add('show');
+}
+function saveEditRefeicao(){
+  if(!_editRefId) return;
+  var r=refeicoes.find(function(x){return x.id===_editRefId;}); if(!r) return;
+  var novoValor=parseFloat(document.getElementById('er-valor').value)||0;
+  var novaData=document.getElementById('er-data').value;
+  var oldValor=r.valor;
+  r.funcionario_id=parseInt(document.getElementById('er-func').value)||r.funcionario_id;
+  r.fornecedor_id=document.getElementById('er-forn').value||r.fornecedor_id;
+  r.data=novaData||r.data;
+  var tipoEl=document.getElementById('er-tipo');if(tipoEl)r.tipo=tipoEl.value;
+  r.valor=novoValor;
+  var obsEl=document.getElementById('er-obs');if(obsEl)r.obs=obsEl.value;
+  // Atualizar vínculo financeiro se valor mudou
+  if(novoValor!==oldValor){
+    var txRef=transacoes.find(function(t){return t.origem==='refeicao'&&t.origem_id===_editRefId;});
+    if(txRef){txRef.valor=novoValor;txRef.data=r.data;syncToSheets('transacoes');}
+  }
+  save();syncToSheets('refeicoes');
+  document.getElementById('m-edit-ref').classList.remove('show');
+  renderRefeicoes();
+  toast('Refeição atualizada!','ok');
+  _editRefId=null;
+}
+
 // -- INIT --------------------------------------------------
 document.getElementById('cx-data').value=fd(td);
 document.getElementById('pt-data').value=fd(td);
@@ -4378,6 +4660,37 @@ var _cfg=getCfg();
     </button>
   </div>
   <div class="print-modal-content" id="print-content"></div>
+</div>
+
+<!-- MODAL EDITAR REFEIÇÃO -->
+<div class="mbg" id="m-edit-ref">
+  <div class="mbox" style="max-width:480px">
+    <button class="ibt mclose" onclick="document.getElementById('m-edit-ref').classList.remove('show')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <h3>Editar Refeição</h3>
+    <p>Altere os dados. Se já gerou lançamento financeiro, o valor será atualizado automaticamente.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
+      <div style="display:flex;gap:8px">
+        <div style="flex:1"><label class="flabel">Funcionário</label><select class="fi" id="er-func" style="width:100%"><option value="">Selecione...</option></select></div>
+        <div style="flex:1"><label class="flabel">Data</label><input type="date" class="fi" id="er-data"></div>
+      </div>
+      <div><label class="flabel">Fornecedor</label><select class="fi" id="er-forn" style="width:100%"><option value="">Selecione...</option></select></div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1"><label class="flabel">Tipo</label>
+          <select class="fi" id="er-tipo">
+            <option value="almoco">Almoço</option>
+            <option value="janta">Jantar</option>
+            <option value="lanche">Lanche</option>
+          </select>
+        </div>
+        <div style="flex:1"><label class="flabel">Valor (R$)</label><input type="number" class="fi" id="er-valor" step="0.01" placeholder="0,00"></div>
+      </div>
+      <div><label class="flabel">Observação</label><input type="text" class="fi" id="er-obs" placeholder="Observação..." style="width:100%"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" onclick="document.getElementById('m-edit-ref').classList.remove('show')" style="flex:1">Cancelar</button>
+      <button class="btn mint" onclick="saveEditRefeicao()" style="flex:2">Salvar</button>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL EDITAR PARCELA A RECEBER -->
