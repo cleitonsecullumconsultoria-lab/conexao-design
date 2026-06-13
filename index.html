@@ -1102,9 +1102,7 @@ textarea.fi{resize:vertical;min-height:72px}
           <div class="fgroup"><label class="flabel">Projeto</label><select class="fi" id="custo-projeto"><option value="">Selecione...</option></select></div>
           <div class="fgroup"><label class="flabel">Tipo</label>
             <select class="fi" id="custo-tipo">
-              <option value="material">Material</option>
-              <option value="espelho">Espelho</option>
-              <option value="outros">Outros</option>
+              <option value="">Selecione a categoria...</option>
             </select>
           </div>
           <div class="fgroup" style="flex:2"><label class="flabel">Descrição</label><input type="text" class="fi" id="custo-desc" placeholder="Ex: MDF 18mm, Vidro temperado..."></div>
@@ -2028,6 +2026,11 @@ function saveEditParcela(){
   renderReceber();
   updateBadgeReceber();
   renderDash();
+  // Atualizar dashboard do projeto se estiver aberto
+  var dpSel=document.getElementById('dash-proj-sel');
+  if(dpSel&&dpSel.value&&typeof renderDashProjeto==='function'){
+    try{ renderDashProjeto(); }catch(e){}
+  }
   toast('Parcela atualizada!','ok');
   _editParcelaId=null;
 }
@@ -4100,7 +4103,7 @@ function projTab(tab, btn){
   if(btn) btn.classList.add('on');
   try{
     if(tab==='lista') renderProjetos();
-    if(tab==='custos'){ renderCustos(); populateProjetoSelects(); }
+    if(tab==='custos'){ renderCustos(); populateProjetoSelects(); populateCustoTipo(); }
     if(tab==='dash'){ populateProjetoSelects(); renderExecutivo(); }
     if(tab==='cond') renderCondPag();
     if(tab==='novo') populateCondPagSelect();
@@ -4128,10 +4131,12 @@ function populateClienteSelect(selId){
 }
 
 function renderEstCats(){
-  var cats=categorias.filter(function(cat){return cat.tipo==='saida'||!cat.tipo;});
+  var cats=categorias.filter(function(cat){return cat.tipo==='custo'||cat.tipo==='despesa';});
   if(!cats.length){
-    // Fallback: show default categories
-    cats=[{id:'mat',nome:'Material (madeira, ferragens)'},{id:'mdo',nome:'Mão de Obra'},{id:'esp',nome:'Espelhos/Vidros'},{id:'out',nome:'Outros'}];
+    cats=categorias.filter(function(cat){return cat.tipo!=='receita';});
+  }
+  if(!cats.length){
+    cats=[{id:1,nome:'Material de Produção'},{id:2,nome:'Mão de Obra'},{id:8,nome:'Refeições'}];
   }
   var html=cats.map(function(cat){
     return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bg3)">'+
@@ -4478,11 +4483,20 @@ function saveCusto(){
     created_by:user,
     created_at:new Date().toISOString()
   });
-  saveProj(); renderCustos(); toast('Custo lançado!','ok');
+  saveProj(); if(ACCESS_TOKEN) syncToSheets('proj_custos'); renderCustos(); toast('Custo lançado!','ok');
   document.getElementById('custo-desc').value='';
   document.getElementById('custo-valor').value='';
 }
 
+function populateCustoTipo(){
+  var sel=document.getElementById('custo-tipo');
+  if(!sel) return;
+  var cats=categorias.filter(function(cat){return cat.tipo==='custo'||cat.tipo==='despesa';});
+  if(!cats.length) cats=categorias.filter(function(cat){return cat.tipo!=='receita';});
+  sel.innerHTML='<option value="">Selecione a categoria...</option>'+cats.map(function(cat){
+    return '<option value="'+cat.id+'">'+cat.nome+'</option>';
+  }).join('');
+}
 function renderCustos(){
   var fp=document.getElementById('custo-filtro-proj').value;
   var list=proj_custos.filter(function(c){return!fp||c.projeto_id==fp;})
@@ -4491,7 +4505,7 @@ function renderCustos(){
   var html='';
   list.forEach(function(c){
     var p=projetos.find(function(x){return x.id===c.projeto_id;});
-    var tipoLbl={material:'Material',espelho:'Espelho',outros:'Outros',mdo:'Mão de Obra'}[c.tipo]||c.tipo;
+    var tipoLbl=catNome(c.tipo)||{material:'Material',espelho:'Espelho',outros:'Outros',mdo:'Mão de Obra'}[c.tipo]||c.tipo;
     html+='<tr><td>'+(p?p.nome:'')+'</td><td><span class="tag cat">'+tipoLbl+'</span></td><td>'+c.descricao+'</td><td>'+dp(c.data)+'</td><td style="font-family:var(--fm)">'+fmt(c.valor)+'</td>'+
       '<td><button class="ibt" onclick="delCusto('+c.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
   });
@@ -4578,6 +4592,30 @@ function renderDashProjeto(){
     '<div class="card"><div class="ch">Estimado vs Real por Categoria</div>'+
     '<table class="tbl"><thead><tr><th>Categoria</th><th>Estimado</th><th>Real</th><th>Diferença</th></tr></thead><tbody>'+rowsHtml+
     '<tr style="font-weight:700;background:var(--bg3)"><td>TOTAL</td><td style="font-family:var(--fm)">'+fmt(estTotal)+'</td><td style="font-family:var(--fm)">'+fmt(real.total)+'</td><td style="font-family:var(--fm);color:'+(margem>=0?'var(--green)':'var(--red)')+'">'+fmt(margem)+'</td></tr>'+
+    '</tbody></table></div>'+
+    montarParcelasProjeto(id);
+}
+
+// Seção de parcelas a receber do projeto (editáveis)
+function montarParcelasProjeto(projId){
+  var parcelas=contas_receber.filter(function(cr){return cr.projeto_id==projId;})
+    .sort(function(a,b){return(a.vencimento||'').localeCompare(b.vencimento||'');});
+  if(!parcelas.length){
+    return '<div class="card"><div class="ch">Parcelas a Receber</div><div class="empty" style="padding:20px">Nenhuma parcela gerada. Aprove o projeto para gerar as contas a receber.</div></div>';
+  }
+  var rows=parcelas.map(function(cr){
+    var stInfo={pendente:{l:'Pendente',c:'pend'},recebido:{l:'Recebido',c:'pago'},cancelado:{l:'Cancelado',c:'venc'}}[cr.status]||{l:cr.status,c:'cat'};
+    return '<tr><td>'+cr.descricao+'</td>'+
+      '<td style="text-align:center">'+dp(cr.vencimento)+'</td>'+
+      '<td style="text-align:right;font-family:var(--fm)">'+fmt(cr.valor)+'</td>'+
+      '<td><span class="tag '+stInfo.c+'">'+stInfo.l+'</span></td>'+
+      '<td><button class="ibt" onclick="editParcelaReceber('+cr.id+')" title="Editar parcela"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></td></tr>';
+  }).join('');
+  var totParc=parcelas.reduce(function(s,p){return s+parseFloat(p.valor||0);},0);
+  var totReceb=parcelas.filter(function(p){return p.status==='recebido';}).reduce(function(s,p){return s+parseFloat(p.valor||0);},0);
+  return '<div class="card"><div class="ch">Parcelas a Receber</div>'+
+    '<table class="tbl"><thead><tr><th>Descrição</th><th style="text-align:center">Vencimento</th><th style="text-align:right">Valor</th><th>Status</th><th></th></tr></thead><tbody>'+rows+
+    '<tr style="font-weight:700;background:var(--bg3)"><td colspan="2">TOTAL</td><td style="text-align:right;font-family:var(--fm)">'+fmt(totParc)+'</td><td colspan="2" style="font-size:11px;color:var(--green)">Recebido: '+fmt(totReceb)+'</td></tr>'+
     '</tbody></table></div>';
 }
 
