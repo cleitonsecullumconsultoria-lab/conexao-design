@@ -1715,7 +1715,8 @@ function populateCondPagSelect(){
     '<option value="50_50">50% Entrada + 50% Entrega</option>'+
     '<option value="3x">Parcelado 3x</option>'+
     '<option value="6x">Parcelado 6x</option>';
-  var cadastradas=cond_pagamento.map(function(cp){
+  var lista=(typeof cond_pagamento!=='undefined'&&cond_pagamento)?cond_pagamento:[];
+  var cadastradas=lista.map(function(cp){
     return '<option value="cp_'+cp.id+'">'+cp.descricao+'</option>';
   }).join('');
   var optgroup=cadastradas?'<optgroup label="Condições Cadastradas">'+cadastradas+'</optgroup>':'';
@@ -4096,12 +4097,14 @@ function projTab(tab, btn){
     if(el) el.style.display = t===tab?'block':'none';
   });
   document.querySelectorAll('#view-projetos .fbt').forEach(function(b){b.classList.remove('on');});
-  btn.classList.add('on');
-  if(tab==='lista') renderProjetos();
-  if(tab==='custos'){ renderCustos(); populateProjetoSelects(); }
-  if(tab==='dash'){ populateProjetoSelects(); renderExecutivo(); }
-  if(tab==='cond') renderCondPag();
-  if(tab==='novo') populateCondPagSelect();
+  if(btn) btn.classList.add('on');
+  try{
+    if(tab==='lista') renderProjetos();
+    if(tab==='custos'){ renderCustos(); populateProjetoSelects(); }
+    if(tab==='dash'){ populateProjetoSelects(); renderExecutivo(); }
+    if(tab==='cond') renderCondPag();
+    if(tab==='novo') populateCondPagSelect();
+  }catch(e){ console.error('projTab erro em '+tab+':',e); }
 }
 
 function populateProjetoSelects(){
