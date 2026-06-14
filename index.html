@@ -11,20 +11,25 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --mint:#B8D8D8;--mint2:#9ECECE;--mint3:#7AB8B8;
-  --sage:#7A9E7E;--sage2:#5C825F;
-  --gray:#8C8C8C;--gray2:#6A6A6A;
-  --charcoal:#2C2C2C;--black:#1A1A1A;
-  --bg:#F5F8F7;--bg2:#FFFFFF;--bg3:#EDF2F1;--bg4:#E2ECEA;
-  --bd:#D4E4E2;--bd2:#C0D8D6;
-  --t:#1A1A1A;--t2:#5A6A69;--t3:#8FA8A6;
-  --red:#C0392B;--red-s:rgba(192,57,43,0.10);
-  --amber:#C47D0A;--amber-s:rgba(196,125,10,0.10);
-  --green:#2E7D52;--green-s:rgba(46,125,82,0.10);
+  /* Paleta Tecnologia Moderna: índigo + teal. Nomes de variáveis mantidos para
+     compatibilidade total com o restante do CSS; apenas os valores mudaram. */
+  --mint:#4338CA;--mint2:#4F46E5;--mint3:#6366F1;        /* marca/primária (índigo) */
+  --sage:#0F766E;--sage2:#115E59;                         /* secundária/acento (teal) */
+  --gray:#64748B;--gray2:#475569;
+  --charcoal:#1E293B;--black:#0F172A;                     /* sidebar/topo (slate escuro) */
+  --bg:#F8FAFC;--bg2:#FFFFFF;--bg3:#EEF2F7;--bg4:#E2E8F0; /* fundos neutros frios */
+  --bd:#E2E8F0;--bd2:#CBD5E1;
+  --t:#0F172A;--t2:#475569;--t3:#94A3B8;                  /* textos slate */
+  --red:#E11D48;--red-s:rgba(225,29,72,0.10);             /* alerta */
+  --amber:#D97706;--amber-s:rgba(217,119,6,0.10);         /* atenção */
+  --green:#059669;--green-s:rgba(5,150,105,0.10);         /* sucesso */
+  --teal:#14B8A6;--teal-s:rgba(20,184,166,0.12);          /* destaque vibrante */
+  --indigo:#4338CA;--indigo-s:rgba(67,56,202,0.10);
+  --blue:#378ADD;--blue-s:rgba(55,138,221,0.10);
   --r:8px;--rl:12px;--rx:18px;
   --ff:'DM Sans',sans-serif;--fh:'Playfair Display',serif;--fm:'DM Mono',monospace;
   --sw:240px;--th:56px;
-  --sh:0 2px 16px rgba(0,0,0,0.08);
+  --sh:0 2px 16px rgba(15,23,42,0.08);
 }
 html,body{height:100%;font-family:var(--ff);background:var(--bg);color:var(--t);font-size:14px;line-height:1.5;overflow:hidden}
 ::-webkit-scrollbar{width:4px;height:4px}
@@ -46,11 +51,11 @@ html,body{height:100%;font-family:var(--ff);background:var(--bg);color:var(--t);
 .sb-sec{font-size:9px;font-weight:600;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em;padding:14px 18px 4px}
 .ni{display:flex;align-items:center;gap:9px;padding:9px 18px;cursor:pointer;color:rgba(255,255,255,0.55);font-size:13px;transition:all .15s;border-left:2px solid transparent;user-select:none}
 .ni:hover{color:#fff;background:rgba(255,255,255,0.06)}
-.ni.active{color:#fff;background:rgba(184,216,216,0.12);border-left-color:var(--mint)}
+.ni.active{color:#fff;background:rgba(99,102,241,0.16);border-left-color:var(--mint3)}
 .ni svg{width:15px;height:15px;flex-shrink:0;opacity:.6}
 .ni:hover svg,.ni.active svg{opacity:1}
 .ni.active svg{color:var(--mint)}
-.nbadge{margin-left:auto;font-size:10px;background:var(--mint);color:var(--charcoal);padding:1px 6px;border-radius:10px;font-weight:600}
+.nbadge{margin-left:auto;font-size:10px;background:var(--mint);color:#fff;padding:1px 6px;border-radius:10px;font-weight:600}
 .sb-foot{padding:14px 18px;border-top:1px solid rgba(255,255,255,0.08)}
 .sb-info{font-size:11px;color:rgba(255,255,255,0.35);line-height:1.6}
 
@@ -95,18 +100,28 @@ html,body{height:100%;font-family:var(--ff);background:var(--bg);color:var(--t);
 }
 
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--bd);background:var(--bg2);color:var(--t);font-family:var(--ff);transition:all .15s;white-space:nowrap;user-select:none}
-.btn:hover{background:var(--bg3);border-color:var(--bd2)}
-.btn:active{transform:scale(.97)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:var(--r);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--bd);background:var(--bg2);color:var(--t);font-family:var(--ff);transition:all .18s cubic-bezier(.4,0,.2,1);white-space:nowrap;user-select:none;line-height:1.2}
+.btn:hover{background:var(--bg3);border-color:var(--bd2);transform:translateY(-1px);box-shadow:0 2px 6px rgba(15,23,42,0.08)}
+.btn:active{transform:translateY(0) scale(.97);box-shadow:none}
 .btn svg{width:14px;height:14px;flex-shrink:0}
 .btn.pri{background:var(--charcoal);border-color:var(--charcoal);color:#fff}
-.btn.pri:hover{background:var(--black)}
-.btn.mint{background:var(--mint);border-color:var(--mint);color:var(--charcoal)}
-.btn.mint:hover{background:var(--mint2)}
-.btn.sm{padding:5px 10px;font-size:11px}
+.btn.pri:hover{background:var(--black);box-shadow:0 3px 8px rgba(15,23,42,0.18)}
+.btn.mint{background:var(--mint);border-color:var(--mint);color:#fff}
+.btn.mint:hover{background:var(--mint2);box-shadow:0 3px 8px rgba(67,56,202,0.28)}
+.btn.success{background:var(--green);border-color:var(--green);color:#fff}
+.btn.success:hover{background:#047857;box-shadow:0 3px 8px rgba(5,150,105,0.28)}
+.btn.edit{background:var(--blue-s);border-color:var(--blue);color:var(--blue)}
+.btn.edit:hover{background:var(--blue);color:#fff;box-shadow:0 3px 8px rgba(55,138,221,0.28)}
+.btn.export{background:var(--teal-s);border-color:var(--sage);color:var(--sage)}
+.btn.export:hover{background:var(--sage);color:#fff;box-shadow:0 3px 8px rgba(15,118,110,0.28)}
+.btn.warnb{background:var(--amber-s);border-color:var(--amber);color:var(--amber)}
+.btn.warnb:hover{background:var(--amber);color:#fff;box-shadow:0 3px 8px rgba(217,119,6,0.28)}
+.btn.sm{padding:4px 9px;font-size:11px;gap:4px}
+.btn.sm svg{width:12px;height:12px}
 .btn.danger{background:var(--red-s);border-color:var(--red);color:var(--red)}
-.ibt{background:none;border:none;cursor:pointer;color:var(--t3);padding:5px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
-.ibt:hover{background:var(--bg3);color:var(--t)}
+.btn.danger:hover{background:var(--red);color:#fff;box-shadow:0 3px 8px rgba(225,29,72,0.28)}
+.ibt{background:none;border:none;cursor:pointer;color:var(--t3);padding:5px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;transition:all .18s cubic-bezier(.4,0,.2,1)}
+.ibt:hover{background:var(--bg3);color:var(--t);transform:translateY(-1px)}
 .ibt svg{width:15px;height:15px}
 
 /* MAIN */
@@ -164,7 +179,7 @@ textarea.fi{resize:vertical;min-height:72px}
 .tag.pend{background:var(--amber-s);color:var(--amber)}
 .tag.venc{background:var(--red-s);color:var(--red)}
 .tag.cat{background:var(--bg3);color:var(--t2)}
-.tag.ativo{background:rgba(122,158,126,0.15);color:var(--sage2)}
+.tag.ativo{background:var(--green-s);color:var(--green)}
 .tag.inativo{background:var(--bg3);color:var(--t3)}
 
 /* MODALS */
@@ -242,7 +257,7 @@ textarea.fi{resize:vertical;min-height:72px}
 .cnpj-wrap{display:flex;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
 .cnpj-wrap .fi{border:none;border-radius:0;flex:1}
 .cnpj-wrap .fi:focus{border:none;box-shadow:none}
-.cnpj-btn{background:var(--mint);border:none;padding:0 12px;cursor:pointer;font-size:12px;font-weight:600;color:var(--charcoal);white-space:nowrap}
+.cnpj-btn{background:var(--mint);border:none;padding:0 12px;cursor:pointer;font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
 .cnpj-btn:hover{background:var(--mint2)}
 
 .log-row{font-size:11px;padding:6px 8px;border-bottom:1px solid var(--bg3);display:flex;gap:8px;align-items:flex-start}
@@ -250,8 +265,8 @@ textarea.fi{resize:vertical;min-height:72px}
 .log-user{color:var(--sage2);font-weight:600;white-space:nowrap}
 .log-action{color:var(--t2);flex:1}
 .tipo-tag{font-size:10px;padding:1px 7px;border-radius:4px;font-weight:600;white-space:nowrap}
-.tipo-diarista{background:rgba(122,158,126,0.15);color:var(--sage2)}
-.tipo-mensalista{background:rgba(184,216,216,0.2);color:var(--mint3)}
+.tipo-diarista{background:var(--teal-s);color:var(--sage)}
+.tipo-mensalista{background:var(--indigo-s);color:var(--mint2)}
 .tipo-prolabore{background:rgba(196,125,10,0.12);color:var(--amber)}
 
 /* PRINT MODAL */
@@ -272,29 +287,30 @@ textarea.fi{resize:vertical;min-height:72px}
 /* === BOTÕES DE AÇÃO COM RÓTULO E COR SEMÂNTICA (clareza de UI) === */
 .actbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .actbtn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--bd);background:var(--bg2);color:var(--t2);
-  padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;line-height:1;white-space:nowrap}
+  padding:4px 9px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;transition:all .18s cubic-bezier(.4,0,.2,1);line-height:1.1;white-space:nowrap}
 .actbtn svg{width:13px;height:13px;flex:0 0 auto}
-.actbtn:hover{filter:brightness(.97);transform:translateY(-1px)}
-.actbtn.edit{border-color:#1565C0;color:#1565C0;background:#1565C012}
-.actbtn.edit:hover{background:#1565C0;color:#fff}
-.actbtn.del{border-color:var(--red);color:var(--red);background:#C6282812}
+.actbtn:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(15,23,42,0.12)}
+.actbtn:active{transform:translateY(0) scale(.97);box-shadow:none}
+.actbtn.edit{border-color:var(--blue);color:var(--blue);background:var(--blue-s)}
+.actbtn.edit:hover{background:var(--blue);color:#fff}
+.actbtn.del{border-color:var(--red);color:var(--red);background:var(--red-s)}
 .actbtn.del:hover{background:var(--red);color:#fff}
-.actbtn.ok{border-color:#2E7D52;color:#2E7D52;background:#2E7D5212}
-.actbtn.ok:hover{background:#2E7D52;color:#fff}
-.actbtn.warnb{border-color:var(--amber,#C47D0A);color:var(--amber,#C47D0A);background:#C47D0A12}
-.actbtn.warnb:hover{background:var(--amber,#C47D0A);color:#fff}
-.actbtn.info{border-color:var(--sage);color:var(--sage);background:#7A9E7E12}
+.actbtn.ok{border-color:var(--green);color:var(--green);background:var(--green-s)}
+.actbtn.ok:hover{background:var(--green);color:#fff}
+.actbtn.warnb{border-color:var(--amber);color:var(--amber);background:var(--amber-s)}
+.actbtn.warnb:hover{background:var(--amber);color:#fff}
+.actbtn.info{border-color:var(--sage);color:var(--sage);background:var(--teal-s)}
 .actbtn.info:hover{background:var(--sage);color:#fff}
 .actbtn.neutral{border-color:var(--bd);color:var(--t2)}
 .actbtn.neutral:hover{background:var(--bg3);color:var(--t)}
-@media(max-width:640px){.actbtn{padding:6px 9px;font-size:11px}.actbtn .lbl{display:inline}}
+@media(max-width:640px){.actbtn{padding:5px 8px;font-size:11px}.actbtn .lbl{display:inline}}
 </style>
 </head>
 <body>
 <div class="sync-bar" id="sync-bar"></div>
 <div class="auth-screen" id="auth-screen">
   <div class="auth-card">
-    <div class="auth-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#2C2C2C" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+    <div class="auth-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
     <div class="auth-title">Conexão Design</div>
     <div class="auth-sub">Sistema de Gestão Empresarial<br>Faça login com sua conta Google para continuar.</div>
     <div id="auth-user-info" style="display:none">
@@ -331,7 +347,7 @@ textarea.fi{resize:vertical;min-height:72px}
   <div class="sb-logo">
     <div class="sb-logo-img">
       <div class="sb-logo-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#2C2C2C" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
       </div>
       <div>
         <div class="sb-brand">Conexão Design</div>
@@ -5744,7 +5760,7 @@ var _cfg=getCfg();
 <div class="print-modal" id="print-modal">
   <div class="print-modal-bar">
     <span id="print-title">Relatório</span>
-    <button onclick="window.print()" style="background:var(--mint);border:none;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:600;color:#2C2C2C;display:flex;align-items:center;gap:6px">
+    <button onclick="window.print()" style="background:var(--mint);border:none;border-radius:6px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:600;color:#fff;display:flex;align-items:center;gap:6px">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       Imprimir
     </button>
