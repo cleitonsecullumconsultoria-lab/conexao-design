@@ -40,7 +40,7 @@ html,body{height:100%;font-family:var(--ff);background:var(--bg);color:var(--t);
 .app{display:flex;height:100vh}
 
 /* SIDEBAR */
-.sb{width:var(--sw);min-width:var(--sw);background:var(--charcoal);display:flex;flex-direction:column;height:100vh;z-index:200;transition:transform .25s ease}
+.sb{width:var(--sw);min-width:var(--sw);background:linear-gradient(180deg,#1E293B 0%,#1B2A4A 100%);display:flex;flex-direction:column;height:100vh;z-index:200;transition:transform .25s ease;border-right:1px solid rgba(99,102,241,0.15)}
 .sb-logo{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,0.08)}
 .sb-logo-img{display:flex;align-items:center;gap:10px}
 .sb-logo-mark{width:36px;height:36px;background:var(--mint);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -513,6 +513,11 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="ch">Folha da Semana</div>
         <div id="dash-folha"></div>
       </div>
+    </div>
+    <div class="card mb16" style="margin-top:16px">
+      <div class="ch" style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Projetos - Centro de Resultado</div>
+      <div id="dash-proj-kpis" class="stats" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin-bottom:14px"></div>
+      <div id="dash-proj-tabela"></div>
     </div>
   </div>
 
@@ -1835,7 +1840,7 @@ function renderLinhasCondPag(){
     return '<div style="display:flex;gap:8px;align-items:center">'+
       '<input type="number" class="fi" style="width:90px" value="'+p.percentual+'" placeholder="%" onchange="_cpParcelas['+i+'].percentual=parseFloat(this.value)||0;renderLinhasCondPag()"> <span style="font-size:11px;color:var(--t3)">% em</span> '+
       '<input type="number" class="fi" style="width:90px" value="'+p.dias+'" placeholder="dias" onchange="_cpParcelas['+i+'].dias=parseInt(this.value)||0"> <span style="font-size:11px;color:var(--t3)">dias</span> '+
-      '<button class="ibt" onclick="removeLinhaCondPag('+i+')" title="Remover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'+
+      '<button class="actbtn del" onclick="removeLinhaCondPag('+i+')" title="Remover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span class="lbl">Excluir</span></button>'+
     '</div>';
   }).join('');
   var soma=_cpParcelas.reduce(function(s,p){return s+(parseFloat(p.percentual)||0);},0);
@@ -2161,10 +2166,10 @@ function renderReceber(){
     var st=c.status==='recebido'?'pago':vencido?'venc':'pend';
     var stLbl=c.status==='recebido'?'Recebido':vencido?'Vencido':'Pendente';
     var btnReceber=c.status!=='recebido'
-      ?'<button class="ibt" onclick="receberParcela('+c.id+')" title="Marcar como recebido" style="color:var(--sage)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>'
+      ?'<button class="actbtn ok" onclick="receberParcela('+c.id+')" title="Marcar como recebido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span class="lbl">Receber</span></button>'
       :'';
-    var btnEdit='<button class="ibt" onclick="editParcelaReceber('+c.id+')" title="Editar parcela"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
-    var btnDel='<button class="ibt" onclick="delContaReceber('+c.id+')" title="Remover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>';
+    var btnEdit='<button class="actbtn edit" onclick="editParcelaReceber('+c.id+')" title="Editar parcela"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="lbl">Editar</span></button>';
+    var btnDel='<button class="actbtn del" onclick="delContaReceber('+c.id+')" title="Remover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button>';
     html+='<tr>'+
       '<td>'+dp(c.vencimento)+'</td>'+
       '<td>'+(proj.nome||'-')+'</td>'+
@@ -2173,7 +2178,7 @@ function renderReceber(){
       '<td style="font-family:var(--fm);font-weight:600">'+fmt(c.valor)+'</td>'+
       '<td><span class="tag '+st+'">'+stLbl+'</span></td>'+
       '<td style="font-size:11px;color:var(--t3)">'+(c.recebido_em?dp(c.recebido_em):'')+'</td>'+
-      '<td style="display:flex;gap:4px">'+btnEdit+btnReceber+btnDel+'</td></tr>';
+      '<td><div class="actbar">'+btnEdit+btnReceber+btnDel+'</div></td></tr>';
   });
   document.getElementById('rec-body').innerHTML=html;
   var elPend=document.getElementById('rec-total-pendente');
@@ -2429,6 +2434,50 @@ function renderDash(){
   document.getElementById('dash-folha').innerHTML=folhaH?'<table class="tbl"><tbody>'+folhaH+'</tbody></table>':'<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg>Nenhum registro esta semana</div>';
   // Badge pagar
   document.getElementById('badge-pagar').textContent=contas_pagar.filter(function(c){return c.status!=='pago';}).length;
+
+  // === SEÇÃO DE PROJETOS NO DASHBOARD ===
+  var elPK=document.getElementById('dash-proj-kpis');
+  var elPT=document.getElementById('dash-proj-tabela');
+  if(elPK&&elPT){
+    var ativos=projetos.filter(function(p){return p.status!=='cancelado';});
+    var tReceita=0,tCusto=0,nAtivos=0,nExec=0;
+    var linhas=ativos.map(function(p){
+      var real=getProjetoReal(p.id);
+      var receita=parseFloat(p.valor_venda||0);
+      var custo=real.total;
+      var lucro=receita-custo;
+      var margem=receita>0?(lucro/receita*100):0;
+      tReceita+=receita; tCusto+=custo;
+      if(p.status!=='finalizado'){nAtivos++;}
+      if(p.status==='execucao'||p.status==='andamento'){nExec++;}
+      return {id:p.id,nome:p.nome,status:p.status,receita:receita,custo:custo,lucro:lucro,margem:margem};
+    }).sort(function(a,b){return b.receita-a.receita;});
+    var tLucro=tReceita-tCusto;
+    var tMargem=tReceita>0?(tLucro/tReceita*100):0;
+    elPK.innerHTML=
+      '<div class="stat"><div class="sn" style="font-size:18px">'+fmt(tReceita)+'</div><div class="sl">Receita Contratada</div></div>'+
+      '<div class="stat red"><div class="sn" style="font-size:18px">'+fmt(tCusto)+'</div><div class="sl">Custo Realizado</div></div>'+
+      '<div class="stat '+(tLucro>=0?'green':'red')+'"><div class="sn" style="font-size:18px">'+fmt(tLucro)+'</div><div class="sl">Lucro</div></div>'+
+      '<div class="stat '+(tMargem>=0?'green':'red')+'"><div class="sn" style="font-size:18px">'+tMargem.toFixed(1)+'%</div><div class="sl">Margem Média</div></div>'+
+      '<div class="stat amber"><div class="sn" style="font-size:18px">'+nAtivos+'</div><div class="sl">Projetos Ativos</div></div>';
+    var top=linhas.slice(0,6);
+    if(top.length){
+      elPT.innerHTML='<table class="tbl"><thead><tr><th>Projeto</th><th style="text-align:right">Receita</th><th style="text-align:right">Custo</th><th style="text-align:right">Lucro</th><th style="text-align:right">Margem</th></tr></thead><tbody>'+
+        top.map(function(x){
+          var st=projStatusInfo(x.status);
+          var ind=x.lucro>0?'🟢':x.lucro<0?'🔴':'🟡';
+          return '<tr style="cursor:pointer" onclick="dashProjeto('+x.id+')">'+
+            '<td>'+ind+' '+x.nome+' <span class="tag '+st.cls+'" style="font-size:9px">'+st.lbl+'</span></td>'+
+            '<td style="text-align:right;font-family:var(--fm)">'+fmt(x.receita)+'</td>'+
+            '<td style="text-align:right;font-family:var(--fm)">'+fmt(x.custo)+'</td>'+
+            '<td style="text-align:right;font-family:var(--fm);font-weight:600;color:'+(x.lucro>=0?'var(--green)':'var(--red)')+'">'+fmt(x.lucro)+'</td>'+
+            '<td style="text-align:right;font-family:var(--fm);color:'+(x.margem>=0?'var(--green)':'var(--red)')+'">'+x.margem.toFixed(1)+'%</td></tr>';
+        }).join('')+'</tbody></table>'+
+        (linhas.length>6?'<div style="text-align:center;margin-top:8px"><button class="btn sm" onclick="go(\'projetos\')">Ver todos os '+linhas.length+' projetos</button></div>':'');
+    } else {
+      elPT.innerHTML='<div class="empty" style="padding:20px">Nenhum projeto cadastrado ainda.</div>';
+    }
+  }
 }
 
 // -- CAIXA -------------------------------------------------
@@ -2479,7 +2528,7 @@ function renderCaixa(){
   if(!list.length){html='<tr><td colspan="7"><div class="empty">Nenhum lançamento encontrado</div></td></tr>';}
   else list.forEach(function(t){
     var contaLbl={pagbank:'PagBank',infinit:'Infinit',caixa:'Caixa'}[t.conta]||t.conta;
-    html+='<tr><td>'+dp(t.data)+'</td><td>'+t.descricao+'</td><td><span class="tag cat">'+catNome(t.categoria_id)+'</span></td><td>'+contaLbl+'</td><td><span class="tag '+(t.tipo==='entrada'?'pago':'venc')+'">'+(t.tipo==='entrada'?'Entrada':'Saída')+'</span></td><td style="font-family:var(--fm);text-align:right;color:'+(t.tipo==='entrada'?'var(--green)':'var(--red)')+'">'+fmt(t.valor)+'</td><td><button class="ibt" onclick="delItem(\'transacoes\','+t.id+',\'Transação: '+t.descricao.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+    html+='<tr><td>'+dp(t.data)+'</td><td>'+t.descricao+'</td><td><span class="tag cat">'+catNome(t.categoria_id)+'</span></td><td>'+contaLbl+'</td><td><span class="tag '+(t.tipo==='entrada'?'pago':'venc')+'">'+(t.tipo==='entrada'?'Entrada':'Saída')+'</span></td><td style="font-family:var(--fm);text-align:right;color:'+(t.tipo==='entrada'?'var(--green)':'var(--red)')+'">'+fmt(t.valor)+'</td><td><button class="actbtn del" onclick="delItem(\'transacoes\','+t.id+',\'Transação: '+t.descricao.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button></td></tr>';
   });
   document.getElementById('cx-body').innerHTML=html;
 }
@@ -2624,16 +2673,16 @@ function renderPagar(){
       ?'<span class="tag" style="background:rgba(140,140,140,0.15);color:var(--gray2);font-size:10px" title="Lançamento gerado automaticamente por outro módulo">🔒 '+origemLabel(c)+'</span>'
       :'<span style="font-size:10px;color:var(--t3)">'+origemLabel(c)+'</span>';
     var btnPagar=c.status!=='pago'
-      ?'<button class="ibt" onclick="pagarConta('+c.id+')" title="Marcar como pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>'
+      ?'<button class="actbtn ok" onclick="pagarConta('+c.id+')" title="Marcar como pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span class="lbl">Pagar</span></button>'
       :'';
     var btnDel=protegida
-      ?'<button class="ibt" disabled title="Lançamento gerado automaticamente — não pode ser excluído aqui" style="opacity:.35;cursor:not-allowed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>'
-      :'<button class="ibt" onclick="delItem(\'contas_pagar\','+c.id+',\'Conta: '+c.descricao.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>';
+      ?'<button class="actbtn del"  title="Lançamento gerado automaticamente — não pode ser excluído aqui"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button>'
+      :'<button class="actbtn del" onclick="delItem(\'contas_pagar\','+c.id+',\'Conta: '+c.descricao.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button>';
     var btnEdit=protegida
-      ?'<button class="ibt" onclick="editContaPagar('+c.id+')" title="Editar status/observação/pagamento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
-      :'<button class="ibt" onclick="editContaPagar('+c.id+')" title="Editar conta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
+      ?'<button class="actbtn edit" onclick="editContaPagar('+c.id+')" title="Editar status/observação/pagamento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="lbl">Editar</span></button>'
+      :'<button class="actbtn edit" onclick="editContaPagar('+c.id+')" title="Editar conta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="lbl">Editar</span></button>';
     var parcBadge=c.parcela_total>0?'<span class="tag cat" style="font-size:9px;margin-left:4px">'+c.parcela_numero+'/'+c.parcela_total+'</span>':'';
-    html+='<tr><td>'+dp(c.vencimento)+'</td><td>'+c.descricao+parcBadge+(c.obs?'<br><span style="font-size:10px;color:var(--t3)">'+c.obs+'</span>':'')+'</td><td>'+fornNome(c.fornecedor_id)+'</td><td><span class="tag cat">'+catNome(c.categoria_id)+'</span></td><td style="font-family:var(--fm)">'+fmt(c.valor)+'</td><td><span class="tag '+st+'">'+stLbl+'</span></td><td>'+origemHtml+'</td><td style="display:flex;gap:4px">'+btnEdit+btnPagar+btnDel+'</td></tr>';
+    html+='<tr><td>'+dp(c.vencimento)+'</td><td>'+c.descricao+parcBadge+(c.obs?'<br><span style="font-size:10px;color:var(--t3)">'+c.obs+'</span>':'')+'</td><td>'+fornNome(c.fornecedor_id)+'</td><td><span class="tag cat">'+catNome(c.categoria_id)+'</span></td><td style="font-family:var(--fm)">'+fmt(c.valor)+'</td><td><span class="tag '+st+'">'+stLbl+'</span></td><td>'+origemHtml+'</td><td><div class="actbar">'+btnEdit+btnPagar+btnDel+'</div></td></tr>';
   });
   document.getElementById('pg-body').innerHTML=html;
 }
@@ -2741,11 +2790,11 @@ function renderClientes(){
   if(!clientes.length){html='<tr><td colspan="7"><div class="empty">Nenhum cliente cadastrado</div></td></tr>';}
   else clientes.forEach(function(c){
     html+='<tr><td><b>'+c.nome+'</b></td><td>'+c.telefone+'</td><td>'+c.documento+'</td><td>'+c.cidade+'</td><td>'+c.email+'</td><td><span class="tag '+(c.ativo?'ativo':'inativo')+'">'+(c.ativo?'Ativo':'Inativo')+'</span></td>'+
-    '<td style="display:flex;gap:4px">'+
-    '<button class="ibt" onclick="editRec(\'clientes\','+c.id+')" title="Editar cliente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'+
-    '<button class="ibt" onclick="toggleAtivo(\'clientes\','+c.id+')" title="Ativar/Inativar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button>'+
-    '<button class="ibt" onclick="delItem(\'clientes\','+c.id+',\'Cliente: '+c.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>'+
-    '</td></tr>';
+    '<td><div class="actbar">'+
+    '<button class="actbtn edit" onclick="editRec(\'clientes\','+c.id+')" title="Editar cliente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="lbl">Editar</span></button>'+
+    '<button class="actbtn neutral" onclick="toggleAtivo(\'clientes\','+c.id+')" title="Ativar/Inativar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button>'+
+    '<button class="actbtn del" onclick="delItem(\'clientes\','+c.id+',\'Cliente: '+c.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button>'+
+    '</div></td></tr>';
   });
   document.getElementById('cl-body').innerHTML=html;
 }
@@ -2782,7 +2831,7 @@ function renderFornecedores(){
   if(!fornecedores.length){html='<tr><td colspan="9"><div class="empty">Nenhum fornecedor cadastrado</div></td></tr>';}
   else fornecedores.forEach(function(f){
     var tipoHtml=f.tipo_fornecedor?'<span class="tag cat">'+tipoFornLabel(f.tipo_fornecedor)+'</span>':'<span style="color:var(--t3);font-size:11px">—</span>';
-    html+='<tr><td><b>'+f.nome+'</b></td><td>'+tipoHtml+'</td><td>'+(f.segmento?'<span class="tag cat">'+segmentoLabel(f.segmento)+'</span>':'<span style="color:var(--t3);font-size:11px">—</span>')+'</td><td><span class="tag cat">'+catNome(f.categoria_id)+'</span></td><td>'+f.produto+'</td><td>'+f.telefone+'</td><td>'+f.pix+'</td><td>'+(f.prazo?f.prazo+' dias':'')+'</td><td style="display:flex;gap:4px"><button class="ibt" onclick="editRec(\'fornecedores\','+f.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ibt" onclick="delItem(\'fornecedores\','+f.id+',\'Fornecedor: '+f.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+    html+='<tr><td><b>'+f.nome+'</b></td><td>'+tipoHtml+'</td><td>'+(f.segmento?'<span class="tag cat">'+segmentoLabel(f.segmento)+'</span>':'<span style="color:var(--t3);font-size:11px">—</span>')+'</td><td><span class="tag cat">'+catNome(f.categoria_id)+'</span></td><td>'+f.produto+'</td><td>'+f.telefone+'</td><td>'+f.pix+'</td><td>'+(f.prazo?f.prazo+' dias':'')+'</td><td><div class="actbar"><button class="actbtn edit" onclick="editRec(\'fornecedores\','+f.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="lbl">Editar</span></button><button class="actbtn del" onclick="delItem(\'fornecedores\','+f.id+',\'Fornecedor: '+f.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button></div></td></tr>';
   });
   document.getElementById('fr-body').innerHTML=html;
 }
@@ -2799,7 +2848,7 @@ function renderCategorias(){
   if(!categorias.length){html='<tr><td colspan="4"><div class="empty">Nenhuma categoria</div></td></tr>';}
   else categorias.forEach(function(c){
     var uso=contas_pagar.filter(function(x){return x.categoria_id==c.id;}).length+transacoes.filter(function(x){return x.categoria_id==c.id;}).length;
-    html+='<tr><td><div style="display:flex;align-items:center;gap:8px"><div style="width:12px;height:12px;border-radius:3px;background:'+c.cor+'"></div><b>'+c.nome+'</b></div></td><td><span class="tag cat">'+c.tipo+'</span></td><td>'+uso+' registros</td><td><button class="ibt" onclick="delItem(\'categorias\','+c.id+',\'Categoria: '+c.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+    html+='<tr><td><div style="display:flex;align-items:center;gap:8px"><div style="width:12px;height:12px;border-radius:3px;background:'+c.cor+'"></div><b>'+c.nome+'</b></div></td><td><span class="tag cat">'+c.tipo+'</span></td><td>'+uso+' registros</td><td><button class="actbtn del" onclick="delItem(\'categorias\','+c.id+',\'Categoria: '+c.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button></td></tr>';
   });
   document.getElementById('cat-body').innerHTML=html;
 }
@@ -2842,7 +2891,7 @@ function renderFuncionarios(){
     var tipoClass={diarista:'tipo-diarista',mensalista:'tipo-mensalista',prolabore:'tipo-prolabore'}[f.tipo||'diarista']||'tipo-diarista';
 var tipoLbl={diarista:'Diarista',mensalista:'Mensalista',prolabore:'Pró-labore'}[f.tipo||'diarista']||'Diarista';
 var valLbl=f.tipo==='diarista'?fmt(f.diaria)+'/dia':(f.tipo==='mensalista'||f.tipo==='prolabore')?fmt(f.salario||0)+'/mês':fmt(f.diaria)+'/dia';
-html+='<tr><td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td><td><span class="tipo-tag '+tipoClass+'">'+tipoLbl+'</span></td><td>'+f.telefone+'</td><td style="font-family:var(--fm)">'+valLbl+'</td><td style="font-family:var(--fm)">'+fmt(f.hora_extra)+'/h</td><td>'+f.pix+'</td><td><span class="tag '+(f.ativo?'ativo':'inativo')+'">'+(f.ativo?'Ativo':'Inativo')+'</span></td><td style="display:flex;gap:4px"><button class="ibt" onclick="editFnForm('+f.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ibt" onclick="toggleAtivo(\'funcionarios\','+f.id+')" title="Ativar/Inativar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button><button class="ibt" onclick="delItem(\'funcionarios\','+f.id+',\'Funcionário: '+f.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+html+='<tr><td><b>'+f.nome+'</b></td><td>'+f.cargo+'</td><td><span class="tipo-tag '+tipoClass+'">'+tipoLbl+'</span></td><td>'+f.telefone+'</td><td style="font-family:var(--fm)">'+valLbl+'</td><td style="font-family:var(--fm)">'+fmt(f.hora_extra)+'/h</td><td>'+f.pix+'</td><td><span class="tag '+(f.ativo?'ativo':'inativo')+'">'+(f.ativo?'Ativo':'Inativo')+'</span></td><td><div class="actbar"><button class="actbtn edit" onclick="editFnForm('+f.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="lbl">Editar</span></button><button class="actbtn neutral" onclick="toggleAtivo(\'funcionarios\','+f.id+')" title="Ativar/Inativar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button><button class="actbtn del" onclick="delItem(\'funcionarios\','+f.id+',\'Funcionário: '+f.nome.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button></div></td></tr>';
   });
   document.getElementById('fn-body').innerHTML=html;
 }
@@ -3050,7 +3099,7 @@ function renderPonto(){
     var ptCreated=p.created_at?new Date(p.created_at).toLocaleDateString('pt-BR')+' '+new Date(p.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
     var ptBy=p.created_by||'';
     var tipoLbl={diaria:'Diária Diurna',noturna:'Diária Noturna',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
-    html+='<tr><td>'+dp(p.data)+'</td><td>'+funcNome(p.funcionario_id)+'</td><td><span class="tag '+(p.tipo==='falta'?'venc':p.tipo==='extra'?'pend':'pago')+'">'+ tipoLbl+'</span></td><td>'+(p.horas||'-')+'</td><td style="font-family:var(--fm)">'+fmt(val)+'</td><td style="font-size:10px;color:var(--t3)">'+(ptCreated?ptCreated+'<br>'+ptBy:'')+'</td><td>'+p.obs+'</td><td style="display:flex;gap:3px"><button class="ibt" onclick="editPonto('+p.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ibt" onclick="delItem(\'pontos\','+p.id+',\'Registro de ponto?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+    html+='<tr><td>'+dp(p.data)+'</td><td>'+funcNome(p.funcionario_id)+'</td><td><span class="tag '+(p.tipo==='falta'?'venc':p.tipo==='extra'?'pend':'pago')+'">'+ tipoLbl+'</span></td><td>'+(p.horas||'-')+'</td><td style="font-family:var(--fm)">'+fmt(val)+'</td><td style="font-size:10px;color:var(--t3)">'+(ptCreated?ptCreated+'<br>'+ptBy:'')+'</td><td>'+p.obs+'</td><td style="display:flex;gap:3px"><button class="actbtn edit" onclick="editPonto('+p.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="lbl">Editar</span></button><button class="actbtn del" onclick="delItem(\'pontos\','+p.id+',\'Registro de ponto?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button></td></tr>';
   });
   document.getElementById('pt-body').innerHTML=html;
   // Cards resumo — quando há período selecionado, mostrar apenas funcionários com ponto no intervalo
@@ -3249,8 +3298,8 @@ function renderFolha(){
       html+='<td style="font-family:var(--fm);font-weight:600">'+fmt(l.total)+'</td>';
       html+='<td><span class="tag pend">Pendente</span></td>';
       html+='<td style="display:flex;gap:3px">';
-      html+='<button class="ibt" data-key="'+l.pkey+'" onclick="togglePagamento(this.dataset.key)" title="Marcar pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>';
-      html+='<button class="ibt" data-fn="'+f.id+'" data-sem="'+sem.key+'" data-tot="'+l.total+'" onclick="abrirRateioDiarista(+this.dataset.fn,this.dataset.sem,+this.dataset.tot)" title="Ratear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg></button>';
+      html+='<button class="actbtn ok" data-key="'+l.pkey+'" onclick="togglePagamento(this.dataset.key)" title="Marcar pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span class="lbl">Pago</span></button>';
+      html+='<button class="actbtn neutral" onclick="abrirRateioDiarista(+this.dataset.fn,this.dataset.sem,+this.dataset.tot)" title="Ratear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg></button>';
       html+='</td></tr>';
     });
   }
@@ -3268,8 +3317,8 @@ function renderFolha(){
       html+='<td style="font-family:var(--fm);font-weight:600">'+fmt(l.total)+'</td>';
       html+='<td><span class="tag pend">Pendente</span></td>';
       html+='<td style="display:flex;gap:3px">';
-      html+='<button class="ibt" data-key="'+l.pkey+'" onclick="togglePagamento(this.dataset.key)" title="Marcar pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>';
-      html+='<button class="ibt" data-fn="'+f.id+'" data-sem="'+sem.key+'" data-tot="'+l.total+'" onclick="abrirRateioMensalista(+this.dataset.fn,this.dataset.sem,+this.dataset.tot)" title="Ratear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg></button>';
+      html+='<button class="actbtn ok" data-key="'+l.pkey+'" onclick="togglePagamento(this.dataset.key)" title="Marcar pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span class="lbl">Pago</span></button>';
+      html+='<button class="actbtn neutral" onclick="abrirRateioMensalista(+this.dataset.fn,this.dataset.sem,+this.dataset.tot)" title="Ratear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg></button>';
       html+='</td></tr>';
     });
   }
@@ -3639,7 +3688,7 @@ function renderRefeicoes(){
   if(!pageList.length){html='<tr><td colspan="6"><div class="empty">Nenhum registro</div></td></tr>';}
   else pageList.forEach(function(r,i){
     var tipoLbl={almoco:'Almoço',janta:'Jantar',lanche:'Lanche'}[r.tipo]||r.tipo;
-    html+='<tr style="background:'+(i%2?'var(--bg3)':'transparent')+'"><td style="text-align:center">'+dp(r.data)+'</td><td>'+funcNome(r.funcionario_id)+'</td><td>'+fornNome(r.fornecedor_id)+'</td><td>'+tipoLbl+'</td><td style="text-align:right;font-family:var(--fm)">'+fmt(r.valor)+'</td><td style="display:flex;gap:3px"><button class="ibt" onclick="editRefeicao('+r.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ibt" onclick="delItem(\'refeicoes\','+r.id+',\'Refeição?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
+    html+='<tr style="background:'+(i%2?'var(--bg3)':'transparent')+'"><td style="text-align:center">'+dp(r.data)+'</td><td>'+funcNome(r.funcionario_id)+'</td><td>'+fornNome(r.fornecedor_id)+'</td><td>'+tipoLbl+'</td><td style="text-align:right;font-family:var(--fm)">'+fmt(r.valor)+'</td><td style="display:flex;gap:3px"><button class="actbtn edit" onclick="editRefeicao('+r.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="lbl">Editar</span></button><button class="actbtn del" onclick="delItem(\'refeicoes\','+r.id+',\'Refeição?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button></td></tr>';
   });
   body.innerHTML=html;
   // Paginação
@@ -3954,7 +4003,7 @@ function populateCargos(){
 }
 function abrirCargos(){
   document.getElementById('cargos-list').innerHTML=funcoes_cargo.map(function(f,i){
-    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg3)"><span style="flex:1">'+f+'</span><button class="ibt" onclick="delCargo('+i+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg3)"><span style="flex:1">'+f+'</span><button class="actbtn del" onclick="delCargo('+i+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span class="lbl">Excluir</span></button></div>';
   }).join('');
   document.getElementById('m-cargos').classList.add('show');
 }
@@ -4140,10 +4189,10 @@ function renderContasBancarias(){
       +'<td style="font-family:var(--fm);font-size:11px">'+c.pix+'</td>'
       +'<td style="font-family:var(--fm);font-weight:600">'+fmt(c.saldo)+'</td>'
       +'<td style="font-size:11px;color:var(--t3)">'+c.obs+'</td>'
-      +'<td style="display:flex;gap:4px">'
-      +'<button class="ibt" onclick="editContaBancaria('+c.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
-      +'<button class="ibt" onclick="delContaBancaria('+c.id+')" title="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>'
-      +'</td></tr>';
+      +'<td><div class="actbar">'
+      +'<button class="actbtn edit" onclick="editContaBancaria('+c.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="lbl">Editar</span></button>'
+      +'<button class="actbtn del" onclick="delContaBancaria('+c.id+')" title="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button>'
+      +'</div></td></tr>';
   });
   document.getElementById('cb-body').innerHTML=html;
 }
@@ -4356,7 +4405,7 @@ function populateTiposFn(){
 }
 function abrirTipos(){
   document.getElementById('tipos-list').innerHTML=tipos_func.map(function(t,i){
-    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg3)"><span style="flex:1">'+t+'</span><button class="ibt" onclick="delTipo('+i+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg3)"><span style="flex:1">'+t+'</span><button class="actbtn del" onclick="delTipo('+i+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span class="lbl">Excluir</span></button></div>';
   }).join('');
   document.getElementById('m-tipos').classList.add('show');
 }
@@ -4520,7 +4569,7 @@ function renderEstCats(){
       '<div style="display:flex;align-items:center;gap:6px">'+
         '<span style="font-size:11px;color:var(--t3)">R$</span>'+
         '<input type="number" class="fi" data-cat="'+e.id+'" value="'+(e.valor||'')+'" placeholder="0,00" step="0.01" oninput="onEstValorInput(\''+e.id+'\',this.value)" style="width:120px;text-align:right">'+
-        '<button class="ibt" type="button" onclick="removeEstCat(\''+e.id+'\')" title="Remover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'+
+        '<button class="actbtn del" onclick="removeEstCat(\''+e.id+'\')" title="Remover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span class="lbl">Excluir</span></button>'+
       '</div></div>';
   }).join('');
   calcEstTotal();
@@ -5268,7 +5317,7 @@ function makeRateioRow(containerId, pctId){
   s+='<select class="fi" style="flex:2;min-width:140px" data-pctid="'+pctId+'" onchange="calcRateioPct(this.getAttribute(\'data-pctid\'))">'+projOpts()+'</select>';
   s+='<input type="number" class="fi" placeholder="%" min="0" max="100" style="width:70px" data-pctid="'+pctId+'" oninput="calcRateioPct(this.getAttribute(\'data-pctid\'))">';
   s+='<span style="font-family:var(--fm);font-size:12px;color:var(--t2);white-space:nowrap" class="rateio-val">R$ 0,00</span>';
-  s+='<button class="ibt" data-pctid="'+pctId+'" onclick="var p=this.getAttribute(\'data-pctid\');this.closest(\'div\').remove();calcRateioPct(p)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+  s+='<button class="actbtn del" onclick="var p=this.getAttribute(\'data-pctid\');this.closest(\'div\').remove();calcRateioPct(p)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span class="lbl">Excluir</span></button>';
   s+='</div>';
   return s;
 }
