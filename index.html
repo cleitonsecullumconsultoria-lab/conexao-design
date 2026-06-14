@@ -834,8 +834,8 @@ textarea.fi{resize:vertical;min-height:72px}
       <div class="frow">
         <div class="fgroup"><label class="flabel">Funcionário</label><select class="fi" id="pt-func" onchange="mostrarRefHE()"><option value="">Selecione...</option></select></div>
         <div class="fgroup"><label class="flabel">Data</label><input type="date" class="fi" id="pt-data"></div>
-        <div class="fgroup"><label class="flabel">Tipo</label><select class="fi" id="pt-tipo"><option value="diaria">Diária Diurna</option><option value="noturna">Diária Noturna</option><option value="meio">Meio período</option><option value="extra">Hora extra</option><option value="falta">Falta</option></select></div>
-        <div class="fgroup"><label class="flabel">Qtd Horas Extra</label><input type="number" class="fi" id="pt-horas" placeholder="0" step="0.5" min="0"></div>
+        <div class="fgroup"><label class="flabel">Tipo</label><select class="fi" id="pt-tipo" onchange="mostrarRefHE()"><option value="diaria">Diária Diurna</option><option value="noturna">Diária Noturna</option><option value="meio">Meio período</option><option value="extra">Só Hora Extra</option><option value="falta">Falta</option></select></div>
+        <div class="fgroup"><label class="flabel">Qtd Horas Extra <span id="pt-he-ref" style="font-size:10px;color:var(--sage);font-weight:400"></span></label><input type="number" class="fi" id="pt-horas" placeholder="0" step="0.5" min="0" oninput="mostrarRefHE()"><span style="font-size:10px;color:var(--t3);margin-top:2px">Pode somar à diária no mesmo dia</span></div>
         <div class="fgroup"><label class="flabel">Qtd de Obras <span style="color:var(--red)">*</span></label><input type="number" class="fi" id="pt-obras" placeholder="1" min="0"></div>
         <div class="fgroup"><label class="flabel">Observação <span style="color:var(--red)">*</span></label><input type="text" class="fi" id="pt-obs" placeholder="Observação obrigatória..."></div>
         <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="addPonto()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Registrar</button></div>
@@ -1253,6 +1253,16 @@ textarea.fi{resize:vertical;min-height:72px}
       <div class="ch">Provisão de Caixa - Próxima Semana</div>
       <div id="cfg-previsao"></div>
     </div>
+    <div class="card">
+      <div class="ch">Histórico de Ponto - Congelar Lançamentos Antigos</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:12px">
+        Lançamentos de ponto feitos antes desta atualização não têm valor congelado e ainda recalculam pelo cadastro atual.
+        Esta rotina grava o valor histórico em cada um deles, usando o valor vigente HOJE no cadastro de cada funcionário,
+        e os deixa imutáveis. Rode <b>uma única vez</b>. Nenhum dado é apagado. Lançamentos já congelados não são afetados.
+      </div>
+      <div id="cfg-migracao-status" style="font-size:12px;margin-bottom:10px"></div>
+      <button class="btn warnb" onclick="migrarSnapshotPontos()" style="background:var(--amber,#C47D0A);color:#fff;border:none;padding:9px 14px;border-radius:8px;font-weight:600;cursor:pointer">Congelar lançamentos antigos agora</button>
+    </div>
   </div>
 
   <!-- USUÁRIOS / LOG -->
@@ -1521,7 +1531,7 @@ async function initSheets(){
     Fornecedores:['id','nome','segmento','categoria_id','telefone','documento','produto','pix','prazo','endereco','bairro','cidade','ativo','tipo_fornecedor','created_at','created_by'],
     Categorias:['id','nome','tipo','cor'],
     Funcionarios:['id','nome','cargo','telefone','cpf','diaria','hora_extra','pix','admissao','ativo','diaria_noturna','tipo','salario','beneficios'],
-    Pontos:['id','funcionario_id','data','tipo','horas','obs','created_at','created_by'],
+    Pontos:['id','funcionario_id','data','tipo','horas','obs','created_at','created_by','valor_hora_hist','valor_diaria_hist','valor_diaria_not_hist','valor_calculado','data_base_calculo'],
     Refeicoes:['id','funcionario_id','fornecedor_id','data','tipo','valor'],
     ContasReceber:['id','projeto_id','descricao','valor','vencimento','status','recebido_em','conta_id'],
     Projetos:['id','nome','cliente_id','status','inicio','entrega','descricao','est_material','est_mdo','est_espelho','est_outros','created_at','created_by','valor_venda','cond_pag','data_receb','status_receb','teve_arquiteto','nome_arquiteto','percentual_arquiteto','valor_arquiteto','estimativas','est_total','updated_by','updated_at'],
@@ -1618,7 +1628,7 @@ function parseCliente(r){ return {id:+r[0],nome:r[1]||'',telefone:r[2]||'',docum
 function parseFornecedor(r){ return {id:+r[0],nome:r[1]||'',segmento:r[2]||'',categoria_id:r[3]||'',telefone:r[4]||'',documento:r[5]||'',produto:r[6]||'',pix:r[7]||'',prazo:r[8]||'',endereco:r[9]||'',bairro:r[10]||'',cidade:r[11]||'',ativo:r[12]!=='false',tipo_fornecedor:r[13]||'',created_at:r[14]||'',created_by:r[15]||''}; }
 function parseCategoria(r){ return {id:+r[0],nome:r[1]||'',tipo:r[2]||'',cor:r[3]||'#7A9E7E'}; }
 function parseFuncionario(r){ return {id:+r[0],nome:r[1]||'',cargo:r[2]||'',telefone:r[3]||'',cpf:r[4]||'',diaria:+r[5]||0,hora_extra:+r[6]||0,pix:r[7]||'',admissao:r[8]||'',ativo:r[9]!=='false',diaria_noturna:+r[10]||0,tipo:r[11]||'diarista',salario:+r[12]||0,beneficios:+r[13]||0}; }
-function parsePonto(r){ return {id:+r[0],funcionario_id:+r[1],data:r[2]||'',tipo:r[3]||'',horas:+r[4]||0,obs:r[5]||'',created_at:r[6]||'',created_by:r[7]||''}; }
+function parsePonto(r){ return {id:+r[0],funcionario_id:+r[1],data:r[2]||'',tipo:r[3]||'',horas:+r[4]||0,obs:r[5]||'',created_at:r[6]||'',created_by:r[7]||'',valor_hora_hist:(r[8]===''||r[8]===undefined?null:+r[8]),valor_diaria_hist:(r[9]===''||r[9]===undefined?null:+r[9]),valor_diaria_not_hist:(r[10]===''||r[10]===undefined?null:+r[10]),valor_calculado:(r[11]===''||r[11]===undefined?null:+r[11]),data_base_calculo:r[12]||''}; }
 function parseRefeicao(r){ return {id:+r[0],funcionario_id:+r[1],fornecedor_id:r[2]||'',data:r[3]||'',tipo:r[4]||'',valor:+r[5]||0}; }
 
 // Row serializers
@@ -1628,7 +1638,7 @@ function rowCliente(c){ return [c.id,c.nome,c.telefone,c.documento,c.endereco,c.
 function rowFornecedor(f){ return [f.id,f.nome,f.segmento||'',f.categoria_id,f.telefone,f.documento,f.produto,f.pix,f.prazo,f.endereco||'',f.bairro||'',f.cidade||'',f.ativo,f.tipo_fornecedor||'',f.created_at||'',f.created_by||'']; }
 function rowCategoria(c){ return [c.id,c.nome,c.tipo,c.cor]; }
 function rowFuncionario(f){ return [f.id,f.nome,f.cargo,f.telefone,f.cpf,f.diaria,f.hora_extra,f.pix,f.admissao,f.ativo,f.diaria_noturna||0,f.tipo||'diarista',f.salario||0,f.beneficios||0]; }
-function rowPonto(p){ return [p.id,p.funcionario_id,p.data,p.tipo,p.horas,p.obs,p.created_at||'',p.created_by||'']; }
+function rowPonto(p){ return [p.id,p.funcionario_id,p.data,p.tipo,p.horas,p.obs,p.created_at||'',p.created_by||'',(p.valor_hora_hist==null?'':p.valor_hora_hist),(p.valor_diaria_hist==null?'':p.valor_diaria_hist),(p.valor_diaria_not_hist==null?'':p.valor_diaria_not_hist),(p.valor_calculado==null?'':p.valor_calculado),p.data_base_calculo||'']; }
 function rowLog(l){ return [l.id||'',l.ts||'',l.user||'',l.action||'']; }
 function rowCondPag(cp){ return [cp.id,cp.descricao||'',JSON.stringify(cp.parcelas||[])]; }
 function parseCondPag(r){ var p=[]; try{p=JSON.parse(r[2]||'[]');}catch(e){p=[];} return {id:+r[0],descricao:r[1]||'',parcelas:p}; }
@@ -2397,7 +2407,7 @@ function renderDash(){
   funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
     var dias=ptSem.filter(function(p){return p.funcionario_id==f.id&&p.tipo==='diaria';}).length;
     var hExt=ptSem.filter(function(p){return p.funcionario_id==f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-    var total=(dias*(parseFloat(f.diaria||0)))+(hExt*(parseFloat(f.hora_extra||0)));
+    var total=ptSem.filter(function(p){return p.funcionario_id==f.id;}).reduce(function(s,p){return s+valorPonto(p);},0);
     if(dias>0||hExt>0)folhaH+='<tr><td style="padding:7px 6px">'+f.nome+'</td><td style="padding:7px 6px">'+dias+' diárias</td><td style="padding:7px 6px;text-align:right">'+fmt(total)+'</td></tr>';
   });
   document.getElementById('dash-folha').innerHTML=folhaH?'<table class="tbl"><tbody>'+folhaH+'</tbody></table>':'<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg>Nenhum registro esta semana</div>';
@@ -2835,20 +2845,73 @@ function semanaDeData(dataStr){
   return {si:f(seg), sf:f(dom), venc:f(sab), key:f(seg)};
 }
 // Calcula o valor total de um funcionário numa semana (com base nos pontos)
+// ============================================================
+// SNAPSHOT HISTÓRICO DE PONTO (imutabilidade financeira)
+// Grava no momento do lançamento/edição os valores vigentes do
+// cadastro do funcionário. Cálculos posteriores usam o congelado.
+// ============================================================
+// Calcula o valor de um ponto a partir de um conjunto de valores-base.
+function calcValorPontoBase(tipo, horas, vDiaria, vNoturna, vHora){
+  vDiaria=parseFloat(vDiaria||0); vNoturna=parseFloat(vNoturna||vDiaria||0); vHora=parseFloat(vHora||0);
+  horas=parseFloat(horas||0);
+  if(tipo==='diaria') return vDiaria + (horas*vHora);
+  if(tipo==='noturna') return vNoturna + (horas*vHora);
+  if(tipo==='meio') return (vDiaria/2) + (horas*vHora);
+  if(tipo==='extra') return horas*vHora;
+  return 0; // falta
+}
+// Grava o snapshot no objeto ponto (muta p) com base no cadastro ATUAL do funcionário.
+function gravarSnapshotPonto(p){
+  var f=funcionarios.find(function(x){return x.id===p.funcionario_id;});
+  var vDiaria=f?parseFloat(f.diaria||0):0;
+  var vNoturna=f?parseFloat(f.diaria_noturna||f.diaria||0):0;
+  var vHora=f?parseFloat(f.hora_extra||0):0;
+  p.valor_hora_hist=vHora;
+  p.valor_diaria_hist=vDiaria;
+  p.valor_diaria_not_hist=vNoturna;
+  p.valor_calculado=parseFloat(calcValorPontoBase(p.tipo,p.horas,vDiaria,vNoturna,vHora).toFixed(2));
+  p.data_base_calculo=fd(td);
+  return p;
+}
+// Retorna o valor do ponto: usa o snapshot congelado se existir;
+// só recai no cadastro atual para registros antigos (sem snapshot).
+function valorPonto(p){
+  if(p && p.valor_calculado!=null && !isNaN(p.valor_calculado)) return parseFloat(p.valor_calculado);
+  // fallback legado (registro anterior ao snapshot)
+  var f=funcionarios.find(function(x){return x.id===p.funcionario_id;});
+  var vDiaria=f?parseFloat(f.diaria||0):0;
+  var vNoturna=f?parseFloat(f.diaria_noturna||f.diaria||0):0;
+  var vHora=f?parseFloat(f.hora_extra||0):0;
+  return calcValorPontoBase(p.tipo,p.horas,vDiaria,vNoturna,vHora);
+}
+
+// Migração única: congela pontos antigos (sem snapshot) com o valor vigente HOJE.
+function migrarSnapshotPontos(){
+  var pendentes=pontos.filter(function(p){return p.valor_calculado==null;});
+  if(!pendentes.length){
+    var st0=document.getElementById('cfg-migracao-status');
+    if(st0) st0.innerHTML='<span style="color:var(--green)">Todos os lançamentos já estão congelados. Nada a fazer.</span>';
+    toast('Nenhum lançamento pendente de congelamento','info');
+    return;
+  }
+  if(!confirm('Congelar '+pendentes.length+' lançamento(s) de ponto antigo(s) com o valor atual do cadastro?\n\nIsto NÃO pode ser desfeito automaticamente, mas nenhum dado existente será apagado. Deseja continuar?')) return;
+  var n=0;
+  pendentes.forEach(function(p){ gravarSnapshotPonto(p); n++; });
+  save();
+  if(ACCESS_TOKEN) syncToSheets('pontos');
+  logActivity('Migração de snapshot de ponto: '+n+' registro(s) congelado(s)');
+  var st=document.getElementById('cfg-migracao-status');
+  if(st) st.innerHTML='<span style="color:var(--green)">'+n+' lançamento(s) congelado(s) com sucesso. Histórico agora imutável.</span>';
+  renderPonto();
+  toast(n+' lançamento(s) congelado(s)!','ok');
+}
+
 function calcValorSemanaFunc(funcId, si, sf){
-  var f=funcionarios.find(function(x){return x.id===funcId;});
-  if(!f) return 0;
   var pts=pontos.filter(function(p){return p.funcionario_id===funcId&&p.data>=si&&p.data<=sf;});
-  var diaria=parseFloat(f.diaria||0);
-  var notVal=parseFloat(f.diaria_noturna||f.diaria||0);
-  var hrVal=parseFloat(f.hora_extra||0);
   var total=0;
   pts.forEach(function(p){
-    if(p.tipo==='diaria') total+=diaria + (parseFloat(p.horas||0)*hrVal);
-    else if(p.tipo==='noturna') total+=notVal;
-    else if(p.tipo==='meio') total+=diaria/2;
-    else if(p.tipo==='extra') total+=parseFloat(p.horas||0)*hrVal;
-    // falta: não soma
+    // usa o valor congelado do lançamento; só recalcula registro antigo sem snapshot
+    total+=valorPonto(p);
   });
   return parseFloat(total.toFixed(2));
 }
@@ -2858,8 +2921,21 @@ function mostrarRefHE(){
   var el=document.getElementById('pt-he-ref');
   if(!el) return;
   var f=funcionarios.find(function(x){return x.id==fid;});
-  if(f&&f.hora_extra>0){ el.textContent='(ref: '+fmt(f.hora_extra)+'/h)'; }
-  else { el.textContent=''; }
+  if(!f){ el.textContent=''; return; }
+  var tipoEl=document.getElementById('pt-tipo');
+  var horasEl=document.getElementById('pt-horas');
+  var tipo=tipoEl?tipoEl.value:'diaria';
+  var horas=horasEl?parseFloat(horasEl.value)||0:0;
+  var vDiaria=parseFloat(f.diaria||0), vNoturna=parseFloat(f.diaria_noturna||f.diaria||0), vHora=parseFloat(f.hora_extra||0);
+  var prev=calcValorPontoBase(tipo,horas,vDiaria,vNoturna,vHora);
+  if(tipo==='falta'){ el.textContent=''; return; }
+  var partes=[];
+  if(tipo==='diaria') partes.push('diária '+fmt(vDiaria));
+  else if(tipo==='noturna') partes.push('noturna '+fmt(vNoturna));
+  else if(tipo==='meio') partes.push('meio '+fmt(vDiaria/2));
+  if(horas>0 && tipo!=='extra') partes.push('+ '+horas+'h x '+fmt(vHora));
+  if(tipo==='extra') partes.push(horas+'h x '+fmt(vHora));
+  el.textContent='= '+fmt(prev)+(partes.length?' ('+partes.join(' ')+')':'');
 }
 function atualizarProvisaoFolha(funcId, dataPonto){
   var f=funcionarios.find(function(x){return x.id===funcId;});
@@ -2925,7 +3001,9 @@ function addPonto(){
   if(!obs){toast('Observação é obrigatória','warn');document.getElementById('pt-obs').focus();return;}
   var user=CURRENT_USER?(CURRENT_USER.name||CURRENT_USER.email):'Sistema';
   var fidInt=parseInt(fid);
-  pontos.push({id:nextId(pontos),funcionario_id:fidInt,data:data,tipo:tipo,horas:parseFloat(document.getElementById('pt-horas').value)||0,obras:parseInt(document.getElementById('pt-obras').value)||1,obs:obs,created_at:new Date().toISOString(),created_by:user});
+  var novoPonto={id:nextId(pontos),funcionario_id:fidInt,data:data,tipo:tipo,horas:parseFloat(document.getElementById('pt-horas').value)||0,obras:parseInt(document.getElementById('pt-obras').value)||1,obs:obs,created_at:new Date().toISOString(),created_by:user};
+  gravarSnapshotPonto(novoPonto); // congela valores vigentes
+  pontos.push(novoPonto);
   atualizarProvisaoFolha(fidInt, data);
   save();syncToSheets('pontos');syncToSheets('contas_pagar');logActivity('Ponto registrado: '+funcNome(fidInt));renderPonto();toast('Ponto registrado! Provisão de folha atualizada.','ok');
   document.getElementById('pt-horas').value='';document.getElementById('pt-obs').value='';
@@ -2951,12 +3029,10 @@ function renderPonto(){
   if(!list.length){html='<tr><td colspan="7"><div class="empty">Nenhum registro de ponto'+(ini||fim?' no período':'')+'</div></td></tr>';}
   else list.slice(0,50).forEach(function(p){
     var f=funcionarios.find(function(x){return x.id===p.funcionario_id;});
-    var val=p.tipo==='diaria'?(f?parseFloat(f.diaria||0):0):p.tipo==='noturna'?(f?parseFloat(f.diaria_noturna||f.diaria||0):0):p.tipo==='meio'?(f?parseFloat(f.diaria||0)/2:0):p.tipo==='extra'?(p.horas*(f?f.hora_extra:0)):0;
+    var val=valorPonto(p);
     var tipoLbl={diaria:'Diária Diurna',noturna:'Diária Noturna',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
     var ptCreated=p.created_at?new Date(p.created_at).toLocaleDateString('pt-BR')+' '+new Date(p.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
     var ptBy=p.created_by||'';
-    var f2=funcionarios.find(function(x){return x.id===p.funcionario_id;});
-    var val=p.tipo==='diaria'?(f2?parseFloat(f2.diaria||0):0):p.tipo==='noturna'?(f2?parseFloat(f2.diaria_noturna||f2.diaria||0):0):p.tipo==='meio'?(f2?parseFloat(f2.diaria||0)/2:0):p.tipo==='extra'?(parseFloat(p.horas||0)*(f2?parseFloat(f2.hora_extra)||0:0)):0;
     var tipoLbl={diaria:'Diária Diurna',noturna:'Diária Noturna',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
     html+='<tr><td>'+dp(p.data)+'</td><td>'+funcNome(p.funcionario_id)+'</td><td><span class="tag '+(p.tipo==='falta'?'venc':p.tipo==='extra'?'pend':'pago')+'">'+ tipoLbl+'</span></td><td>'+(p.horas||'-')+'</td><td style="font-family:var(--fm)">'+fmt(val)+'</td><td style="font-size:10px;color:var(--t3)">'+(ptCreated?ptCreated+'<br>'+ptBy:'')+'</td><td>'+p.obs+'</td><td style="display:flex;gap:3px"><button class="ibt" onclick="editPonto('+p.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ibt" onclick="delItem(\'pontos\','+p.id+',\'Registro de ponto?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td></tr>';
   });
@@ -2983,7 +3059,7 @@ function renderPonto(){
       });
       var dias=ptPer.filter(function(p){return p.tipo==='diaria';}).length;
       var hExt=ptPer.filter(function(p){return p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-      var total=(dias*(parseFloat(f.diaria)||0))+(hExt*(parseFloat(f.hora_extra)||0));
+      var total=ptPer.reduce(function(s,p){return s+valorPonto(p);},0);
       var periodoLbl=(ini?dp(ini):'…')+' a '+(fim?dp(fim):'…');
       cards+='<div class="ponto-card"><div class="ponto-name">'+f.nome+'</div><div class="ponto-cargo">'+f.cargo+'</div><div style="display:flex;gap:16px;margin-top:10px"><div><div class="ponto-dias">'+dias+'</div><div class="ponto-val">diárias no período</div></div><div><div class="ponto-dias" style="color:var(--amber)">'+hExt.toFixed(1)+'h</div><div class="ponto-val">horas extras</div></div><div><div class="ponto-dias" style="color:var(--charcoal)">'+fmt(total)+'</div><div class="ponto-val">total período</div></div></div><div style="font-size:10px;color:var(--t3);margin-top:6px">'+periodoLbl+'</div></div>';
     });
@@ -2997,7 +3073,7 @@ function renderPonto(){
       var ptMes=pontos.filter(function(p){return p.funcionario_id===f.id&&p.data.startsWith(mes);});
       var dias=ptMes.filter(function(p){return p.tipo==='diaria';}).length;
       var hExt=ptMes.filter(function(p){return p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-      var total=(dias*f.diaria)+(hExt*f.hora_extra);
+      var total=ptMes.reduce(function(s,p){return s+valorPonto(p);},0);
       cards+='<div class="ponto-card"><div class="ponto-name">'+f.nome+'</div><div class="ponto-cargo">'+f.cargo+'</div><div style="display:flex;gap:16px;margin-top:10px"><div><div class="ponto-dias">'+dias+'</div><div class="ponto-val">diárias no mês</div></div><div><div class="ponto-dias" style="color:var(--amber)">'+hExt.toFixed(1)+'h</div><div class="ponto-val">horas extras</div></div><div><div class="ponto-dias" style="color:var(--charcoal)">'+fmt(total)+'</div><div class="ponto-val">total mês</div></div></div></div>';
     });
   }
@@ -3047,7 +3123,7 @@ function renderPontoGrid(){
       if(!cel||!cel.length)return'<td style="text-align:center;color:var(--t3);font-size:11px">-</td>';
       var icons=cel.map(function(p){
         var tipo=p.tipo||'diaria';
-        var val=tipo==='diaria'?(parseFloat(f.diaria)||0):tipo==='noturna'?(parseFloat(f.diaria_noturna||f.diaria)||0):tipo==='meio'?((parseFloat(f.diaria)||0)/2):tipo==='extra'?((parseFloat(p.horas||0))*(parseFloat(f.hora_extra)||0)):0;
+        var val=valorPonto(p);
         totalVal+=val;
         if(tipo==='diaria')totalDias+=1;
         else if(tipo==='meio')totalDias+=0.5;
@@ -3116,11 +3192,11 @@ function renderFolha(){
     var noturnas=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='noturna';}).length;
     var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
     var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-    var hrVal=parseFloat(f.hora_extra)||0;
-    var diariaVal=parseFloat(f.diaria||0);
-    var notVal=parseFloat(f.diaria_noturna||f.diaria||0);
-    var totD=(dias*diariaVal)+(noturnas*notVal)+(meio*(diariaVal/2));
-    var totH=hExt*hrVal;
+    // Totais a partir dos valores CONGELADOS de cada ponto (imutável). Diária+H.Extra do mesmo
+    // dia ficam embutidos no valor_calculado do ponto tipo 'diaria'.
+    var ptsF=ptSem.filter(function(p){return p.funcionario_id===f.id;});
+    var totH=ptsF.filter(function(p){return p.tipo==='extra';}).reduce(function(s,p){return s+valorPonto(p);},0);
+    var totD=ptsF.filter(function(p){return p.tipo!=='extra';}).reduce(function(s,p){return s+valorPonto(p);},0);
     var total=totD+totH;
     var pkey=sem.key+'_'+f.id;
     var pago=folha_paga[pkey];
@@ -3202,9 +3278,8 @@ function marcarPago(){
       var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
       var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
       var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-      var totD=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
-      var totH=hExt*(parseFloat(f.hora_extra)||0);
-      temSaldo=(totD+totH)>0.005;
+      var totSem=ptSem.filter(function(p){return p.funcionario_id===f.id;}).reduce(function(s,p){return s+valorPonto(p);},0);
+      temSaldo=totSem>0.005;
     } else if(f.tipo==='mensalista'||f.tipo==='prolabore'){
       var sal=parseFloat(f.salario||0)*(sem.custom?fatorSemanas:1);
       var ben=parseFloat(f.beneficios||0)*(sem.custom?fatorSemanas:1);
@@ -3214,6 +3289,21 @@ function marcarPago(){
   });
   save();renderFolha();toast('Pendentes marcados como pagos!','ok');
 }
+// Retorna nome(s) resumido(s) do(s) projeto(s) rateado(s) para um ponto (via rateio de folha).
+function projetoDoPonto(p){
+  var rats=proj_rateio.filter(function(r){
+    return r.origem==='folha' && r.funcionario_id==p.funcionario_id && r.data===p.data;
+  });
+  if(!rats.length) return '';
+  var nomes=rats.map(function(r){
+    var pr=projetos.find(function(x){return x.id==r.projeto_id;});
+    return pr?pr.nome:'';
+  }).filter(Boolean);
+  // remove duplicados
+  nomes=nomes.filter(function(v,i){return nomes.indexOf(v)===i;});
+  return nomes.join(', ');
+}
+
 function pdfFolha(){
   var sem=getSemana(); if(!sem.si){toast('Selecione uma semana ou período','warn');return;}
   var cfg=getCfg();
@@ -3221,52 +3311,95 @@ function pdfFolha(){
   var fatorSemanas=sem.custom?semanasNoPeriodo(sem.si,sem.sf):1;
   var totalGeral=0;
   var rows='';
+  var resumo=[]; // para o resumo por colaborador no final
   // Apenas funcionários com saldo a pagar — coerente com a tela
   funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
     var pkey=sem.key+'_'+f.id;
     var pago=folha_paga[pkey];
     if(pago) return; // ignora quem já está pago
     var hrVal=parseFloat(f.hora_extra)||0;
-    var dias=0,meio=0,hExt=0,totD=0,totH=0,total=0;
+    var total=0, totDiurna=0, totNoturna=0, totHExtra=0, qtdDiurna=0, qtdNoturna=0, qtdMeio=0, horasExtra=0;
     if(!f.tipo||f.tipo==='diarista'){
-      dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
-      var noturnasPdf=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='noturna';}).length;
-      meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
-      hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-      totD=(dias*parseFloat(f.diaria||0))+(noturnasPdf*parseFloat(f.diaria_noturna||f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
-      totH=hExt*hrVal;
-      total=totD+totH;
+      var ptsFf=ptSem.filter(function(p){return p.funcionario_id===f.id;});
+      ptsFf.forEach(function(p){
+        var vh=(p.valor_hora_hist!=null?parseFloat(p.valor_hora_hist):hrVal);
+        var he=parseFloat(p.horas||0)*vh; // valor das horas extras embutidas no dia
+        if(p.tipo==='diaria'){ qtdDiurna++; totHExtra+=he; horasExtra+=parseFloat(p.horas||0); totDiurna+=(valorPonto(p)-he); }
+        else if(p.tipo==='noturna'){ qtdNoturna++; totHExtra+=he; horasExtra+=parseFloat(p.horas||0); totNoturna+=(valorPonto(p)-he); }
+        else if(p.tipo==='meio'){ qtdMeio++; totHExtra+=he; horasExtra+=parseFloat(p.horas||0); totDiurna+=(valorPonto(p)-he); }
+        else if(p.tipo==='extra'){ totHExtra+=valorPonto(p); horasExtra+=parseFloat(p.horas||0); }
+        // falta: nada
+      });
+      total=totDiurna+totNoturna+totHExtra;
     } else {
       var sal=parseFloat(f.salario||0)*(sem.custom?fatorSemanas:1);
       var ben=parseFloat(f.beneficios||0)*(sem.custom?fatorSemanas:1);
-      total=sal+ben;
-      totD=sal;
+      total=sal+ben; totDiurna=sal;
     }
     if(total<=0.005) return; // sem saldo, pula
     totalGeral+=total;
-    var ptFunc=ptSem.filter(function(p){return p.funcionario_id===f.id;}).sort(function(a,b){return a.data.localeCompare(b.data);});
-    rows+='<tr style="background:#f0f8f0"><td colspan="8"><b>'+f.nome+'</b> - '+f.cargo+
+    resumo.push({nome:f.nome,cargo:f.cargo,pix:f.pix,qtdDiurna:qtdDiurna,qtdNoturna:qtdNoturna,horasExtra:horasExtra,totDiurna:totDiurna,totNoturna:totNoturna,totHExtra:totHExtra,total:total});
+    // Cabeçalho do colaborador
+    rows+='<tr style="background:#f0f8f0"><td colspan="7"><b>'+f.nome+'</b> - '+f.cargo+
       ' | Diária: R$ '+parseFloat(f.diaria||0).toFixed(2)+
       ' | H.Extra: R$ '+hrVal.toFixed(2)+'/h'+
       (f.pix?' | <b>PIX: '+f.pix+'</b>':'')+
       ' | Status: <span style="color:#C47D0A">⚠ PENDENTE</span></td></tr>';
+    // Linhas detalhadas por dia (uma linha por lançamento), com colunas separadas
+    var ptFunc=ptSem.filter(function(p){return p.funcionario_id===f.id;}).sort(function(a,b){return a.data.localeCompare(b.data);});
     ptFunc.forEach(function(p){
-      var tipoLbl={diaria:'Diária Diurna',noturna:'Diária Noturna',meio:'Meio período',extra:'H. Extra',falta:'Falta'}[p.tipo]||p.tipo;
-      var val=p.tipo==='diaria'?parseFloat(f.diaria||0):p.tipo==='noturna'?parseFloat(f.diaria_noturna||f.diaria||0):p.tipo==='meio'?parseFloat(f.diaria||0)/2:p.tipo==='extra'?(parseFloat(p.horas||0)*hrVal):0;
-      var created=p.created_at?new Date(p.created_at).toLocaleDateString('pt-BR')+' '+new Date(p.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
-      rows+='<tr><td>'+dp(p.data)+'</td><td>'+tipoLbl+'</td><td>'+(p.horas||'-')+'</td><td>R$ '+val.toFixed(2)+'</td><td>'+p.obs+'</td><td style="color:#999;font-size:9px">'+created+'</td><td style="color:#999;font-size:9px">'+(p.created_by||'')+'</td><td></td></tr>';
+      if(p.tipo==='falta'){
+        rows+='<tr><td>'+dp(p.data)+'</td><td colspan="3" style="color:#C0392B">Falta</td><td>'+(projetoDoPonto(p)||'-')+'</td><td>'+(p.obs||'')+'</td><td style="text-align:right">R$ 0,00</td></tr>';
+        return;
+      }
+      var vh=(p.valor_hora_hist!=null?parseFloat(p.valor_hora_hist):hrVal);
+      var he=parseFloat(p.horas||0)*vh;
+      var vTotalDia=valorPonto(p);
+      var vDiurna='-', vNoturna='-', vHE='-';
+      if(p.tipo==='diaria'||p.tipo==='meio'){ vDiurna='R$ '+(vTotalDia-he).toFixed(2); }
+      else if(p.tipo==='noturna'){ vNoturna='R$ '+(vTotalDia-he).toFixed(2); }
+      if(p.tipo==='extra'){ vHE='R$ '+vTotalDia.toFixed(2)+' ('+parseFloat(p.horas||0).toFixed(1)+'h)'; }
+      else if(parseFloat(p.horas||0)>0){ vHE='R$ '+he.toFixed(2)+' ('+parseFloat(p.horas||0).toFixed(1)+'h)'; }
+      var proj=projetoDoPonto(p);
+      rows+='<tr><td>'+dp(p.data)+'</td>'+
+        '<td style="text-align:right">'+vDiurna+'</td>'+
+        '<td style="text-align:right">'+vNoturna+'</td>'+
+        '<td style="text-align:right">'+vHE+'</td>'+
+        '<td style="font-size:9px">'+(proj||'-')+'</td>'+
+        '<td style="font-size:9px">'+(p.obs||'')+'</td>'+
+        '<td style="text-align:right;font-weight:600">R$ '+vTotalDia.toFixed(2)+'</td></tr>';
     });
-    rows+='<tr style="background:#e8f4f4;font-weight:bold"><td colspan="3">TOTAL '+f.nome+'</td><td>R$ '+totD.toFixed(2)+'</td><td></td><td></td><td></td><td>R$ '+total.toFixed(2)+'</td></tr>';
+    rows+='<tr style="background:#e8f4f4;font-weight:bold"><td colspan="6">TOTAL '+f.nome+' (Diurna: R$ '+totDiurna.toFixed(2)+' | Noturna: R$ '+totNoturna.toFixed(2)+' | H.Extra: R$ '+totHExtra.toFixed(2)+')</td><td style="text-align:right">R$ '+total.toFixed(2)+'</td></tr>';
   });
   var semLbl=(sem.custom?(sem.si==='0000-01-01'?'…':dp(sem.si))+' a '+(sem.sf==='9999-12-31'?'…':dp(sem.sf)):dp(sem.si)+' a '+dp(sem.sf));
-  if(!rows){rows='<tr><td colspan="8" style="text-align:center;padding:20px;color:#999">Nenhum funcionário com saldo a pagar no período</td></tr>';}
-  var html='<html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px}.h{text-align:center;border-bottom:2px solid #2C2C2C;padding-bottom:10px;margin-bottom:16px}.h h1{font-size:18px;margin:0}.h p{margin:2px 0;color:#666;font-size:10px}table{width:100%;border-collapse:collapse}th{background:#2C2C2C;color:#fff;padding:6px 8px;text-align:left;font-size:10px}td{padding:5px 8px;border-bottom:1px solid #eee}.ft{margin-top:20px;border-top:1px solid #ccc;padding-top:6px;font-size:9px;color:#999;display:flex;justify-content:space-between}</style></head><body>';
+  if(!rows){rows='<tr><td colspan="7" style="text-align:center;padding:20px;color:#999">Nenhum funcionário com saldo a pagar no período</td></tr>';}
+  var html='<html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px}.h{text-align:center;border-bottom:2px solid #2C2C2C;padding-bottom:10px;margin-bottom:16px}.h h1{font-size:18px;margin:0}.h p{margin:2px 0;color:#666;font-size:10px}table{width:100%;border-collapse:collapse;margin-bottom:8px}th{background:#2C2C2C;color:#fff;padding:6px 8px;text-align:left;font-size:10px}td{padding:5px 8px;border-bottom:1px solid #eee}.ft{margin-top:20px;border-top:1px solid #ccc;padding-top:6px;font-size:9px;color:#999;display:flex;justify-content:space-between}.sec{font-size:12px;font-weight:700;margin:18px 0 6px;border-bottom:1px solid #B8D8D8;padding-bottom:3px}</style></head><body>';
   html+='<div class="h"><h1>'+(cfg.razao||'Conexão Design')+'</h1>';
   html+='<p>CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+' | '+(cfg.cidade||'Aparecida de Goiânia/GO')+'</p>';
   html+='<p>Folha — '+(sem.custom?'Período':'Semanal')+': '+semLbl+' | Emitido em: '+new Date().toLocaleDateString('pt-BR')+' '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</p></div>';
-  html+='<table><thead><tr><th>Data</th><th>Tipo</th><th>H.Extra</th><th>Valor</th><th>Obs</th><th>Lançado em</th><th>Por</th><th>Total</th></tr></thead><tbody>'+rows;
-  html+='<tr style="background:#2C2C2C;color:#fff;font-weight:bold"><td colspan="7">TOTAL GERAL DO '+(sem.custom?'PERÍODO':'SEMANA')+'</td><td>R$ '+totalGeral.toFixed(2)+'</td></tr>';
-  html+='</tbody></table><div class="ft"><span>'+(cfg.razao||'Conexão Design')+' - CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+'</span><span>'+new Date().toLocaleDateString('pt-BR')+'</span></div></body></html>';
+  html+='<div class="sec">Detalhamento por Dia</div>';
+  html+='<table><thead><tr><th>Data</th><th style="text-align:right">Diária Diurna</th><th style="text-align:right">Diária Noturna</th><th style="text-align:right">H. Extra</th><th>Projeto</th><th>Obs</th><th style="text-align:right">Total</th></tr></thead><tbody>'+rows;
+  html+='<tr style="background:#2C2C2C;color:#fff;font-weight:bold"><td colspan="6">TOTAL GERAL DO '+(sem.custom?'PERÍODO':'SEMANA')+'</td><td style="text-align:right">R$ '+totalGeral.toFixed(2)+'</td></tr>';
+  html+='</tbody></table>';
+  // RESUMO POR COLABORADOR
+  if(resumo.length){
+    var resRows=resumo.map(function(r){
+      return '<tr><td><b>'+r.nome+'</b></td><td>'+r.cargo+'</td>'+
+        '<td style="text-align:center">'+r.qtdDiurna+'</td>'+
+        '<td style="text-align:center">'+r.qtdNoturna+'</td>'+
+        '<td style="text-align:center">'+r.horasExtra.toFixed(1)+'h</td>'+
+        '<td style="text-align:right">R$ '+r.totDiurna.toFixed(2)+'</td>'+
+        '<td style="text-align:right">R$ '+r.totNoturna.toFixed(2)+'</td>'+
+        '<td style="text-align:right">R$ '+r.totHExtra.toFixed(2)+'</td>'+
+        '<td style="text-align:right;font-weight:700">R$ '+r.total.toFixed(2)+'</td>'+
+        '<td style="font-size:9px">'+(r.pix||'')+'</td></tr>';
+    }).join('');
+    html+='<div class="sec">Resumo por Colaborador</div>';
+    html+='<table><thead><tr><th>Colaborador</th><th>Cargo</th><th style="text-align:center">Diurnas</th><th style="text-align:center">Noturnas</th><th style="text-align:center">H.Extra</th><th style="text-align:right">Total Diurna</th><th style="text-align:right">Total Noturna</th><th style="text-align:right">Total H.Extra</th><th style="text-align:right">Total a Pagar</th><th>PIX</th></tr></thead><tbody>'+resRows;
+    html+='<tr style="background:#2C2C2C;color:#fff;font-weight:bold"><td colspan="8">TOTAL GERAL</td><td style="text-align:right">R$ '+totalGeral.toFixed(2)+'</td><td></td></tr>';
+    html+='</tbody></table>';
+  }
+  html+='<div class="ft"><span>'+(cfg.razao||'Conexão Design')+' - CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+'</span><span>'+new Date().toLocaleDateString('pt-BR')+'</span></div></body></html>';
   // Melhoria G: Rateio por projeto
   var rateioFolha=proj_rateio.filter(function(r){
     return r.origem==='folha' && r.data>=sem.si && r.data<=sem.sf;
@@ -3303,8 +3436,9 @@ function exportFolha(){
       var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
       var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
       var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-      var totD=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2));
-      var totH=hExt*(parseFloat(f.hora_extra)||0);
+      var ptsCsv=ptSem.filter(function(p){return p.funcionario_id===f.id;});
+      var totH=ptsCsv.filter(function(p){return p.tipo==='extra';}).reduce(function(s,p){return s+valorPonto(p);},0);
+      var totD=ptsCsv.filter(function(p){return p.tipo!=='extra';}).reduce(function(s,p){return s+valorPonto(p);},0);
       if((totD+totH)<=0.005) return;
       rows.push([f.nome,f.cargo,'Diarista',dias,meio,hExt.toFixed(1),totD.toFixed(2),totH.toFixed(2),(totD+totH).toFixed(2),'Pendente'].join(';'));
     } else {
@@ -3917,14 +4051,16 @@ function calcEpValor(){
   var f=funcionarios.find(function(x){return x.id===p.funcionario_id;});
   var tipo=document.getElementById('ep-tipo').value;
   var horas=parseFloat(document.getElementById('ep-horas').value)||0;
-  var val=tipo==='diaria'?(f?parseFloat(f.diaria||0):0)
-    :tipo==='noturna'?(f?parseFloat(f.diaria_noturna||f.diaria||0):0)
-    :tipo==='meio'?(f?parseFloat(f.diaria||0)/2:0)
-    :tipo==='extra'?horas*(f?parseFloat(f.hora_extra||0):0)
-    :0;
+  // Se o ponto tem snapshot, o preview respeita os valores congelados do lançamento
+  // (a edição de tipo/horas recalcula sobre a MESMA base histórica, não sobre cadastro novo).
+  var temSnap=(p.valor_diaria_hist!=null);
+  var vDiaria=temSnap?p.valor_diaria_hist:(f?parseFloat(f.diaria||0):0);
+  var vNoturna=temSnap?p.valor_diaria_not_hist:(f?parseFloat(f.diaria_noturna||f.diaria||0):0);
+  var vHora=temSnap?p.valor_hora_hist:(f?parseFloat(f.hora_extra||0):0);
+  var val=calcValorPontoBase(tipo,horas,vDiaria,vNoturna,vHora);
   var calc=document.getElementById('ep-valor-calc');
   if(tipo==='falta'){calc.textContent='Falta - sem valor';calc.style.background='var(--red-s)';calc.style.color='var(--red)';}
-  else{var extra=tipo==='extra'?' ('+horas.toFixed(1)+'h x '+fmt(f?f.hora_extra:0)+')':tipo==='noturna'?' (Noturna: '+fmt(f?parseFloat(f.diaria_noturna||f.diaria||0):0)+')':'';calc.textContent='Valor calculado: '+fmt(val)+extra;calc.style.background='var(--green-s)';calc.style.color='var(--green)';}
+  else{var extra=tipo==='extra'?' ('+horas.toFixed(1)+'h x '+fmt(vHora)+')':tipo==='noturna'?' (Noturna: '+fmt(vNoturna)+')':'';calc.textContent='Valor calculado: '+fmt(val)+extra;calc.style.background='var(--green-s)';calc.style.color='var(--green)';}
 }
 function saveEditPonto(){
   if(!_editPontoId) return;
@@ -3933,6 +4069,15 @@ function saveEditPonto(){
   p.tipo=document.getElementById('ep-tipo').value;
   p.horas=parseFloat(document.getElementById('ep-horas').value)||0;
   p.obs=document.getElementById('ep-obs').value;
+  // Recalcular o valor congelado. Se já existe snapshot, usa a MESMA base histórica
+  // (editar tipo/horas não puxa reajuste de cadastro). Se for registro antigo sem
+  // snapshot, cria agora com o cadastro vigente.
+  if(p.valor_diaria_hist!=null){
+    p.valor_calculado=parseFloat(calcValorPontoBase(p.tipo,p.horas,p.valor_diaria_hist,p.valor_diaria_not_hist,p.valor_hora_hist).toFixed(2));
+    if(!p.data_base_calculo) p.data_base_calculo=fd(td);
+  } else {
+    gravarSnapshotPonto(p);
+  }
   atualizarProvisaoFolha(p.funcionario_id, p.data);
   save(); syncToSheets('pontos'); syncToSheets('contas_pagar');
   logActivity('Ponto editado: '+funcNome(p.funcionario_id)+' ('+dp(p.data)+')');
@@ -4046,7 +4191,7 @@ function pdfDashboard(){
       var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
       var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
       var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-      folhaSem+=(dias*parseFloat(f.diaria||0))+(meio*(parseFloat(f.diaria||0)/2))+(hExt*parseFloat(f.hora_extra||0));
+      folhaSem+=ptSem.filter(function(p){return p.funcionario_id===f.id;}).reduce(function(s,p){return s+valorPonto(p);},0);
     });
   }
   // Próximos vencimentos
@@ -4097,7 +4242,7 @@ function pdfDashboard(){
     funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
       var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
       var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-      var tot=(dias*parseFloat(f.diaria||0))+(hExt*parseFloat(f.hora_extra||0));
+      var tot=ptSem.filter(function(p){return p.funcionario_id===f.id;}).reduce(function(s,p){return s+valorPonto(p);},0);
       html+='<tr><td>'+f.nome+'</td><td>'+f.cargo+'</td><td>'+dias+'</td><td>'+hExt.toFixed(1)+'h</td><td style="text-align:right;font-weight:bold">R$ '+tot.toFixed(2)+'</td></tr>';
     });
     html+='<tr style="background:#E2ECEA;font-weight:bold"><td colspan="4">TOTAL DA SEMANA</td><td style="text-align:right">R$ '+folhaSem.toFixed(2)+'</td></tr>';
@@ -4124,7 +4269,7 @@ function relFuncionarios(funcId){
     var dias=ptMes.filter(function(p){return p.tipo==='diaria';}).length;
     var meio=ptMes.filter(function(p){return p.tipo==='meio';}).length;
     var hExt=ptMes.filter(function(p){return p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-    var totD=(dias*f.diaria)+(meio*(f.diaria/2)); var totH=hExt*(f.hora_extra||0); var total=totD+totH; totalGeral+=total;
+    var totH=ptMes.filter(function(p){return p.tipo==='extra';}).reduce(function(s,p){return s+valorPonto(p);},0); var totD=ptMes.filter(function(p){return p.tipo!=='extra';}).reduce(function(s,p){return s+valorPonto(p);},0); var total=totD+totH; totalGeral+=total;
     rows+='<tr><td>'+f.nome+'</td><td>'+f.cargo+'</td><td>'+f.cpf+'</td><td>'+f.pix+'</td><td>'+dias+'</td><td>'+meio+'</td><td>'+hExt.toFixed(1)+'h</td><td>R$ '+totD.toFixed(2)+'</td><td>R$ '+totH.toFixed(2)+'</td><td><b>R$ '+total.toFixed(2)+'</b></td></tr>';
   });
   var html='<html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px}.h{text-align:center;border-bottom:2px solid #2C2C2C;padding-bottom:10px;margin-bottom:14px}.h h1{font-size:18px;margin:0}.h p{margin:2px 0;color:#666;font-size:10px}table{width:100%;border-collapse:collapse}th{background:#2C2C2C;color:#fff;padding:6px 8px;text-align:left;font-size:10px}td{padding:5px 8px;border-bottom:1px solid #eee}tr:nth-child(even){background:#f9f9f9}.tot{font-weight:bold;background:#e8f4f4!important}.ft{margin-top:20px;border-top:1px solid #ccc;padding-top:6px;font-size:9px;color:#999;display:flex;justify-content:space-between}</style></head><body>';
@@ -5239,7 +5384,7 @@ function abrirRateioFolha(){
     var dias=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='diaria';}).length;
     var meio=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='meio';}).length;
     var hExt=ptSem.filter(function(p){return p.funcionario_id===f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
-    var total=(dias*parseFloat(f.diaria||0))+(meio*parseFloat(f.diaria||0)/2)+(hExt*(parseFloat(f.hora_extra)||0));
+    var total=ptSem.filter(function(p){return p.funcionario_id===f.id;}).reduce(function(s,p){return s+valorPonto(p);},0);
     window['_rateio_base_rf-pct-'+f.id]=total;
     html+='<div style="background:var(--bg3);border-radius:var(--r);padding:12px">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
