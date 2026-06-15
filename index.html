@@ -1683,7 +1683,7 @@ function rowContaPagar(c){ return [c.id,c.descricao,c.fornecedor_id,c.categoria_
 function rowCliente(c){ return [c.id,c.nome,c.telefone,c.documento,c.endereco,c.cidade,c.email,c.ativo]; }
 function rowFornecedor(f){ return [f.id,f.nome,f.segmento||'',f.categoria_id,f.telefone,f.documento,f.produto,f.pix,f.prazo,f.endereco||'',f.bairro||'',f.cidade||'',f.ativo,f.tipo_fornecedor||'',f.created_at||'',f.created_by||'']; }
 function rowCategoria(c){ return [c.id,c.nome,c.tipo,c.cor]; }
-function rowFuncionario(f){ return [f.id,f.nome,f.cargo,f.telefone,f.cpf,f.diaria,f.hora_extra,f.pix,f.admissao,f.ativo,f.diaria_noturna||0,f.tipo||'diarista',f.salario||0,f.beneficios||0]; }
+function rowFuncionario(f){ return [f.id,f.nome,f.cargo,f.telefone,f.cpf,(parseFloat(f.diaria)||0),(parseFloat(f.hora_extra)||0),f.pix,f.admissao,f.ativo,(parseFloat(f.diaria_noturna)||0),f.tipo||'diarista',(parseFloat(f.salario)||0),(parseFloat(f.beneficios)||0)]; }
 function rowPonto(p){ return [p.id,p.funcionario_id,p.data,p.tipo,p.horas,p.obs,p.created_at||'',p.created_by||'',(p.valor_hora_hist==null?'':p.valor_hora_hist),(p.valor_diaria_hist==null?'':p.valor_diaria_hist),(p.valor_diaria_not_hist==null?'':p.valor_diaria_not_hist),(p.valor_calculado==null?'':p.valor_calculado),p.data_base_calculo||'']; }
 function rowLog(l){ return [l.id||'',l.ts||'',l.user||'',l.action||'']; }
 function rowCondPag(cp){ return [cp.id,cp.descricao||'',JSON.stringify(cp.parcelas||[])]; }
@@ -2886,6 +2886,15 @@ function renderCategorias(){
 
 // -- FUNCIONÁRIOS ------------------------------------------
 function addFuncionario(){
+  // Lê número de um campo: se vazio, mantém o valor atual; se preenchido (inclusive 0), usa o digitado.
+  function numCampo(id, atual){
+    var el=document.getElementById(id);
+    if(!el) return (atual!=null?atual:0);
+    var raw=(el.value==null?'':String(el.value)).trim();
+    if(raw==='') return (atual!=null?atual:0);
+    var v=parseFloat(raw.replace(',','.'));
+    return isNaN(v)?(atual!=null?atual:0):v;
+  }
   // Handle edit mode
   if(window._editFnId){
     var fn=funcionarios.find(function(x){return x.id===window._editFnId;});
@@ -2895,10 +2904,11 @@ function addFuncionario(){
       fn.cargo=document.getElementById('fn-cargo').value;
       fn.telefone=document.getElementById('fn-tel').value;
       fn.cpf=document.getElementById('fn-cpf').value;
-      fn.diaria=parseFloat(document.getElementById('fn-diaria').value)||fn.diaria;
-      fn.diaria_noturna=parseFloat(document.getElementById('fn-diaria-noturna')&&document.getElementById('fn-diaria-noturna').value||0)||fn.diaria_noturna||0;
-      fn.salario=parseFloat(document.getElementById('fn-salario').value)||fn.salario;
-      fn.hora_extra=parseFloat(document.getElementById('fn-hora-extra').value)||fn.hora_extra;
+      fn.diaria=numCampo('fn-diaria', fn.diaria);
+      fn.diaria_noturna=numCampo('fn-diaria-noturna', fn.diaria_noturna);
+      fn.salario=numCampo('fn-salario', fn.salario);
+      fn.beneficios=numCampo('fn-beneficios', fn.beneficios);
+      fn.hora_extra=numCampo('fn-hora-extra', fn.hora_extra);
       fn.pix=document.getElementById('fn-pix').value||fn.pix;
     }
     window._editFnId=null;
