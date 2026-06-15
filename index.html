@@ -1658,6 +1658,8 @@ async function loadAllData(){
       }
     }
     populateCatSelect('cx-cat');
+    // Dados carregados da planilha: a partir daqui é seguro gravar.
+    window._dadosCarregados = true;
     renderDash();
     updateBadgeReceber();
     if(typeof viewAtual!=='undefined' && viewAtual==='projetos') renderProjetos();
@@ -2257,6 +2259,10 @@ function save(){
 // Sync specific collection to Sheets
 async function syncToSheets(type){
   if(!ACCESS_TOKEN) return;
+  // PROTEÇÃO ANTI-SOBRESCRITA: não gravar na planilha antes do carregamento inicial
+  // dos dados terminar. Evita que um backup local antigo (ex.: hora extra zerada)
+  // sobrescreva os dados corretos que ainda estão sendo lidos da planilha.
+  if(!window._dadosCarregados){ console.warn('syncToSheets bloqueado: dados ainda não carregados ('+type+')'); return; }
   var maps = {
     transacoes:{data:transacoes,sheet:'Transacoes',row:rowTransacao},
     contas_pagar:{data:contas_pagar,sheet:'ContasPagar',row:rowContaPagar},
