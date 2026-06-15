@@ -319,20 +319,10 @@ textarea.fi{resize:vertical;min-height:72px}
         <div><div class="auth-name" id="auth-name"></div><div class="auth-email" id="auth-email-lbl"></div></div>
       </div>
     </div>
-    <div id="g_id_onload"
-      data-client_id="715814366188-vv7eh5m7nkd9k9ns1vn50pl16ejt3a0e.apps.googleusercontent.com"
-      data-callback="handleGoogleLogin"
-      data-auto_prompt="false">
-    </div>
-    <div class="g_id_signin"
-      data-type="standard"
-      data-size="large"
-      data-theme="outline"
-      data-text="signin_with"
-      data-shape="rectangular"
-      data-logo_alignment="left"
-      data-width="300">
-    </div>
+    <button class="btn mint" id="btn-google-login" onclick="iniciarLogin()" style="width:100%;justify-content:center;padding:11px;font-size:13px;margin-top:4px">
+      <svg viewBox="0 0 24 24" width="16" height="16"><path fill="#fff" d="M21.35 11.1h-9.18v2.83h5.27c-.23 1.4-1.64 4.1-5.27 4.1-3.17 0-5.76-2.62-5.76-5.86s2.59-5.86 5.76-5.86c1.81 0 3.02.77 3.71 1.43l2.53-2.44C17.07 3.6 14.86 2.6 12.17 2.6 6.98 2.6 2.8 6.78 2.8 11.97s4.18 9.37 9.37 9.37c5.41 0 8.99-3.8 8.99-9.16 0-.62-.07-1.08-.16-1.55z"/></svg>
+      Entrar com Google
+    </button>
     <div id="auth-token-status" style="margin-top:12px;font-size:11px;color:var(--amber);display:none">
       Aguardando autorização do Google Sheets...
     </div>
@@ -1401,42 +1391,71 @@ var SHEET_NAMES = {
   pontos:'Pontos', refeicoes:'Refeicoes'
 };
 
-// -- AUTH --------------------------------------------------
+// -- AUTH (fluxo único: token do Sheets + perfil em uma só passada) ----------
 var _tokenClient = null;
 
-function handleGoogleLogin(response){
-  var payload = JSON.parse(atob(response.credential.split('.')[1]));
-  CURRENT_USER = payload;
-  document.getElementById('auth-token-status').style.display = 'block';
-  requestSheetsToken();
+// Inicializa o cliente de token uma única vez.
+function _getTokenClient(){
+  if(_tokenClient) return _tokenClient;
+  if(typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) return null;
+  _tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+    callback: function(tokenResponse){
+      if(tokenResponse && tokenResponse.access_token){
+        ACCESS_TOKEN = tokenResponse.access_token;
+        // Guarda token e validade para reaproveitar (evita refazer login a cada abertura)
+        var expSeg = parseInt(tokenResponse.expires_in||3600,10);
+        try{
+          localStorage.setItem('cd_token', ACCESS_TOKEN);
+          localStorage.setItem('cd_token_exp', String(Date.now() + (expSeg-60)*1000));
+        }catch(e){}
+        window.sheetStatus.online=true; updateSheetStatusUI();
+        // Renova em silêncio antes de expirar
+        setTimeout(function(){ if(ACCESS_TOKEN && _tokenClient) _tokenClient.requestAccessToken({prompt:''}); }, (expSeg-120)*1000);
+        carregarPerfilEEntrar();
+      } else {
+        toast('Erro ao obter acesso ao Google Sheets','warn');
+        var b=document.getElementById('btn-google-login'); if(b) b.disabled=false;
+      }
+    },
+    error_callback: function(err){
+      toast('Erro de autorização: '+(err&&err.type?err.type:'desconhecido'),'warn');
+      var b=document.getElementById('btn-google-login'); if(b) b.disabled=false;
+    }
+  });
+  return _tokenClient;
 }
 
-function requestSheetsToken(){
-  if(typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2){
-    setTimeout(requestSheetsToken, 500);
-    return;
-  }
-  if(!_tokenClient){
-    _tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: GOOGLE_CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/spreadsheets',
-      callback: function(tokenResponse){
-        if(tokenResponse && tokenResponse.access_token){
-          ACCESS_TOKEN = tokenResponse.access_token; window.sheetStatus.online=true; updateSheetStatusUI();
-          // Renovar token automaticamente antes de expirar (55 min)
-          setTimeout(function(){ if(ACCESS_TOKEN) _tokenClient.requestAccessToken({prompt:''}); }, 55*60*1000);
-          onAuthenticated();
-        } else {
-          toast('Erro ao obter acesso ao Google Sheets','warn');
-        }
-      },
-      error_callback: function(err){
-        toast('Erro de autorizacao: '+err.type,'warn');
-      }
-    });
-  }
-  _tokenClient.requestAccessToken({prompt: 'consent'});
+// Chamado pelo botão. prompt:'' faz o Google reusar consentimento já dado.
+function iniciarLogin(){
+  var btn=document.getElementById('btn-google-login');
+  var tc=_getTokenClient();
+  if(!tc){ setTimeout(iniciarLogin, 400); return; }
+  if(btn) btn.disabled=true;
+  document.getElementById('auth-token-status').style.display='block';
+  tc.requestAccessToken({prompt:''});
 }
+
+// Busca nome/email/foto do usuário a partir do token e entra no sistema.
+async function carregarPerfilEEntrar(){
+  try{
+    var res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {headers:{Authorization:'Bearer '+ACCESS_TOKEN}});
+    if(res.ok){
+      var p = await res.json();
+      CURRENT_USER = {name:p.name, email:p.email, picture:p.picture};
+    }
+  }catch(e){}
+  onAuthenticated();
+}
+
+// Mantido por compatibilidade caso o botão antigo ainda chame (não usado no fluxo novo).
+function handleGoogleLogin(response){
+  try{ CURRENT_USER = JSON.parse(atob(response.credential.split('.')[1])); }catch(e){}
+  iniciarLogin();
+}
+
+function requestSheetsToken(){ iniciarLogin(); }
 
 function onAuthenticated(){
   document.getElementById('auth-screen').style.display = 'none';
@@ -1458,11 +1477,12 @@ function logout(){
   }
   ACCESS_TOKEN = null;
   CURRENT_USER = null;
-  _tokenClient = null;
+  try{ localStorage.removeItem('cd_token'); localStorage.removeItem('cd_token_exp'); }catch(e){}
   document.getElementById('auth-screen').style.display = 'flex';
+  var b=document.getElementById('btn-google-login'); if(b) b.disabled=false;
   document.getElementById('tb-name').textContent = '';
   document.getElementById('tb-avatar').style.display = 'none';
-  toast('Sessao encerrada','info');
+  toast('Sessão encerrada','info');
 }
 
 // -- SHEETS API --------------------------------------------
@@ -5739,6 +5759,18 @@ if(document.getElementById('fl-semana'))document.getElementById('fl-semana').val
 populateCargos();
 // Load cfg into config view when available
 var _cfg=getCfg();
+// Reusar sessão: se há token salvo e ainda válido, entra direto sem refazer login.
+(function tentarReusarSessao(){
+  try{
+    var tk=localStorage.getItem('cd_token');
+    var exp=parseInt(localStorage.getItem('cd_token_exp')||'0',10);
+    if(tk && exp && Date.now() < exp){
+      ACCESS_TOKEN = tk;
+      if(window.sheetStatus){ window.sheetStatus.online=true; updateSheetStatusUI(); }
+      carregarPerfilEEntrar();
+    }
+  }catch(e){}
+})();
 // Show auth screen - renderDash called after login
 </script>
 
