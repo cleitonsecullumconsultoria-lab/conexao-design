@@ -4517,7 +4517,7 @@ function showPrint(title, htmlContent){
     if(!win){ toast('Permita pop-ups para gerar a proposta','warn'); return; }
     win.document.write(htmlContent);
     win.document.close();
-    setTimeout(function(){ try{ win.focus(); win.print(); }catch(e){} }, 700);
+    win.focus();
     return;
   }
   // Demais PDFs: usar modal interno
@@ -4784,11 +4784,14 @@ function addProjFotos(input){
         var canvas=document.createElement('canvas');
         var maxW=1000;
         var scale=img.width>maxW?maxW/img.width:1;
-        canvas.width=img.width*scale;
-        canvas.height=img.height*scale;
+        canvas.width=Math.round(img.width*scale);
+        canvas.height=Math.round(img.height*scale);
         var ctx=canvas.getContext('2d');
+        // Fundo branco: sem isso, JPEG renderiza áreas vazias como preto
+        ctx.fillStyle='#FFFFFF';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
         ctx.drawImage(img,0,0,canvas.width,canvas.height);
-        var dataUrl=canvas.toDataURL('image/jpeg',0.78);
+        var dataUrl=canvas.toDataURL('image/jpeg',0.85);
         _projFotos.push(dataUrl);
         renderProjFotosPreview();
         restantes--;
@@ -4861,7 +4864,7 @@ function gerarProposta(projId){
   var dataHoje    = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
   var primeiroNome= (cl.nome||'Cliente').split(' ')[0];
   var fotos       = (projId===window._editProjId&&_projFotos.length)?_projFotos:loadProjFotos(p.id);
-  var escopo      = p.desc_escopo||'';
+  var escopo      = (p.desc_escopo&&p.desc_escopo.trim())?p.desc_escopo:(p.descricao||'');
 
   // Parcelas
   var parcelasHTML='';
@@ -4888,6 +4891,11 @@ function gerarProposta(projId){
 '.page+.page{page-break-before:always}'+
 '@media print{html,body{width:210mm}.page{margin:0;box-shadow:none;page-break-after:always}.page:last-child{page-break-after:auto}}'+
 '@media screen{.page{box-shadow:0 2px 12px rgba(0,0,0,.15);margin-bottom:16px}body{background:#e8e8e8;padding:16px 0}}'+
+'@media print{.no-print{display:none!important}}'+
+'.print-bar{position:fixed;top:14px;right:14px;z-index:9999;display:flex;gap:8px}'+
+'.print-bar button{padding:10px 18px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);font-family:Arial,sans-serif}'+
+'.print-bar .pb-print{background:#2c7070;color:#fff}'+
+'.print-bar .pb-close{background:#fff;color:#444}'+
 '.hdr{background:#b2d8d8;padding:16mm 12mm 10mm;text-align:center;flex-shrink:0}'+
 '.hdr-inner{display:inline-flex;align-items:center;gap:12px}'+
 '.hdr-line{display:inline-block;width:34px;height:2px;background:#1a1a1a;vertical-align:middle}'+
@@ -4967,7 +4975,8 @@ function gerarProposta(projId){
     '<div class="assin"><div><div class="assin-ln"><div style="font-size:9pt">'+((cl.nome)||'').toUpperCase()+'</div><div style="font-size:8.5pt;color:#666">Assinatura do Cliente</div></div></div><div><div class="assin-ln"><div style="font-size:9pt">'+respProjeto.toUpperCase()+'</div><div style="font-size:8.5pt;color:#666">'+emp.razao+'</div></div></div></div>'+
     '</div>'+FTR+'</div>';
 
-  var html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Proposta - '+p.nome+'</title><style>'+css+'</style></head><body>'+p1+pEscopo+pFotos+pInvest+pContrato+'</body></html>';
+  var printBar='<div class="print-bar no-print"><button class="pb-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button><button class="pb-close" onclick="window.close()">✕ Fechar</button></div>';
+  var html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Proposta - '+p.nome+'</title><style>'+css+'</style></head><body>'+printBar+p1+pEscopo+pFotos+pInvest+pContrato+'</body></html>';
   showPrint('Proposta - '+p.nome, html);
 }
 
