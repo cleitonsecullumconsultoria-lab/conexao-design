@@ -390,6 +390,10 @@ textarea.fi{resize:vertical;min-height:72px}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
       Fornecedores
     </div>
+    <div class="ni" onclick="go('produtos')" id="nav-produtos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="7" height="7" rx="1"/><rect x="15" y="3" width="7" height="7" rx="1"/><rect x="15" y="14" width="7" height="7" rx="1"/><rect x="2" y="14" width="7" height="7" rx="1"/></svg>
+      Produtos
+    </div>
     <div class="ni" onclick="go('categorias')" id="nav-categorias">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
       Categorias
@@ -806,6 +810,60 @@ textarea.fi{resize:vertical;min-height:72px}
     </div>
   </div>
 
+
+  <!-- PRODUTOS -->
+  <div class="view" id="view-produtos">
+    <div class="card mb16">
+      <div class="ch">Cadastrar Produto / Material</div>
+      <div class="frow">
+        <div class="fgroup" style="flex:2"><label class="flabel">Nome do Produto *</label><input type="text" class="fi" id="prod-nome" placeholder="Ex: MDF 18mm, Perfil 30x30..."></div>
+        <div class="fgroup"><label class="flabel">Código / SKU</label><input type="text" class="fi" id="prod-codigo" placeholder="Ex: MDF-18-BR"></div>
+        <div class="fgroup"><label class="flabel">Unidade *</label>
+          <select class="fi" id="prod-unidade">
+            <option value="un">un — Unidade</option>
+            <option value="m">m — Metro linear</option>
+            <option value="m2">m² — Metro quadrado</option>
+            <option value="m3">m³ — Metro cúbico</option>
+            <option value="kg">kg — Quilograma</option>
+            <option value="L">L — Litro</option>
+            <option value="cx">cx — Caixa</option>
+            <option value="pc">pç — Peça</option>
+            <option value="rolo">rolo — Rolo</option>
+            <option value="chapa">chapa — Chapa</option>
+          </select>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fgroup"><label class="flabel">Categoria</label><select class="fi" id="prod-categoria"><option value="">Selecione...</option></select></div>
+        <div class="fgroup"><label class="flabel">Fornecedor Padrão</label><select class="fi" id="prod-fornecedor"><option value="">Selecione...</option></select></div>
+        <div class="fgroup"><label class="flabel">Custo Médio (R$/un)</label><input type="number" class="fi" id="prod-custo-medio" placeholder="0,00" step="0.01"></div>
+        <div class="fgroup"><label class="flabel">Estoque Mínimo</label><input type="number" class="fi" id="prod-estoque-min" placeholder="0" min="0"></div>
+      </div>
+      <div class="frow">
+        <div class="fgroup" style="flex:1"><label class="flabel">Descrição Técnica</label><input type="text" class="fi" id="prod-descricao" placeholder="Especificações, dimensões padrão..."></div>
+        <div class="fgroup" style="justify-content:flex-end;padding-top:20px">
+          <button class="btn mint" onclick="saveProduto()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Salvar Produto
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="ch" style="flex:1;margin:0">Produtos Cadastrados</div>
+        <input type="text" class="fi" id="prod-filtro" oninput="renderProdutos()" placeholder="Buscar produto..." style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+        <select class="fi" id="prod-filtro-cat" onchange="renderProdutos()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px"><option value="">Todas categorias</option></select>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>Nome</th><th>Cód.</th><th>Un.</th><th>Categoria</th><th>Custo Médio</th><th>Último Custo</th><th>Compras</th><th></th></tr></thead>
+          <tbody id="prod-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- CATEGORIAS -->
   <div class="view" id="view-categorias">
     <div class="card mb16">
@@ -1130,7 +1188,17 @@ textarea.fi{resize:vertical;min-height:72px}
             <div class="fgroup"><label class="flabel">Link / Contato</label><input type="text" class="fi" id="proj-link-contato" placeholder="https://airgo.bio/..."></div>
           </div>
           <div class="frow">
-            <div class="fgroup" style="flex:1"><label class="flabel">Observações da Proposta</label><input type="text" class="fi" id="proj-obs-proposta" placeholder="Aparece na carta ao cliente..."></div>
+            <div class="fgroup" style="flex:1"><label class="flabel">Observações da Proposta (carta)</label><input type="text" class="fi" id="proj-obs-proposta" placeholder="Aparece na carta ao cliente..."></div>
+          </div>
+          <div class="frow">
+            <div class="fgroup" style="flex:1"><label class="flabel">Descrição Detalhada dos Itens / Escopo</label><textarea class="fi" id="proj-desc-escopo" rows="6" placeholder="Descreva cada item da proposta. Ex:&#10;&#10;ESTRUTURA ARMÁRIO LAVANDERIA:&#10;Fabricado em AÇO INOXIDÁVEL. Acabamento ESCOVADO. Pintura cinza fosco automotivo. 1 tubo de 790x30x20mm. Quantidade: 1 unidade. VALOR: 489,00&#10;&#10;BASE CRIADO MUDO:&#10;Fabricada em tubo quadrado 20x20mm. AÇO CARBONO. Pintura preto eletrostático. Medidas: 550x403x135mm. Valor: 430,00" style="font-family:var(--fm);font-size:12px;line-height:1.5;resize:vertical"></textarea></div>
+          </div>
+          <div class="frow">
+            <div class="fgroup" style="flex:1">
+              <label class="flabel">Fotos do Projeto / Trabalho (aparecem na proposta)</label>
+              <input type="file" id="proj-fotos-input" accept="image/*" multiple onchange="addProjFotos(this)" style="font-size:12px;padding:6px;border:1px dashed var(--bd);border-radius:6px;background:var(--bg2);width:100%">
+              <div id="proj-fotos-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+            </div>
           </div>
         </div>
         <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px">
@@ -1149,13 +1217,16 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="ch">Lançar Custo Real</div>
         <div class="frow">
           <div class="fgroup"><label class="flabel">Projeto</label><select class="fi" id="custo-projeto"><option value="">Selecione...</option></select></div>
-          <div class="fgroup"><label class="flabel">Tipo</label>
+          <div class="fgroup"><label class="flabel">Produto (opcional)</label><select class="fi" id="custo-produto" onchange="onSelectProdutoCusto()"><option value="">Digitar manualmente...</option></select></div>
+          <div class="fgroup"><label class="flabel">Categoria</label>
             <select class="fi" id="custo-tipo">
               <option value="">Selecione a categoria...</option>
             </select>
           </div>
           <div class="fgroup" style="flex:2"><label class="flabel">Descrição</label><input type="text" class="fi" id="custo-desc" placeholder="Ex: MDF 18mm, Vidro temperado..."></div>
-          <div class="fgroup"><label class="flabel">Valor (R$)</label><input type="number" class="fi" id="custo-valor" placeholder="0,00" step="0.01"></div>
+          <div class="fgroup"><label class="flabel">Qtd</label><input type="number" class="fi" id="custo-qtd" placeholder="1" min="0.01" step="0.01" value="1" oninput="calcCustoTotal()"></div>
+          <div class="fgroup"><label class="flabel">Valor Unit. (R$)</label><input type="number" class="fi" id="custo-valor-unit" placeholder="0,00" step="0.01" oninput="calcCustoTotal()"></div>
+          <div class="fgroup"><label class="flabel">Total (R$)</label><input type="number" class="fi" id="custo-valor" placeholder="0,00" step="0.01" style="background:var(--bg3);font-weight:600" readonly></div>
           <div class="fgroup"><label class="flabel">Data</label><input type="date" class="fi" id="custo-data"></div>
           <div class="fgroup" style="justify-content:flex-end;padding-top:20px"><button class="btn mint" onclick="saveCusto()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Lançar</button></div>
         </div>
@@ -1588,10 +1659,13 @@ async function initSheets(){
     Pontos:['id','funcionario_id','data','tipo','horas','obs','created_at','created_by','valor_hora_hist','valor_diaria_hist','valor_diaria_not_hist','valor_calculado','data_base_calculo'],
     Refeicoes:['id','funcionario_id','fornecedor_id','data','tipo','valor'],
     ContasReceber:['id','projeto_id','descricao','valor','vencimento','status','recebido_em','conta_id'],
-    Projetos:['id','nome','cliente_id','status','inicio','entrega','descricao','est_material','est_mdo','est_espelho','est_outros','created_at','created_by','valor_venda','cond_pag','data_receb','status_receb','teve_arquiteto','nome_arquiteto','percentual_arquiteto','valor_arquiteto','estimativas','est_total','updated_by','updated_at'],
-    ProjetoCustos:['id','projeto_id','tipo','descricao','valor','data','created_by'],
+    Projetos:['id','nome','cliente_id','status','inicio','entrega','descricao','est_material','est_mdo','est_espelho','est_outros','created_at','created_by','valor_venda','cond_pag','data_receb','status_receb','teve_arquiteto','nome_arquiteto','percentual_arquiteto','valor_arquiteto','estimativas','est_total','updated_by','updated_at','desc_escopo'],
+    ProjetoCustos:['id','projeto_id','tipo','descricao','valor','qtd','valor_unit','produto_id','data','created_by'],
+    ContasBancarias:['id','nome','banco','tipo','agencia','conta','saldo_inicial','ativo','cor'],
+    Produtos:['id','nome','codigo','unidade','categoria_id','fornecedor_id','custo_medio','custo_ultima','qtd_compras','estoque_min','descricao','ativo'],
     ProjetoRateio:['id','projeto_id','origem','origem_id','funcionario_id','semana','mes','percentual','valor_rateado','data','categoria_id'],
     Log:['id','ts','user','action'],
+    Config:['chave','valor'],
     CondicoesPagamento:['id','descricao','parcelas_json']
   };
   // Proteção: só cria cabeçalho se aba estiver COMPLETAMENTE vazia (sem nenhuma linha)
@@ -1622,7 +1696,8 @@ async function loadAllData(){
       {key:'pontos', sheet:'Pontos', parser: parsePonto},
       {key:'refeicoes', sheet:'Refeicoes', parser: parseRefeicao},
       {key:'contas_receber', sheet:'ContasReceber', parser: parseContaReceber},
-      {key:'projetos', sheet:'Projetos', parser: function(r){return {id:+r[0],nome:r[1]||'',cliente_id:r[2]||'',status:r[3]||'orcamento',inicio:r[4]||'',entrega:r[5]||'',descricao:r[6]||'',est_material:+r[7]||0,est_mdo:+r[8]||0,est_espelho:+r[9]||0,est_outros:+r[10]||0,created_at:r[11]||'',created_by:r[12]||'',valor_venda:+r[13]||0,cond_pag:r[14]||'',data_receb:r[15]||'',status_receb:r[16]||'pendente',teve_arquiteto:r[17]==='true'||r[17]===true,nome_arquiteto:r[18]||'',percentual_arquiteto:+r[19]||0,valor_arquiteto:+r[20]||0,estimativas:r[21]||'',est_total:+r[22]||0,updated_by:r[23]||'',updated_at:r[24]||''};}},
+      {key:'produtos', sheet:'Produtos', parser: parseProduto},
+      {key:'projetos', sheet:'Projetos', parser: function(r){return {id:+r[0],nome:r[1]||'',cliente_id:r[2]||'',status:r[3]||'orcamento',inicio:r[4]||'',entrega:r[5]||'',descricao:r[6]||'',est_material:+r[7]||0,est_mdo:+r[8]||0,est_espelho:+r[9]||0,est_outros:+r[10]||0,created_at:r[11]||'',created_by:r[12]||'',valor_venda:+r[13]||0,cond_pag:r[14]||'',data_receb:r[15]||'',status_receb:r[16]||'pendente',teve_arquiteto:r[17]==='true'||r[17]===true,nome_arquiteto:r[18]||'',percentual_arquiteto:+r[19]||0,valor_arquiteto:+r[20]||0,estimativas:r[21]||'',est_total:+r[22]||0,updated_by:r[23]||'',updated_at:r[24]||'',desc_escopo:r[25]||''};}},
       {key:'proj_custos', sheet:'ProjetoCustos', parser: function(r){return {id:+r[0],projeto_id:+r[1],tipo:r[2]||'',descricao:r[3]||'',valor:+r[4]||0,data:r[5]||'',created_by:r[6]||''};}},
       {key:'proj_rateio', sheet:'ProjetoRateio', parser: function(r){return {id:+r[0],projeto_id:+r[1],origem:r[2]||'',origem_id:r[3]||'',funcionario_id:+r[4]||0,semana:r[5]||'',mes:r[6]||'',percentual:+r[7]||0,valor_rateado:+r[8]||0,data:r[9]||'',categoria_id:r[10]||''};}},
       {key:'log', sheet:'Log', parser: parseLog},
@@ -1642,6 +1717,7 @@ async function loadAllData(){
         else if(l.key === 'pontos') pontos = data;
         else if(l.key === 'refeicoes') refeicoes = data;
         else if(l.key === 'contas_receber') contas_receber = data;
+        else if(l.key === 'produtos') produtos = data;
         else if(l.key === 'projetos'){
           if(data.length) projetos = data;
           localStorage.setItem('cd_projetos', JSON.stringify(projetos));
@@ -1683,6 +1759,8 @@ function parseContaPagar(r){ return {id:+r[0],descricao:r[1]||'',fornecedor_id:r
 function parseCliente(r){ return {id:+r[0],nome:r[1]||'',telefone:r[2]||'',documento:r[3]||'',endereco:r[4]||'',cidade:r[5]||'',email:r[6]||'',ativo:r[7]!=='false'}; }
 function parseFornecedor(r){ return {id:+r[0],nome:r[1]||'',segmento:r[2]||'',categoria_id:r[3]||'',telefone:r[4]||'',documento:r[5]||'',produto:r[6]||'',pix:r[7]||'',prazo:r[8]||'',endereco:r[9]||'',bairro:r[10]||'',cidade:r[11]||'',ativo:r[12]!=='false',tipo_fornecedor:r[13]||'',created_at:r[14]||'',created_by:r[15]||''}; }
 function parseCategoria(r){ return {id:+r[0],nome:r[1]||'',tipo:r[2]||'',cor:r[3]||'#7A9E7E'}; }
+function parseProduto(r){ return {id:+r[0],nome:r[1]||'',codigo:r[2]||'',unidade:r[3]||'un',categoria_id:r[4]||'',fornecedor_id:r[5]||'',custo_medio:+r[6]||0,custo_ultima:+r[7]||0,qtd_compras:+r[8]||0,estoque_min:+r[9]||0,descricao:r[10]||'',ativo:r[11]!=='false'}; }
+function rowProduto(p){ return [p.id,p.nome,p.codigo||'',p.unidade||'un',p.categoria_id||'',p.fornecedor_id||'',p.custo_medio||0,p.custo_ultima||0,p.qtd_compras||0,p.estoque_min||0,p.descricao||'',p.ativo]; }
 function parseFuncionario(r){ return {id:+r[0],nome:r[1]||'',cargo:r[2]||'',telefone:r[3]||'',cpf:r[4]||'',diaria:+r[5]||0,hora_extra:+r[6]||0,pix:r[7]||'',admissao:r[8]||'',ativo:r[9]!=='false',diaria_noturna:+r[10]||0,tipo:r[11]||'diarista',salario:+r[12]||0,beneficios:+r[13]||0}; }
 function parsePonto(r){ return {id:+r[0],funcionario_id:+r[1],data:r[2]||'',tipo:r[3]||'',horas:+r[4]||0,obs:r[5]||'',created_at:r[6]||'',created_by:r[7]||'',valor_hora_hist:(r[8]===''||r[8]===undefined?null:+r[8]),valor_diaria_hist:(r[9]===''||r[9]===undefined?null:+r[9]),valor_diaria_not_hist:(r[10]===''||r[10]===undefined?null:+r[10]),valor_calculado:(r[11]===''||r[11]===undefined?null:+r[11]),data_base_calculo:r[12]||''}; }
 function parseRefeicao(r){ return {id:+r[0],funcionario_id:+r[1],fornecedor_id:r[2]||'',data:r[3]||'',tipo:r[4]||'',valor:+r[5]||0}; }
@@ -1722,6 +1800,7 @@ var cond_pagamento = sg('cond_pagamento')||[];
 // CONTAS A RECEBER - Estado e funções (M1, M2, M3)
 // ================================================================
 var contas_receber = sg('contas_receber')||[];
+var produtos = sg('produtos')||[];
 
 // Persistência
 function saveReceber(){
@@ -2263,6 +2342,7 @@ function save(){
   ss('fornecedores',fornecedores);ss('categorias',categorias);ss('funcionarios',funcionarios);
   ss('pontos',pontos);ss('refeicoes',refeicoes);ss('folha_paga',folha_paga);ss('contas_bancarias',contas_bancarias);
   if(typeof contas_receber!=='undefined') ss('contas_receber',contas_receber);
+  if(typeof produtos!=='undefined') ss('produtos',produtos);
 }
 // Sync specific collection to Sheets
 async function syncToSheets(type){
@@ -2285,7 +2365,7 @@ async function syncToSheets(type){
     p.valor_venda||'',p.cond_pag||'',p.data_receb||'',p.status_receb||'',
     p.teve_arquiteto||false,p.nome_arquiteto||'',p.percentual_arquiteto||0,p.valor_arquiteto||0,
     p.estimativas||'',p.est_total||0,
-    p.updated_by||'',p.updated_at||''
+    p.updated_by||'',p.updated_at||'',p.desc_escopo||''
   ];}},
     proj_custos:{data:proj_custos,sheet:'ProjetoCustos',row:function(c){return[c.id,c.projeto_id,c.tipo,c.descricao,c.valor,c.data,c.created_by];}},
     proj_rateio:{data:proj_rateio,sheet:'ProjetoRateio',row:function(r){return[r.id,r.projeto_id,r.origem,r.origem_id||'',r.funcionario_id||'',r.semana||'',r.mes||'',r.percentual,r.valor_rateado,r.data,r.categoria_id||''];}},
@@ -2293,7 +2373,10 @@ async function syncToSheets(type){
     cond_pagamento:{data:cond_pagamento,sheet:'CondicoesPagamento',row:rowCondPag},
     pontos:{data:pontos,sheet:'Pontos',row:rowPonto},
     refeicoes:{data:refeicoes,sheet:'Refeicoes',row:rowRefeicao},
-    contas_receber:{data:contas_receber,sheet:'ContasReceber',row:rowContaReceber}
+    contas_receber:{data:contas_receber,sheet:'ContasReceber',row:rowContaReceber},
+    config:{data:Object.keys(getCfg()).map(function(k){var c=getCfg();return{chave:k,valor:String(c[k]||'')};}),sheet:'Config',row:function(r){return[r.chave,r.valor];}},
+    contas_bancarias:{data:contas_bancarias,sheet:'ContasBancarias',row:function(c){return[c.id,c.nome||'',c.banco||'',c.tipo||'',c.agencia||'',c.conta||'',c.saldo_inicial||c.saldo||0,c.ativo,c.cor||''];}},
+    produtos:{data:typeof produtos!=='undefined'?produtos:[],sheet:'Produtos',row:rowProduto}
   };
   var m = maps[type]; if(!m) return;
   await sheetsWriteAll(m.sheet, m.data.map(m.row));
@@ -2329,6 +2412,7 @@ function go(v){
   if(v==='caixa'){populateCatSelect('cx-cat');renderCaixa();}
   if(v==='pagar'){populateFornSelect('pg-forn');populateCatSelect('pg-cat');renderPagar();}
   if(v==='receber'){renderReceber();}
+  if(v==='produtos'){renderProdutos();populateCatSelect('prod-categoria');populateFornSelect('prod-fornecedor');populateProdutoSelect();}
   if(v==='clientes')renderClientes();
   if(v==='fornecedores'){populateCatSelect('fr-cat');renderFornecedores();}
   if(v==='categorias')renderCategorias();
@@ -3921,6 +4005,7 @@ function saveCfg(){
     banco_tipo:_gv('cfg-banco-tipo'), pix:_gv('cfg-pix')
   };
   localStorage.setItem('cd_cfg', JSON.stringify(Object.assign(getCfg(),cfg)));
+  if(typeof ACCESS_TOKEN!=='undefined'&&ACCESS_TOKEN) setTimeout(function(){syncToSheets('config');},500);
   toast('Dados da empresa salvos!','ok');
 }
 function saveSaldos(){
@@ -3997,6 +4082,7 @@ function logActivity(action){
   var user=CURRENT_USER?CURRENT_USER.name||CURRENT_USER.email:'Sistema';
   actLog.unshift({ts:new Date().toISOString(),user:user,action:action});
   saveLog();
+  if(typeof ACCESS_TOKEN!=='undefined'&&ACCESS_TOKEN) setTimeout(function(){syncToSheets('log');},2000);
 }
 function renderLog(){
   var fu=document.getElementById('log-filtro-user').value;
@@ -4226,6 +4312,7 @@ function addContaBancaria(){
   });
   save();
   logActivity('Nova conta bancaria: '+nome);
+  if(ACCESS_TOKEN) syncToSheets('contas_bancarias');
   renderContasBancarias();
   toast('Conta cadastrada!','ok');
   ['cb-nome','cb-banco','cb-agencia','cb-numero','cb-pix','cb-saldo','cb-obs'].forEach(function(id){document.getElementById(id).value='';});
@@ -4424,16 +4511,23 @@ function relRefeicoesForn(){
 
 // -- PRINT MODAL ---------------------------------------------
 function showPrint(title, htmlContent){
+  // Proposta/contrato: abrir em nova aba para preservar CSS A4 e paginação correta
+  if(htmlContent.indexOf('class="page"') !== -1 || htmlContent.indexOf("class='page'") !== -1){
+    var win = window.open('', '_blank');
+    if(!win){ toast('Permita pop-ups para gerar a proposta','warn'); return; }
+    win.document.write(htmlContent);
+    win.document.close();
+    setTimeout(function(){ try{ win.focus(); win.print(); }catch(e){} }, 700);
+    return;
+  }
+  // Demais PDFs: usar modal interno
   var bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-  var content = bodyMatch ? bodyMatch[1] : htmlContent;
+  var cnt = bodyMatch ? bodyMatch[1] : htmlContent;
   var styleMatches = htmlContent.match(/<style[^>]*>[\s\S]*?<\/style>/gi);
-  // baseStyle mínimo: só garante cores na impressão. NÃO força padding/font/table,
-  // para não desconfigurar layouts próprios (propostas, contratos). O CSS do
-  // conteúdo vem DEPOIS e tem prioridade.
   var baseStyle = '<style>*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}</style>';
   var styles = styleMatches ? baseStyle + styleMatches.join('') : baseStyle + '<style>body{margin:0;padding:12px;font-size:11px}table{width:100%;border-collapse:collapse}th,td{padding:5px 7px;font-size:10px}</style>';
   document.getElementById('print-title').textContent = title;
-  document.getElementById('print-content').innerHTML = styles + content;
+  document.getElementById('print-content').innerHTML = styles + cnt;
   document.getElementById('print-modal').classList.add('show');
   window.scrollTo(0,0);
 }
@@ -4548,13 +4642,13 @@ function projTab(tab, btn){
   if(btn) btn.classList.add('on');
   try{
     if(tab==='lista') renderProjetos();
-    if(tab==='custos'){ renderCustos(); populateProjetoSelects(); populateCustoTipo(); }
+    if(tab==='custos'){ renderCustos(); populateProjetoSelects(); populateCustoTipo(); populateProdutoSelect(); }
     if(tab==='dash'){ populateProjetoSelects(); renderExecutivo(); }
     if(tab==='cond') renderCondPag();
     if(tab==='novo'){
     populateCondPagSelect();
-    // Se não está editando, começar grade de categorias vazia
-    if(!window._editProjId){ window._estCats=[]; popularSelectAddCat(); renderEstCats(); }
+    // Se não está editando, começar grade de categorias vazia e fotos zeradas
+    if(!window._editProjId){ window._estCats=[]; popularSelectAddCat(); renderEstCats(); _projFotos=[]; if(typeof renderProjFotosPreview==='function') renderProjFotosPreview(); }
     else { popularSelectAddCat(); }
   }
   }catch(e){ console.error('projTab erro em '+tab+':',e); }
@@ -4665,6 +4759,63 @@ function calcValorArquiteto(){
 // ================================================================
 // PROPOSTA / CONTRATO - Conexão Design
 // ================================================================
+
+// --- Gestão de fotos da proposta (guardadas no localStorage, fora do Sheets) ---
+var _projFotos = []; // fotos da sessão de edição atual (base64)
+
+function fotosKey(projId){ return 'cd_proj_fotos_'+projId; }
+function loadProjFotos(projId){
+  try{ return JSON.parse(localStorage.getItem(fotosKey(projId))||'[]'); }catch(e){ return []; }
+}
+function saveProjFotos(projId, fotos){
+  try{ localStorage.setItem(fotosKey(projId), JSON.stringify(fotos||[])); }catch(e){ toast('Fotos muito grandes para salvar localmente','warn'); }
+}
+
+function addProjFotos(input){
+  var files=input.files; if(!files||!files.length) return;
+  var restantes=files.length;
+  Array.prototype.forEach.call(files, function(file){
+    if(!file.type.match(/^image\//)){ restantes--; return; }
+    var reader=new FileReader();
+    reader.onload=function(e){
+      // Redimensionar para no máx 1000px de largura para não estourar o localStorage
+      var img=new Image();
+      img.onload=function(){
+        var canvas=document.createElement('canvas');
+        var maxW=1000;
+        var scale=img.width>maxW?maxW/img.width:1;
+        canvas.width=img.width*scale;
+        canvas.height=img.height*scale;
+        var ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        var dataUrl=canvas.toDataURL('image/jpeg',0.78);
+        _projFotos.push(dataUrl);
+        renderProjFotosPreview();
+        restantes--;
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value=''; // limpar para permitir re-upload do mesmo arquivo
+}
+
+function renderProjFotosPreview(){
+  var box=document.getElementById('proj-fotos-preview'); if(!box) return;
+  if(!_projFotos.length){ box.innerHTML='<span style="font-size:11px;color:var(--t3)">Nenhuma foto adicionada</span>'; return; }
+  box.innerHTML=_projFotos.map(function(src,i){
+    return '<div style="position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--bd)">'+
+      '<img src="'+src+'" style="width:100%;height:100%;object-fit:cover">'+
+      '<button onclick="removeProjFoto('+i+')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border:none;border-radius:50%;background:rgba(200,40,40,.9);color:#fff;font-size:11px;cursor:pointer;line-height:1;padding:0">×</button>'+
+      '</div>';
+  }).join('');
+}
+
+function removeProjFoto(i){
+  _projFotos.splice(i,1);
+  renderProjFotosPreview();
+}
+
 function calcValorComDesconto(){
   var venda=parseFloat(document.getElementById('proj-valor-venda')?document.getElementById('proj-valor-venda').value:0)||0;
   var desc=parseFloat(document.getElementById('proj-desconto')?document.getElementById('proj-desconto').value:0)||0;
@@ -4679,7 +4830,7 @@ function gerarProposta(projId){
   var cfg=getCfg();
   var cl=clientes.find(function(x){return x.id==p.cliente_id;})||{};
 
-  // Dados da empresa com fallbacks do modelo original
+  // Dados da empresa com fallbacks
   var emp={
     razao   : cfg.razao       || 'CONEXÃO DESIGN MÓVEIS E DECORAÇÕES',
     cnpj    : cfg.cnpj        || '58.323.410/0001-53',
@@ -4698,7 +4849,6 @@ function gerarProposta(projId){
     pix     : cfg.pix         || '58.323.410/0001-53'
   };
 
-  // Dados do projeto
   var valorBruto  = parseFloat(p.valor_venda||0);
   var desconto    = parseFloat(p.desconto||0);
   var valorFinal  = parseFloat(p.valor_final||0)||(valorBruto-desconto);
@@ -4710,8 +4860,10 @@ function gerarProposta(projId){
   var linkProjeto = p.link_contato || emp.link;
   var dataHoje    = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
   var primeiroNome= (cl.nome||'Cliente').split(' ')[0];
+  var fotos       = (projId===window._editProjId&&_projFotos.length)?_projFotos:loadProjFotos(p.id);
+  var escopo      = p.desc_escopo||'';
 
-  // Parcelas formatadas
+  // Parcelas
   var parcelasHTML='';
   if(p.cond_pag && valorFinal && typeof getParcelas==='function'){
     var parcelas=getParcelas(p.cond_pag,valorFinal,p.data_receb||fd(td));
@@ -4727,35 +4879,95 @@ function gerarProposta(projId){
     parcelasHTML=(condLabels[p.cond_pag]||p.cond_pag||'A definir');
   }
 
-  var css=`*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:11pt;color:#1a1a1a;background:#fff}.page{width:210mm;min-height:297mm;margin:0 auto;display:flex;flex-direction:column}@media print{.page{margin:0;page-break-after:always}.page:last-child{page-break-after:auto}}.hdr{background:#b2d8d8;padding:24px 20px 16px;text-align:center;border-bottom:3px solid #7ab8b8}.hdr-inner{display:inline-flex;align-items:center;gap:14px}.hdr-line{display:inline-block;width:36px;height:2px;background:#2c2c2c;vertical-align:middle}.hdr-brand{text-align:center}.hdr-conexao{font-size:9pt;letter-spacing:8px;font-weight:700;color:#1a1a1a}.hdr-design{font-size:26pt;font-weight:900;letter-spacing:5px;color:#1a1a1a;line-height:1}.hdr-sub{font-size:7.5pt;letter-spacing:4px;color:#444;text-transform:uppercase;margin-top:3px}.body{padding:18px 22px;flex:1}.box{border:1px solid #ccc;padding:14px;margin-bottom:12px}.box-title{font-weight:700;font-size:10pt;margin-bottom:8px;text-align:center;border-bottom:1px solid #ddd;padding-bottom:5px}.dados-t{width:100%;border-collapse:collapse;margin:8px 0}.dados-t td{padding:5px 8px;border:1px solid #ddd;font-size:10pt;vertical-align:top}.dados-t td:first-child{font-weight:700;width:130px;background:#f5f5f5}.bv{text-align:center;padding:14px 8px}.bv p{margin:3px 0;font-size:10.5pt}.inv-t{width:100%;border-collapse:collapse;margin:8px 0}.inv-t td{padding:9px 12px;border:1px solid #ddd;font-size:10.5pt;vertical-align:top}.inv-t td:first-child{font-weight:700;width:190px;background:#f5f5f5}.cl{margin-bottom:10px}.cl-t{font-weight:700;font-size:10pt;margin-bottom:4px}.cl p,.cl li{font-size:9.5pt;line-height:1.65;margin-bottom:2px}.cl ul{padding-left:16px}.assin{display:flex;justify-content:space-around;margin-top:36px}.assin-ln{text-align:center;padding-top:6px;border-top:1px solid #666;width:220px}.ftr{background:#b2d8d8;padding:7px 20px;text-align:center;font-size:8pt;color:#2c2c2c}`;
+  // ===== CSS com paginação A4 robusta (@page + mm fixos) =====
+  var css=''+
+'@page{size:A4;margin:0}'+
+'*{margin:0;padding:0;box-sizing:border-box}'+
+'html,body{background:#fff;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a}'+
+'.page{width:210mm;height:297mm;margin:0 auto;position:relative;overflow:hidden;display:flex;flex-direction:column;background:#fff}'+
+'.page+.page{page-break-before:always}'+
+'@media print{html,body{width:210mm}.page{margin:0;box-shadow:none;page-break-after:always}.page:last-child{page-break-after:auto}}'+
+'@media screen{.page{box-shadow:0 2px 12px rgba(0,0,0,.15);margin-bottom:16px}body{background:#e8e8e8;padding:16px 0}}'+
+'.hdr{background:#b2d8d8;padding:16mm 12mm 10mm;text-align:center;flex-shrink:0}'+
+'.hdr-inner{display:inline-flex;align-items:center;gap:12px}'+
+'.hdr-line{display:inline-block;width:34px;height:2px;background:#1a1a1a;vertical-align:middle}'+
+'.hdr-conexao{font-size:10pt;letter-spacing:7px;font-weight:700;color:#1a1a1a}'+
+'.hdr-design{font-size:30pt;font-weight:800;letter-spacing:6px;color:#1a1a1a;line-height:1.05}'+
+'.hdr-sub{font-size:7.5pt;letter-spacing:4px;color:#333;text-transform:uppercase;margin-top:2px}'+
+'.body{padding:8mm 12mm;flex:1;overflow:hidden}'+
+'.box{border:1px solid #ccc;padding:10px 12px;margin-bottom:10px}'+
+'.box-title{font-weight:700;font-size:10pt;margin-bottom:7px;text-align:center;border-bottom:1px solid #ddd;padding-bottom:4px}'+
+'.dados-t{width:100%;border-collapse:collapse}'+
+'.dados-t td{padding:5px 8px;border:1px solid #ddd;font-size:10pt;vertical-align:top}'+
+'.dados-t td:first-child{font-weight:700;width:120px;background:#f5f5f5}'+
+'.bv{text-align:center;padding:10px 6px}'+
+'.bv p{margin:3px 0;font-size:10.5pt;line-height:1.5}'+
+'.inv-t{width:100%;border-collapse:collapse}'+
+'.inv-t td{padding:8px 11px;border:1px solid #ddd;font-size:10pt;vertical-align:top}'+
+'.inv-t td:first-child{font-weight:700;width:175px;background:#f5f5f5}'+
+'.esc{white-space:pre-wrap;font-size:9.5pt;line-height:1.6;color:#222}'+
+'.cl{margin-bottom:9px}'+
+'.cl-t{font-weight:700;font-size:10pt;margin-bottom:3px}'+
+'.cl p,.cl li{font-size:9.5pt;line-height:1.55;margin-bottom:2px}'+
+'.cl ul{padding-left:16px}'+
+'.assin{display:flex;justify-content:space-around;margin-top:30px}'+
+'.assin-ln{text-align:center;padding-top:6px;border-top:1px solid #555;width:215px}'+
+'.fotos-grid{display:flex;flex-wrap:wrap;gap:6mm;justify-content:center;align-items:flex-start}'+
+'.foto-item{width:80mm;border:1px solid #ddd;border-radius:4px;overflow:hidden}'+
+'.foto-item img{width:100%;display:block;object-fit:cover;max-height:95mm}'+
+'.ftr{background:#b2d8d8;padding:5mm 12mm;text-align:center;font-size:7.5pt;color:#1a1a1a;flex-shrink:0}';
 
-  // PÁGINA 1 - Capa
-  var p1='<div class="page"><div class="hdr"><div class="hdr-inner"><span class="hdr-line"></span><div class="hdr-brand"><div class="hdr-conexao">CONEXÃO</div><div class="hdr-design">DESIGN</div><div class="hdr-sub">Móveis e Decoração</div></div><span class="hdr-line"></span></div></div><div class="body"><p style="font-weight:700;font-size:10pt;margin-bottom:14px">'+emp.cidade.replace('/GO','').replace('-GO','')+', '+dataHoje+'</p><div class="box"><p><b>'+emp.razao.toUpperCase()+'</b></p><p>CNPJ: '+emp.cnpj+'</p><p>E-MAIL: <b>'+emp.email.toUpperCase()+'</b></p><p>CONTATOS: <b>'+linkProjeto+'</b></p><p>CONTATO: <b>'+emp.tel+'</b> '+respProjeto+'&nbsp;&nbsp;<b>'+emp.tel2+'</b></p></div><div class="box"><div class="box-title">DADOS</div><table class="dados-t"><tr><td>Cliente</td><td>'+(cl.nome||'').toUpperCase()+'</td></tr><tr><td>CPF / CNPJ</td><td>'+(cl.documento||'-')+'</td></tr><tr><td>Telefone</td><td>'+(cl.telefone||'-')+'</td></tr><tr><td>Endereço</td><td>'+(cl.endereco||'-')+(cl.cidade?', '+cl.cidade:'')+'</td></tr><tr><td>Projeto</td><td>'+p.nome+'</td></tr>'+(p.entrega?'<tr><td>Previsão Entrega</td><td>'+dp(p.entrega)+'</td></tr>':'')+'</table></div><div class="bv"><p>Olá, <b style="color:#2c7070">'+primeiroNome.toUpperCase()+'</b></p><p>seja bem-vindo(a) a <b>'+emp.razao+'</b></p><p><b>Agradecemos sua confiança</b></p><p>e apresentamos aqui uma proposta exclusiva para você de acordo com suas especificações.</p><p>Confira nosso orçamento e sinta-se à vontade para entrar em contato para esclarecer qualquer dúvida.</p><p><b>Estamos prontos para transformar seu projeto em realidade</b></p>'+(p.obs_proposta?'<p style="margin-top:10px;color:#555;font-style:italic">'+p.obs_proposta+'</p>':'')+'<div style="text-align:right;margin-top:14px"><p><b>Atenciosamente: '+respProjeto.toUpperCase()+'</b></p><p><b>CONTATO: '+emp.tel.replace(/\s/g,'')+'</b></p></div></div></div><div class="ftr">'+emp.razao+' &nbsp;|&nbsp; CNPJ: '+emp.cnpj+' &nbsp;|&nbsp; END: '+emp.end+' - '+emp.cidade+'</div></div>';
+  var HDR='<div class="hdr"><div class="hdr-inner"><span class="hdr-line"></span><div><div class="hdr-conexao">CONEXÃO</div><div class="hdr-design">DESIGN</div><div class="hdr-sub">Móveis e Decoração</div></div><span class="hdr-line"></span></div></div>';
+  var FTR='<div class="ftr">'+emp.razao+' &nbsp;|&nbsp; CNPJ: '+emp.cnpj+' &nbsp;|&nbsp; '+emp.end+' - '+emp.cidade+'</div>';
 
-  // PÁGINA 2 - Investimento
-  // Quadro de itens (a partir das estimativas do projeto, se houver)
-  var itensProj=[];
-  if(p.estimativas){try{itensProj=JSON.parse(p.estimativas);}catch(e){}}
-  var quadroItensHTML='';
-  if(itensProj.length){
-    var somaItens=0;
-    var linhasItens=itensProj.map(function(it,i){
-      var nome=(typeof catNome==='function'?catNome(it.categoria_id):'')||('Item '+(i+1));
-      var v=parseFloat(it.valor||0); somaItens+=v;
-      return '<tr><td style="text-align:center;background:#fff;font-weight:400;width:40px">'+(i+1)+'</td><td style="background:#fff;font-weight:400;width:auto">'+nome+'</td><td style="text-align:right;background:#fff;font-weight:700;width:140px">R$ '+v.toFixed(2).replace('.',',')+'</td></tr>';
-    }).join('');
-    quadroItensHTML='<div class="box"><div class="box-title">QUADRO DE ITENS</div><table class="inv-t"><tr style="background:#2c2c2c;color:#fff"><td style="background:#2c2c2c;color:#fff;text-align:center;width:40px">Item</td><td style="background:#2c2c2c;color:#fff">Descrição</td><td style="background:#2c2c2c;color:#fff;text-align:right;width:140px">Valor (R$)</td></tr>'+linhasItens+'<tr style="background:#e8f4f4;font-weight:700"><td colspan="2" style="background:#e8f4f4;font-weight:700">VALOR TOTAL</td><td style="text-align:right;background:#e8f4f4;font-weight:700">R$ '+somaItens.toFixed(2).replace('.',',')+'</td></tr></table></div>';
+  // ===== PÁGINA 1 - Capa =====
+  var p1='<div class="page">'+HDR+'<div class="body">'+
+    '<p style="font-weight:700;font-size:10pt;margin-bottom:12px">'+emp.cidade.replace('/GO','').replace('-GO','')+', '+dataHoje+'</p>'+
+    '<div class="box"><p><b>'+emp.razao.toUpperCase()+'</b></p><p>CNPJ: '+emp.cnpj+'</p><p>E-MAIL: <b>'+emp.email.toUpperCase()+'</b></p><p>CONTATOS: <b>'+linkProjeto+'</b></p><p>CONTATO: <b>'+emp.tel+'</b> '+respProjeto+'&nbsp;&nbsp;<b>'+emp.tel2+'</b></p></div>'+
+    '<div class="box"><div class="box-title">DADOS</div><table class="dados-t"><tr><td>Cliente</td><td>'+(cl.nome||'').toUpperCase()+'</td></tr><tr><td>CPF / CNPJ</td><td>'+(cl.documento||'-')+'</td></tr><tr><td>Telefone</td><td>'+(cl.telefone||'-')+'</td></tr><tr><td>Endereço</td><td>'+(cl.endereco||'-')+(cl.cidade?', '+cl.cidade:'')+'</td></tr><tr><td>Projeto</td><td>'+p.nome+'</td></tr>'+(p.entrega?'<tr><td>Previsão Entrega</td><td>'+dp(p.entrega)+'</td></tr>':'')+'</table></div>'+
+    '<div class="bv"><p>Olá, <b style="color:#2c7070">'+primeiroNome.toUpperCase()+'</b></p><p>seja bem-vindo(a) a <b>'+emp.razao+'</b></p><p><b>Agradecemos sua confiança</b></p><p>e apresentamos aqui uma proposta exclusiva para você de acordo com suas especificações.</p><p>Confira nosso orçamento e sinta-se à vontade para entrar em contato para esclarecer qualquer dúvida.</p><p><b>Estamos prontos para transformar seu projeto em realidade</b></p>'+(p.obs_proposta?'<p style="margin-top:8px;color:#555;font-style:italic">'+p.obs_proposta+'</p>':'')+'<div style="text-align:right;margin-top:12px"><p><b>Atenciosamente: '+respProjeto.toUpperCase()+'</b></p><p><b>CONTATO: '+emp.tel.replace(/\s/g,'')+'</b></p></div></div>'+
+    '</div>'+FTR+'</div>';
+
+  // ===== PÁGINA(S) de DESCRIÇÃO / ESCOPO (só se houver) =====
+  var pEscopo='';
+  if(escopo && escopo.trim()){
+    pEscopo='<div class="page">'+HDR+'<div class="body"><div class="box-title" style="border:none;font-size:11pt;margin-bottom:10px">INFORMAÇÕES SOBRE OS PRODUTOS</div><div class="esc">'+escopo.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div></div>'+FTR+'</div>';
   }
+
+  // ===== PÁGINA(S) de FOTOS (só se houver) =====
+  var pFotos='';
+  if(fotos && fotos.length){
+    // 4 fotos por página (2 colunas x 2 linhas aprox)
+    var perPage=4;
+    for(var fi=0; fi<fotos.length; fi+=perPage){
+      var lote=fotos.slice(fi,fi+perPage);
+      var imgsHTML=lote.map(function(src){return '<div class="foto-item"><img src="'+src+'"></div>';}).join('');
+      pFotos+='<div class="page">'+HDR+'<div class="body"><div class="box-title" style="border:none;font-size:11pt;margin-bottom:10px">PROJETO / REFERÊNCIAS'+(fotos.length>perPage?' ('+(Math.floor(fi/perPage)+1)+')':'')+'</div><div class="fotos-grid">'+imgsHTML+'</div></div>'+FTR+'</div>';
+    }
+  }
+
+  // ===== PÁGINA de INVESTIMENTO =====
   var vBrutoFmt='R$ '+valorBruto.toFixed(2).replace('.',',');
   var vFinalFmt='R$ '+valorFinal.toFixed(2).replace('.',',');
   var investLine=valorBruto>0?(vBrutoFmt+(desconto>0?' com desconto de R$ '+desconto.toFixed(2).replace('.',',')+'<br><b style="color:#2c7070;font-size:12pt">'+vFinalFmt+'</b>':'')):'A definir';
-  var p2='<div class="page" style="page-break-before:always"><div class="hdr"><div class="hdr-inner"><span class="hdr-line"></span><div class="hdr-brand"><div class="hdr-conexao">CONEXÃO</div><div class="hdr-design">DESIGN</div><div class="hdr-sub">Móveis e Decoração</div></div><span class="hdr-line"></span></div></div><div class="body">'+quadroItensHTML+'<div class="box"><table class="inv-t"><tr><td>INVESTIMENTO TOTAL</td><td>'+investLine+'</td></tr><tr><td>CONDIÇÃO EXCLUSIVA</td><td>'+parcelasHTML+'</td></tr><tr><td>DADOS DE PAGAMENTO</td><td><b>'+emp.bnome+'</b><br>Banco: '+emp.bcod+'<br>Agência: '+emp.bag+'<br>Número da conta: '+emp.bconta+'<br>Tipo: '+emp.btipo+'<br>CNPJ: '+emp.cnpj+'<br>Nome: '+emp.razao.toUpperCase()+'<br><b>CHAVE PIX: '+emp.pix+'</b></td></tr><tr><td>FRETE</td><td><b>'+freteLbl+'</b></td></tr><tr><td>INSTALAÇÃO</td><td><b>'+instLbl+'</b></td></tr><tr><td>PRAZO DE ENTREGA</td><td><b>'+prazo+' dias a contar da entrada</b>'+(p.entrega?' (previsão: '+dp(p.entrega)+')':'')+'</td></tr></table></div><div class="box"><p style="font-weight:700;font-size:10pt;text-decoration:underline;margin-bottom:6px">GARANTIA</p><p style="font-size:10.5pt;font-weight:700">'+garantia+' ('+{6:'SEIS',12:'DOZE',24:'VINTE E QUATRO'}[garantia]||(garantia+' MESES')+') meses contra defeito de fabricação a partir da data de entrega.</p></div></div><div class="ftr">'+emp.razao+' &nbsp;|&nbsp; CNPJ: '+emp.cnpj+' &nbsp;|&nbsp; END: '+emp.end+' - '+emp.cidade+'</div></div>';
+  var garExt={6:'SEIS',12:'DOZE',18:'DEZOITO',24:'VINTE E QUATRO'}[garantia]||garantia;
+  var pInvest='<div class="page">'+HDR+'<div class="body">'+
+    '<div class="box"><table class="inv-t"><tr><td>INVESTIMENTO TOTAL</td><td>'+investLine+'</td></tr><tr><td>CONDIÇÃO EXCLUSIVA</td><td>'+parcelasHTML+'</td></tr><tr><td>DADOS DE PAGAMENTO</td><td><b>'+emp.bnome+'</b><br>Banco: '+emp.bcod+'<br>Agência: '+emp.bag+'<br>Número da conta: '+emp.bconta+'<br>Tipo: '+emp.btipo+'<br>CNPJ: '+emp.cnpj+'<br>Nome: '+emp.razao.toUpperCase()+'<br><b>CHAVE PIX: '+emp.pix+'</b></td></tr><tr><td>FRETE</td><td><b>'+freteLbl+'</b></td></tr><tr><td>INSTALAÇÃO</td><td><b>'+instLbl+'</b></td></tr><tr><td>PRAZO DE ENTREGA</td><td><b>'+prazo+' dias a contar da entrada</b>'+(p.entrega?' (previsão: '+dp(p.entrega)+')':'')+'</td></tr></table></div>'+
+    '<div class="box"><p style="font-weight:700;font-size:10pt;text-decoration:underline;margin-bottom:5px">GARANTIA</p><p style="font-size:10.5pt;font-weight:700">'+garantia+' ('+garExt+') meses contra defeito de fabricação a partir da data de entrega.</p></div>'+
+    '</div>'+FTR+'</div>';
 
-  // PÁGINA 3 - Contrato
+  // ===== PÁGINA de CONTRATO =====
   var comarca=emp.cidade.split('/')[0].split('-')[0].trim();
-  var p3='<div class="page" style="page-break-before:always"><div class="hdr"><div class="hdr-inner"><span class="hdr-line"></span><div class="hdr-brand"><div class="hdr-conexao">CONEXÃO</div><div class="hdr-design">DESIGN</div><div class="hdr-sub">Móveis e Decoração</div></div><span class="hdr-line"></span></div></div><div class="body"><div class="cl"><p class="cl-t">Responsabilidade da Contratante</p><ul><li>a) <b>Efetuar os pagamentos conforme previstos.</b></li><li>b) <b>Após entregue o serviço, é de total responsabilidade do contratante seguir com as orientações passadas para a conservação das peças;</b></li><li>c) <b>É de responsabilidade financeira da contratante qualquer acréscimo de outros itens que não estejam descritos no Quadro de Custos.</b></li></ul></div><div class="cl"><p class="cl-t">Responsabilidade da Contratada</p><ul><li>d) <b>Entrega de todos os itens conforme descrito nos custos.</b></li><li>e) <b>Entrega de peças de qualidade e tamanho descritos na Cláusula Primeira;</b></li><li>f) <b>Não é de responsabilidade da contratada, após revisado e entregue o serviço, repor peças.</b></li></ul></div><div class="cl"><p class="cl-t">Prazo</p><p><b>O presente instrumento terá início na data de sua assinatura e encerrar-se-á '+prazo+' dias a contar da entrada.</b></p></div><div class="cl"><p class="cl-t">Da Rescisão</p><p><b>Caso o Contratante desista da execução da fabricação, este deverá fazê-lo em um pronunciamento por escrito e, como multa rescisória, 10% do valor deste contrato.</b></p><p style="margin-top:6px"><b>As partes elegem o foro da Comarca de '+comarca+', para dirimir quaisquer dúvidas oriundas do presente instrumento, com expressa renúncia a qualquer outro, por mais privilegiado que seja.</b></p><p style="margin-top:6px"><b>Assim, justas e acertadas, assinam as partes o presente instrumento em duas vias de igual teor e validade.</b></p></div><p style="margin-top:18px;font-weight:700">'+emp.cidade.replace('/GO','').replace('-GO','')+', '+dataHoje+'</p><div class="assin"><div><div class="assin-ln"><div style="font-size:9pt">'+((cl.nome)||'').toUpperCase()+'</div><div style="font-size:8.5pt;color:#666">Assinatura do Cliente</div></div></div><div><div class="assin-ln"><div style="font-size:9pt">'+respProjeto.toUpperCase()+'</div><div style="font-size:8.5pt;color:#666">'+emp.razao+'</div></div></div></div></div><div class="ftr">'+emp.razao+' &nbsp;|&nbsp; CNPJ: '+emp.cnpj+' &nbsp;|&nbsp; END: '+emp.end+' - '+emp.cidade+'</div></div>';
+  var pContrato='<div class="page">'+HDR+'<div class="body">'+
+    '<div class="cl"><p class="cl-t">Responsabilidade da Contratante</p><ul><li>a) <b>Efetuar os pagamentos conforme previstos.</b></li><li>b) <b>Após entregue o serviço, é de total responsabilidade do contratante seguir com as orientações passadas para a conservação das peças;</b></li><li>c) <b>É de responsabilidade financeira da contratante qualquer acréscimo de outros itens que não estejam descritos no Quadro de Custos.</b></li></ul></div>'+
+    '<div class="cl"><p class="cl-t">Responsabilidade da Contratada</p><ul><li>d) <b>Entrega de todos os itens conforme descrito nos custos.</b></li><li>e) <b>Entrega de peças de qualidade e tamanho descritos na Cláusula Primeira;</b></li><li>f) <b>Não é de responsabilidade da contratada, após revisado e entregue o serviço, repor peças.</b></li></ul></div>'+
+    '<div class="cl"><p class="cl-t">Prazo</p><p><b>O presente instrumento terá início na data de sua assinatura e encerrar-se-á '+prazo+' dias a contar da entrada.</b></p></div>'+
+    '<div class="cl"><p class="cl-t">Da Rescisão</p><p><b>Caso o Contratante desista da execução da fabricação, este deverá fazê-lo em um pronunciamento por escrito e, como multa rescisória, 10% do valor deste contrato.</b></p><p style="margin-top:6px"><b>As partes elegem o foro da Comarca de '+comarca+', para dirimir quaisquer dúvidas oriundas do presente instrumento, com expressa renúncia a qualquer outro, por mais privilegiado que seja.</b></p><p style="margin-top:6px"><b>Assim, justas e acertadas, assinam as partes o presente instrumento em duas vias de igual teor e validade.</b></p></div>'+
+    '<p style="margin-top:16px;font-weight:700">'+emp.cidade.replace('/GO','').replace('-GO','')+', '+dataHoje+'</p>'+
+    '<div class="assin"><div><div class="assin-ln"><div style="font-size:9pt">'+((cl.nome)||'').toUpperCase()+'</div><div style="font-size:8.5pt;color:#666">Assinatura do Cliente</div></div></div><div><div class="assin-ln"><div style="font-size:9pt">'+respProjeto.toUpperCase()+'</div><div style="font-size:8.5pt;color:#666">'+emp.razao+'</div></div></div></div>'+
+    '</div>'+FTR+'</div>';
 
-  var html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Proposta - '+p.nome+'</title><style>'+css+'</style></head><body>'+p1+p2+p3+'</body></html>';
+  var html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Proposta - '+p.nome+'</title><style>'+css+'</style></head><body>'+p1+pEscopo+pFotos+pInvest+pContrato+'</body></html>';
   showPrint('Proposta - '+p.nome, html);
 }
 
@@ -4857,6 +5069,146 @@ function gerarContrato(projId){
   var html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Contrato - '+p.nome+'</title><style>'+ccss+'</style></head><body><div class="page">'+H+'<div class="body">'+corpo+'</div>'+F+'</div></body></html>';
   showPrint('Contrato - '+p.nome, html);
 }
+
+// ================================================================
+// PRODUTOS — Cadastro e integração com custos do projeto
+// ================================================================
+var _editProdId = null;
+
+function saveProduto(){
+  var nome=document.getElementById('prod-nome').value.trim();
+  if(!nome){toast('Informe o nome do produto','warn');return;}
+  var user=CURRENT_USER?(CURRENT_USER.name||CURRENT_USER.email):'Sistema';
+  if(_editProdId){
+    var p=produtos.find(function(x){return x.id===_editProdId;});
+    if(p){
+      p.nome=nome;
+      p.codigo=document.getElementById('prod-codigo').value;
+      p.unidade=document.getElementById('prod-unidade').value;
+      p.categoria_id=document.getElementById('prod-categoria').value;
+      p.fornecedor_id=document.getElementById('prod-fornecedor').value;
+      p.custo_medio=parseFloat(document.getElementById('prod-custo-medio').value)||0;
+      p.estoque_min=parseFloat(document.getElementById('prod-estoque-min').value)||0;
+      p.descricao=document.getElementById('prod-descricao').value;
+    }
+    _editProdId=null;
+  } else {
+    produtos.push({
+      id:nextId(produtos), nome:nome,
+      codigo:document.getElementById('prod-codigo').value,
+      unidade:document.getElementById('prod-unidade').value,
+      categoria_id:document.getElementById('prod-categoria').value,
+      fornecedor_id:document.getElementById('prod-fornecedor').value,
+      custo_medio:parseFloat(document.getElementById('prod-custo-medio').value)||0,
+      custo_ultima:0, qtd_compras:0,
+      estoque_min:parseFloat(document.getElementById('prod-estoque-min').value)||0,
+      descricao:document.getElementById('prod-descricao').value,
+      ativo:true, created_by:user
+    });
+  }
+  save();
+  if(ACCESS_TOKEN) syncToSheets('produtos');
+  renderProdutos();
+  populateProdutoSelect();
+  toast('Produto salvo!','ok');
+  ['prod-nome','prod-codigo','prod-custo-medio','prod-estoque-min','prod-descricao'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('prod-unidade').value='un';
+}
+
+function renderProdutos(){
+  var filtro=(document.getElementById('prod-filtro')?document.getElementById('prod-filtro').value||'':'').toLowerCase();
+  var catFil=document.getElementById('prod-filtro-cat')?document.getElementById('prod-filtro-cat').value:'';
+  var list=produtos.filter(function(p){
+    if(!p.ativo) return false;
+    if(filtro&&p.nome.toLowerCase().indexOf(filtro)===-1&&(p.codigo||'').toLowerCase().indexOf(filtro)===-1) return false;
+    if(catFil&&String(p.categoria_id)!==String(catFil)) return false;
+    return true;
+  });
+  var body=document.getElementById('prod-body');
+  if(!body) return;
+  if(!list.length){body.innerHTML='<tr><td colspan="8"><div class="empty">Nenhum produto cadastrado</div></td></tr>';return;}
+  var UN={un:'un',m:'m',m2:'m²',m3:'m³',kg:'kg',L:'L',cx:'cx',pc:'pç',rolo:'rolo',chapa:'chapa'};
+  var html='';
+  list.forEach(function(p){
+    var unLbl=UN[p.unidade]||p.unidade;
+    html+='<tr>'+
+      '<td><b>'+p.nome+'</b>'+(p.descricao?'<br><span style="font-size:10px;color:var(--t3)">'+p.descricao+'</span>':'')+'</td>'+
+      '<td style="font-size:11px;color:var(--t3)">'+(p.codigo||'—')+'</td>'+
+      '<td><span class="tag cat">'+unLbl+'</span></td>'+
+      '<td><span class="tag cat">'+catNome(p.categoria_id)+'</span></td>'+
+      '<td style="font-family:var(--fm);font-weight:600;color:var(--sage)">'+fmt(p.custo_medio)+'/'+unLbl+'</td>'+
+      '<td style="font-family:var(--fm);color:var(--t2)">'+(p.custo_ultima?fmt(p.custo_ultima):'—')+'</td>'+
+      '<td style="text-align:center;color:var(--t3)">'+(p.qtd_compras||0)+'x</td>'+
+      '<td><div class="actbar">'+
+        '<button class="actbtn edit" onclick="editProduto('+p.id+')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="lbl">Editar</span></button>'+
+        '<button class="actbtn del" onclick="delProduto('+p.id+')" title="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button>'+
+      '</div></td></tr>';
+  });
+  body.innerHTML=html;
+  // Atualizar filtro de categoria
+  var fc=document.getElementById('prod-filtro-cat');
+  if(fc){var cur=fc.value;fc.innerHTML='<option value="">Todas categorias</option>'+categorias.map(function(c){return'<option value="'+c.id+'"'+(String(c.id)===cur?' selected':'')+'>'+c.nome+'</option>';}).join('');fc.value=cur;}
+}
+
+function editProduto(id){
+  var p=produtos.find(function(x){return x.id===id;}); if(!p) return;
+  _editProdId=id;
+  var _sv=function(elId,val){var el=document.getElementById(elId);if(el)el.value=val||'';};
+  _sv('prod-nome',p.nome); _sv('prod-codigo',p.codigo);
+  _sv('prod-custo-medio',p.custo_medio||''); _sv('prod-estoque-min',p.estoque_min||'');
+  _sv('prod-descricao',p.descricao);
+  var elUn=document.getElementById('prod-unidade'); if(elUn) elUn.value=p.unidade||'un';
+  var elCat=document.getElementById('prod-categoria'); if(elCat) elCat.value=p.categoria_id||'';
+  var elForn=document.getElementById('prod-fornecedor'); if(elForn) elForn.value=p.fornecedor_id||'';
+  go('produtos');
+  toast('Editando: '+p.nome,'info');
+}
+
+function delProduto(id){
+  if(!confirm('Excluir produto?')) return;
+  produtos=produtos.filter(function(x){return x.id!==id;});
+  save(); if(ACCESS_TOKEN) syncToSheets('produtos');
+  renderProdutos(); populateProdutoSelect();
+  toast('Produto removido','info');
+}
+
+function populateProdutoSelect(){
+  var sel=document.getElementById('custo-produto'); if(!sel) return;
+  var cur=sel.value;
+  var UN={un:'un',m:'m',m2:'m²',m3:'m³',kg:'kg',L:'L',cx:'cx',pc:'pç',rolo:'rolo',chapa:'chapa'};
+  sel.innerHTML='<option value="">Digitar manualmente...</option>'+
+    (typeof produtos!=='undefined'?produtos:[]).filter(function(p){return p.ativo;}).map(function(p){
+      var un=UN[p.unidade]||p.unidade;
+      return'<option value="'+p.id+'"'+(String(p.id)===String(cur)?' selected':'')+'>'+p.nome+(p.custo_medio?' — '+fmt(p.custo_medio)+'/'+un:'')+' </option>';
+    }).join('');
+}
+
+function onSelectProdutoCusto(){
+  var sel=document.getElementById('custo-produto'); if(!sel) return;
+  var pid=sel.value; if(!pid) return;
+  var p=(typeof produtos!=='undefined'?produtos:[]).find(function(x){return String(x.id)===String(pid);}); if(!p) return;
+  var elDesc=document.getElementById('custo-desc'); if(elDesc) elDesc.value=p.nome+(p.codigo?' ('+p.codigo+')':'');
+  var elTipo=document.getElementById('custo-tipo'); if(elTipo&&p.categoria_id) elTipo.value=String(p.categoria_id);
+  var elUnit=document.getElementById('custo-valor-unit'); if(elUnit&&p.custo_medio) elUnit.value=p.custo_medio.toFixed(2);
+  calcCustoTotal();
+}
+
+function calcCustoTotal(){
+  var qtd=parseFloat(document.getElementById('custo-qtd')?document.getElementById('custo-qtd').value:1)||1;
+  var unit=parseFloat(document.getElementById('custo-valor-unit')?document.getElementById('custo-valor-unit').value:0)||0;
+  var elTotal=document.getElementById('custo-valor');
+  if(elTotal&&unit>0) elTotal.value=(qtd*unit).toFixed(2);
+}
+
+function atualizarCustoProduto(prodId, novoValorUnit){
+  var p=(typeof produtos!=='undefined'?produtos:[]).find(function(x){return String(x.id)===String(prodId);}); if(!p) return;
+  p.custo_ultima=novoValorUnit;
+  p.qtd_compras=(p.qtd_compras||0)+1;
+  p.custo_medio=p.qtd_compras>1?((p.custo_medio*(p.qtd_compras-1)+novoValorUnit)/p.qtd_compras):novoValorUnit;
+  save(); if(ACCESS_TOKEN) syncToSheets('produtos');
+}
 function saveProjeto(){
   var nome=document.getElementById('proj-nome').value.trim();
   if(!nome){toast('Informe o nome do projeto','warn');return;}
@@ -4897,6 +5249,7 @@ function saveProjeto(){
     responsavel:(document.getElementById('proj-responsavel')?document.getElementById('proj-responsavel').value:''),
     link_contato:(document.getElementById('proj-link-contato')?document.getElementById('proj-link-contato').value:''),
     obs_proposta:(document.getElementById('proj-obs-proposta')?document.getElementById('proj-obs-proposta').value:''),
+    desc_escopo:(document.getElementById('proj-desc-escopo')?document.getElementById('proj-desc-escopo').value:''),
     updated_by:user,
     updated_at:new Date().toISOString()
   };
@@ -4926,6 +5279,9 @@ function saveProjeto(){
     projetos.push(dados);
     logActivity('Novo projeto: '+nome);
   }
+  // Salvar fotos da proposta (localStorage, vinculadas ao id do projeto)
+  var _savedProjId = editId || dados.id;
+  if(typeof _projFotos!=='undefined') saveProjFotos(_savedProjId, _projFotos);
   saveProj();
   if(ACCESS_TOKEN) syncToSheets('projetos');
   projTab('lista',document.getElementById('proj-tab-lista'));
@@ -4935,6 +5291,8 @@ function saveProjeto(){
   var elStRec=document.getElementById('proj-status-receb');if(elStRec)elStRec.value='pendente';
   var prev=document.getElementById('proj-parcelas-preview');if(prev)prev.style.display='none';
   ['proj-desconto','proj-valor-final','proj-prazo-dias','proj-responsavel','proj-link-contato','proj-obs-proposta'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var elEsc=document.getElementById('proj-desc-escopo');if(elEsc)elEsc.value='';
+  _projFotos=[];renderProjFotosPreview();
   var elGar=document.getElementById('proj-garantia');if(elGar)elGar.value='12';
   var elPrev=document.getElementById('btn-prev-proposta');if(elPrev)elPrev.style.display='none';
   window._editProjId=null;
@@ -4986,6 +5344,8 @@ function editProjeto(id){
   _sv('proj-responsavel',p.responsavel||'');
   _sv('proj-link-contato',p.link_contato||'');
   _sv('proj-obs-proposta',p.obs_proposta||'');
+  _sv('proj-desc-escopo',p.desc_escopo||'');
+  _projFotos=loadProjFotos(p.id);renderProjFotosPreview();
   var elFrete=document.getElementById('proj-frete');if(elFrete)elFrete.value=p.frete||'incluso';
   var elInst=document.getElementById('proj-instalacao');if(elInst)elInst.value=p.instalacao||'inclusa';
   populateCondPagSelect();
