@@ -4941,10 +4941,10 @@ function gerarProposta(projId){
   if(p.cond_pag && valorFinal && typeof getParcelas==='function'){
     var parcelas=getParcelas(p.cond_pag,valorFinal,p.data_receb||fd(td));
     if(parcelas.length===1){
-      parcelasHTML=parcelas[0].descricao+': <b>R$ '+parcelas[0].valor.toFixed(2).replace('.',',')+'</b>';
+      parcelasHTML=parcelas[0].descricao+': <b>'+fmt(parcelas[0].valor)+'</b>';
     } else {
       parcelasHTML=parcelas.map(function(pa){
-        return pa.descricao+': <b>R$ '+pa.valor.toFixed(2).replace('.',',')+'</b>'+(pa.vencimento?' ('+dp(pa.vencimento)+')':'');
+        return pa.descricao+': <b>'+fmt(pa.valor)+'</b>'+(pa.vencimento?' ('+dp(pa.vencimento)+')':'');
       }).join('<br>');
     }
   } else {
@@ -5023,7 +5023,7 @@ function gerarProposta(projId){
         return '<div class="item-blk">'+
           '<div class="item-nome">'+esc(it.nome||'Item')+'</div>'+
           '<div class="item-cols">'+
-            '<div class="item-desc">'+esc(it.descricao||'')+(it.valor?'<div class="item-val">VALOR: R$ '+parseFloat(it.valor).toFixed(2).replace('.',',')+'</div>':'')+'</div>'+
+            '<div class="item-desc">'+esc(it.descricao||'')+(it.valor?'<div class="item-val">VALOR: '+fmt(it.valor)+'</div>':'')+'</div>'+
             (fotosImg?'<div class="item-fotos">'+fotosImg+'</div>':'')+
           '</div>'+
         '</div>';
@@ -5036,17 +5036,17 @@ function gerarProposta(projId){
   }
 
   // ===== PÁGINA de INVESTIMENTO =====
-  var vBrutoFmt='R$ '+valorBruto.toFixed(2).replace('.',',');
-  var vFinalFmt='R$ '+valorFinal.toFixed(2).replace('.',',');
-  var investLine=valorBruto>0?(vBrutoFmt+(desconto>0?' com desconto de R$ '+desconto.toFixed(2).replace('.',',')+'<br><b style="color:#2c7070;font-size:12pt">'+vFinalFmt+'</b>':'')):'A definir';
+  var vBrutoFmt=fmt(valorBruto);
+  var vFinalFmt=fmt(valorFinal);
+  var investLine=valorBruto>0?(vBrutoFmt+(desconto>0?' com desconto de '+fmt(desconto)+'<br><b style="color:#2c7070;font-size:12pt">'+vFinalFmt+'</b>':'')):'A definir';
   var garExt={6:'SEIS',12:'DOZE',18:'DEZOITO',24:'VINTE E QUATRO'}[garantia]||garantia;
   // Quadro resumo de itens, se houver
   var quadroResumo='';
   if(itens.length){
     var linhas=itens.map(function(it,idx){
-      return '<tr><td style="text-align:center;width:40px">'+(idx+1)+'</td><td>'+esc(it.nome||'Item')+'</td><td style="text-align:right;width:130px;font-weight:600">R$ '+(parseFloat(it.valor)||0).toFixed(2).replace('.',',')+'</td></tr>';
+      return '<tr><td style="text-align:center;width:40px">'+(idx+1)+'</td><td>'+esc(it.nome||'Item')+'</td><td style="text-align:right;width:130px;font-weight:600">'+fmt(parseFloat(it.valor)||0)+'</td></tr>';
     }).join('');
-    quadroResumo='<div class="box"><div class="box-title">QUADRO DE ITENS</div><table class="inv-t" style="border:1px solid #ddd"><tr style="background:#2c2c2c"><td style="background:#2c2c2c;color:#fff;text-align:center;width:40px;font-weight:700">Nº</td><td style="background:#2c2c2c;color:#fff;font-weight:700">Descrição</td><td style="background:#2c2c2c;color:#fff;text-align:right;width:130px;font-weight:700">Valor</td></tr>'+linhas+'<tr style="background:#e8f4f4"><td colspan="2" style="background:#e8f4f4;font-weight:700">VALOR TOTAL</td><td style="background:#e8f4f4;text-align:right;font-weight:700">R$ '+somaItens.toFixed(2).replace('.',',')+'</td></tr></table></div>';
+    quadroResumo='<div class="box"><div class="box-title">QUADRO DE ITENS</div><table class="inv-t" style="border:1px solid #ddd"><tr style="background:#2c2c2c"><td style="background:#2c2c2c;color:#fff;text-align:center;width:40px;font-weight:700">Nº</td><td style="background:#2c2c2c;color:#fff;font-weight:700">Descrição</td><td style="background:#2c2c2c;color:#fff;text-align:right;width:130px;font-weight:700">Valor</td></tr>'+linhas+'<tr style="background:#e8f4f4"><td colspan="2" style="background:#e8f4f4;font-weight:700">VALOR TOTAL</td><td style="background:#e8f4f4;text-align:right;font-weight:700">'+fmt(somaItens)+'</td></tr></table></div>';
   }
   var pInvest='<div class="page">'+HDR+'<div class="body">'+quadroResumo+
     '<div class="box"><table class="inv-t"><tr><td>INVESTIMENTO TOTAL</td><td>'+investLine+'</td></tr><tr><td>CONDIÇÃO EXCLUSIVA</td><td>'+parcelasHTML+'</td></tr><tr><td>DADOS DE PAGAMENTO</td><td><b>'+emp.bnome+'</b><br>Banco: '+emp.bcod+'<br>Agência: '+emp.bag+'<br>Número da conta: '+emp.bconta+'<br>Tipo: '+emp.btipo+'<br>CNPJ: '+emp.cnpj+'<br>Nome: '+emp.razao.toUpperCase()+'<br><b>CHAVE PIX: '+emp.pix+'</b></td></tr><tr><td>FRETE</td><td><b>'+freteLbl+'</b></td></tr><tr><td>INSTALAÇÃO</td><td><b>'+instLbl+'</b></td></tr><tr><td>PRAZO DE ENTREGA</td><td><b>'+prazo+' dias a contar da entrada</b>'+(p.entrega?' (previsão: '+dp(p.entrega)+')':'')+'</td></tr></table></div>'+
@@ -5097,18 +5097,18 @@ function gerarContrato(projId){
   var linhasItens=itensProj.map(function(it,i){
     var nome=(typeof catNome==='function'?catNome(it.categoria_id):'')||('Item '+(i+1));
     var v=parseFloat(it.valor||0); somaItens+=v;
-    return '<tr><td style="text-align:center">'+(i+1)+'</td><td>'+nome+'</td><td style="text-align:right">'+v.toFixed(2).replace('.',',')+'</td></tr>';
+    return '<tr><td style="text-align:center">'+(i+1)+'</td><td>'+nome+'</td><td style="text-align:right">'+fmt(v)+'</td></tr>';
   }).join('');
-  var quadroItens=itensProj.length?('<table class="ct"><tr><th style="width:36px">Item</th><th>Descrição</th><th style="width:120px;text-align:right">Valor (R$)</th></tr>'+linhasItens+'<tr style="font-weight:700;background:#eee"><td colspan="2">VALOR TOTAL</td><td style="text-align:right">'+somaItens.toFixed(2).replace('.',',')+'</td></tr></table>'):'';
+  var quadroItens=itensProj.length?('<table class="ct"><tr><th style="width:36px">Item</th><th>Descrição</th><th style="width:120px;text-align:right">Valor (R$)</th></tr>'+linhasItens+'<tr style="font-weight:700;background:#eee"><td colspan="2">VALOR TOTAL</td><td style="text-align:right">'+fmt(somaItens)+'</td></tr></table>'):'';
 
   // Parcelas
   var parcelasTxt='';
   if(p.cond_pag && valorTotal && typeof getParcelas==='function'){
     var parc=getParcelas(p.cond_pag,valorTotal,p.data_receb||fd(td));
     if(parc.length>1){
-      parcelasTxt='<ul>'+parc.map(function(pa){return '<li>'+pa.descricao+': <b>R$ '+pa.valor.toFixed(2).replace('.',',')+'</b>'+(pa.vencimento?' (venc. '+dp(pa.vencimento)+')':'')+'</li>';}).join('')+'</ul>';
+      parcelasTxt='<ul>'+parc.map(function(pa){return '<li>'+pa.descricao+': <b>'+fmt(pa.valor)+'</b>'+(pa.vencimento?' (venc. '+dp(pa.vencimento)+')':'')+'</li>';}).join('')+'</ul>';
     } else if(parc.length===1){
-      parcelasTxt='<p>Pagamento em parcela única de <b>R$ '+parc[0].valor.toFixed(2).replace('.',',')+'</b>.</p>';
+      parcelasTxt='<p>Pagamento em parcela única de <b>'+fmt(parc[0].valor)+'</b>.</p>';
     }
   }
   if(!parcelasTxt) parcelasTxt='<p>Conforme condição de pagamento acordada entre as Partes.</p>';
@@ -5130,7 +5130,7 @@ function gerarContrato(projId){
     quadroItens+
 
     '<div class="cl">Cláusula 2ª - Do Valor</div>'+
-    '<p class="c">Pelo integral cumprimento do objeto, o CONTRATANTE pagará à CONTRATADA o valor total, certo e ajustado, de <b>R$ '+valorTotal.toFixed(2).replace('.',',')+'</b>, no qual já estão incluídos todos os custos, tributos, encargos, materiais, mão de obra, transporte e demais despesas necessárias à integral execução, nada mais podendo ser exigido a esse título, ressalvados itens adicionais não previstos no quadro acima.</p>'+
+    '<p class="c">Pelo integral cumprimento do objeto, o CONTRATANTE pagará à CONTRATADA o valor total, certo e ajustado, de <b>'+fmt(valorTotal)+'</b>, no qual já estão incluídos todos os custos, tributos, encargos, materiais, mão de obra, transporte e demais despesas necessárias à integral execução, nada mais podendo ser exigido a esse título, ressalvados itens adicionais não previstos no quadro acima.</p>'+
 
     '<div class="cl">Cláusula 3ª - Da Forma de Pagamento</div>'+
     parcelasTxt+
