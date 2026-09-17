@@ -319,6 +319,19 @@ textarea.fi{resize:vertical;min-height:72px}
 .amenu-item.danger svg{color:var(--red)}
 .amenu-item.danger:hover{background:var(--red-s)}
 .amenu-sep{height:1px;background:var(--bd);margin:4px 6px}
+
+.filtro-box{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:14px}
+.filtro-linha{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filtro-linha+.filtro-linha{margin-top:9px;padding-top:9px;border-top:1px solid var(--bg3)}
+.filtro-tit{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);min-width:112px}
+.filtro-inp{width:auto;min-width:auto;padding:5px 9px;font-size:11px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:11px;padding:4px 11px;border-radius:14px;border:1px solid var(--bd);background:transparent;color:var(--t2);cursor:pointer;user-select:none}
+.chip:hover{border-color:var(--sage)}
+.chip.on{background:var(--sage);border-color:var(--sage);color:#fff;font-weight:600}
+.filtro-resumo{font-size:11px;color:var(--t3);margin-left:auto}
+.req{color:var(--red);margin-left:3px}
+.fi.erro{border-color:var(--red)!important;background:rgba(200,40,40,.06)}
 </style>
 </head>
 <body>
@@ -1077,20 +1090,25 @@ textarea.fi{resize:vertical;min-height:72px}
       <div class="card mb16">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
           <div class="ch" style="flex:1;margin:0">Projetos</div>
-          <select class="fi" id="proj-filtro-status" onchange="renderProjetos()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
-            <option value="todos">Todos</option>
-            <option value="rascunho">Rascunho</option>
-            <option value="orcamento">Orçado</option>
-            <option value="aprovado">Aprovado</option>
-            <option value="execucao">Em Execução</option>
-            <option value="finalizado">Finalizado</option>
-            <option value="cancelado">Cancelado</option>
-          </select>
-          <input type="month" class="fi" id="proj-filtro-mes" onchange="renderProjetos()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+        </div>
+        <div class="filtro-box" id="proj-filtros">
+          <div class="filtro-linha">
+            <span class="filtro-tit">Status</span>
+            <div class="chips" id="proj-chips-status"></div>
+          </div>
+          <div class="filtro-linha">
+            <span class="filtro-tit">Período de início</span>
+            <input type="date" class="fi filtro-inp" id="proj-filtro-ini" onchange="renderProjetos()">
+            <span style="font-size:11px;color:var(--t3)">até</span>
+            <input type="date" class="fi filtro-inp" id="proj-filtro-fim" onchange="renderProjetos()">
+            <button class="btn sm" onclick="projPeriodoMes()">Mês atual</button>
+            <button class="btn sm" onclick="projPeriodoTudo()">Todo o histórico</button>
+            <span class="filtro-resumo" id="proj-filtro-resumo"></span>
+          </div>
         </div>
         <div class="tbl-wrap">
           <table class="tbl">
-            <thead><tr><th>Projeto</th><th>Cliente</th><th>Início</th><th>Entrega</th><th>Status</th><th>Valor Venda</th><th>Cond. Pgto</th><th>Estimado</th><th>Real</th><th>Margem</th><th></th></tr></thead>
+            <thead><tr><th>Projeto</th><th>Cliente</th><th>Início</th><th>Entrega</th><th>Valor Venda</th><th>Status</th><th>Cond. Pgto</th><th>Estimado</th><th>Real</th><th>Margem</th><th></th></tr></thead>
             <tbody id="proj-body"></tbody>
           </table>
         </div>
@@ -1101,10 +1119,11 @@ textarea.fi{resize:vertical;min-height:72px}
     <div id="proj-panel-novo" style="display:none">
       <div class="card mb16">
         <div class="ch" id="proj-form-title">Novo Projeto</div>
+        <div style="font-size:11px;color:var(--t3);margin:-6px 0 10px">Campos com <span class="req">*</span> são obrigatórios.</div>
         <input type="hidden" id="proj-edit-id">
         <div class="frow">
-          <div class="fgroup" style="flex:2"><label class="flabel">Nome do Projeto</label><input type="text" class="fi" id="proj-nome" placeholder="Ex: Dormitório Casal - Dr. Pablo..."></div>
-          <div class="fgroup"><label class="flabel">Cliente</label><select class="fi" id="proj-cliente"><option value="">Selecione...</option></select></div>
+          <div class="fgroup" style="flex:2"><label class="flabel">Nome do Projeto<span class="req">*</span></label><input type="text" class="fi" id="proj-nome" placeholder="Ex: Dormitório Casal - Dr. Pablo..."></div>
+          <div class="fgroup"><label class="flabel">Cliente<span class="req">*</span></label><select class="fi" id="proj-cliente"><option value="">Selecione...</option></select></div>
           <div class="fgroup"><label class="flabel">Status</label>
             <select class="fi" id="proj-status">
               <option value="rascunho">Rascunho</option>
@@ -1117,12 +1136,12 @@ textarea.fi{resize:vertical;min-height:72px}
           </div>
         </div>
         <div class="frow">
-          <div class="fgroup"><label class="flabel">Data Início</label><input type="date" class="fi" id="proj-inicio"></div>
+          <div class="fgroup"><label class="flabel">Data Início<span class="req">*</span></label><input type="date" class="fi" id="proj-inicio"></div>
           <div class="fgroup"><label class="flabel">Previsão Entrega</label><input type="date" class="fi" id="proj-entrega"></div>
-          <div class="fgroup" style="flex:2"><label class="flabel">Descrição</label><input type="text" class="fi" id="proj-desc" placeholder="Descrição do projeto..."></div>
+          <div class="fgroup" style="flex:2"><label class="flabel">Descrição<span class="req">*</span></label><input type="text" class="fi" id="proj-desc" placeholder="Descrição do projeto..."></div>
         </div>
         <div class="frow" style="background:var(--bg2);border-radius:8px;padding:12px;margin-top:4px;border:1px solid var(--bd)">
-          <div class="fgroup"><label class="flabel">Valor do Projeto (R$) <span style="color:var(--sage)">●</span></label><input type="number" class="fi" id="proj-valor-venda" placeholder="0,00" step="0.01" oninput="calcValorComDesconto()"></div>
+          <div class="fgroup"><label class="flabel">Valor do Projeto (R$)<span class="req">*</span></label><input type="number" class="fi" id="proj-valor-venda" placeholder="0,00" step="0.01" oninput="calcValorComDesconto()"></div>
           <div class="fgroup" style="flex:2"><label class="flabel">Condição de Pagamento</label>
             <div style="display:flex;gap:6px;align-items:center">
               <select class="fi" id="proj-cond-pag" onchange="onChangCondPag()" style="flex:1">
@@ -1485,7 +1504,7 @@ function _getTokenClient(){
   if(typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) return null;
   _tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: GOOGLE_CLIENT_ID,
-    scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+    scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
     callback: function(tokenResponse){
       if(tokenResponse && tokenResponse.access_token){
         ACCESS_TOKEN = tokenResponse.access_token;
@@ -1608,16 +1627,24 @@ async function sheetsGet(sheetName){
 }
 
 async function sheetsAppend(sheetName, row){
-  if(!ACCESS_TOKEN) return;
+  if(!ACCESS_TOKEN) return false;
   syncStart();
   try{
     var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!A:AB') + ':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS';
-    await fetch(url, {
+    var res = await fetch(url, {
       method: 'POST',
       headers: {Authorization: 'Bearer ' + ACCESS_TOKEN, 'Content-Type': 'application/json'},
       body: JSON.stringify({values: [row]})
     });
-  } catch(e){ toast('Erro ao salvar no Sheets','warn'); }
+    if(!res.ok){
+      var det = 'HTTP ' + res.status;
+      try{ var b = await res.json(); if(b && b.error && b.error.message) det += ': ' + b.error.message; }catch(e2){}
+      registraFalhaSync(sheetName, det);
+      toast('Nao gravou em ' + sheetName + ' (' + det + ')','warn');
+      return false;
+    }
+    return true;
+  } catch(e){ registraFalhaSync(sheetName, e.message||'rede'); toast('Erro ao salvar no Sheets','warn'); return false; }
   finally{ syncEnd(); }
 }
 
@@ -1707,24 +1734,38 @@ async function initSheets(){
     ProjetoRateio:['id','projeto_id','origem','origem_id','funcionario_id','semana','mes','percentual','valor_rateado','data','categoria_id'],
     Log:['id','ts','user','action'],
     Config:['chave','valor'],
-    CondicoesPagamento:['id','descricao','parcelas_json']
+    Parcelamentos:['id','descricao','parcelas_json']
   };
-  // Proteção: só cria cabeçalho se aba estiver COMPLETAMENTE vazia (sem nenhuma linha)
+  // Protecao: so cria cabecalho se a aba estiver COMPLETAMENTE vazia
+  var _abasComProblema = [];
   for(var sheet in headers){
     var rows = await sheetsGet(sheet);
-    if(!rows || rows.length === 0){
-      // Aba vazia ou não existe - criar cabeçalho
-      await sheetsAppend(sheet, headers[sheet]);
-      console.log('initSheets: cabeçalho criado para', sheet);
+    if(rows === null){
+      // LEITURA FALHOU. Nao escrever nada: antes, este caminho acrescentava
+      // uma linha de cabecalho no FIM de abas que ja tinham dados.
+      console.warn('initSheets: leitura de '+sheet+' falhou, nada sera escrito');
+      _abasComProblema.push(sheet);
+      continue;
+    }
+    if(rows.length === 0){
+      var okh = await sheetsAppend(sheet, headers[sheet]);
+      if(!okh) _abasComProblema.push(sheet);
+      else console.log('initSheets: cabecalho criado para', sheet);
     }
     // Se rows.length > 0, aba já tem dados - NÃO tocar
+  }
+  if(_abasComProblema.length){
+    toast('Abas com problema (inexistentes ou sem permissao): '+_abasComProblema.join(', '),'warn');
+    console.warn('initSheets: abas com problema:', _abasComProblema);
   }
   // Carregar todos os dados
   await loadAllData();
 }
 
+window._abaCarregada = window._abaCarregada || {};
 async function loadAllData(){
   syncStart();
+  window._abaCarregada = {};
   try{
     // Load each collection from Sheets
     var loaders = [
@@ -1742,11 +1783,17 @@ async function loadAllData(){
       {key:'proj_custos', sheet:'ProjetoCustos', parser: function(r){return {id:+r[0],projeto_id:+r[1],tipo:r[2]||'',descricao:r[3]||'',valor:+r[4]||0,data:r[5]||'',created_by:r[6]||''};}},
       {key:'proj_rateio', sheet:'ProjetoRateio', parser: function(r){return {id:+r[0],projeto_id:+r[1],origem:r[2]||'',origem_id:r[3]||'',funcionario_id:+r[4]||0,semana:r[5]||'',mes:r[6]||'',percentual:+r[7]||0,valor_rateado:+r[8]||0,data:r[9]||'',categoria_id:r[10]||''};}},
       {key:'log', sheet:'Log', parser: parseLog},
-      {key:'cond_pagamento', sheet:'CondicoesPagamento', parser: parseCondPag}
+      {key:'cond_pagamento', sheet:'Parcelamentos', parser: parseCondPag},
+      {key:'contas_bancarias', sheet:'ContasBancarias', parser: parseContaBancaria}
     ];
     for(var i=0; i<loaders.length; i++){
       var l = loaders[i];
       var rows = await sheetsGet(l.sheet);
+      // marca a aba como carregada SOMENTE se a leitura realmente voltou.
+      // rows===null significa erro (401, 429, rede). Nesse caso a colecao em
+      // memoria continua sendo a copia local antiga, e gravar por cima
+      // apagaria a planilha. Por isso a aba fica bloqueada para escrita.
+      window._abaCarregada[l.sheet] = (rows !== null);
       if(rows && rows.length > 1){
         var data = rows.slice(1).map(l.parser).filter(function(x){ return x && x.id; });
         if(l.key === 'transacoes') transacoes = data;
@@ -1772,7 +1819,11 @@ async function loadAllData(){
                     var locais=loadItensProposta(pr.id);
                     var merged=itensTexto.map(function(it,idx){
                       var fotosLocais=(locais[idx]&&locais[idx].fotos)?locais[idx].fotos:[];
-                      return {nome:it.nome||'',descricao:it.descricao||'',valor:it.valor||0,fotos:fotosLocais};
+                      // referencias do Drive vindas da planilha + fotos antigas em base64 que so existem aqui
+                      var fotosSheet=(it.fotos||[]).filter(function(f){return String(f).indexOf('drive:')===0;});
+                      var antigasLocais=fotosLocais.filter(function(f){return String(f).indexOf('data:')===0;});
+                      var fotosFinal=fotosSheet.concat(antigasLocais);
+                      return {nome:it.nome||'',descricao:it.descricao||'',valor:it.valor||0,fotos:fotosFinal.length?fotosFinal:fotosLocais};
                     });
                     saveItensProposta(pr.id, merged);
                   }
@@ -1798,11 +1849,28 @@ async function loadAllData(){
           }
         }
         else if(l.key === 'cond_pagamento'){ if(data.length){ cond_pagamento=data; saveCondPag(); } }
+        else if(l.key === 'contas_bancarias'){
+          // MERGE por id: a planilha manda no que ja existe la, e as contas que
+          // so existem neste navegador sao preservadas e sobem no proximo sync.
+          var porId = {};
+          contas_bancarias.forEach(function(c){ porId[c.id] = c; });
+          data.forEach(function(c){ porId[c.id] = Object.assign({}, porId[c.id]||{}, c); });
+          contas_bancarias = Object.keys(porId).map(function(k){ return porId[k]; })
+                                   .sort(function(a,b){ return (a.id||0)-(b.id||0); });
+          ss('contas_bancarias', contas_bancarias);
+        }
       }
     }
     populateCatSelect('cx-cat');
-    // Dados carregados da planilha: a partir daqui é seguro gravar.
+    // Dados carregados: a partir daqui e seguro gravar, porem SOMENTE nas abas
+    // que de fato foram lidas (ver window._abaCarregada).
     window._dadosCarregados = true;
+    var _falhou = loaders.filter(function(l){ return !window._abaCarregada[l.sheet]; })
+                         .map(function(l){ return l.sheet; });
+    if(_falhou.length){
+      toast('ATENCAO: nao consegui ler ' + _falhou.join(', ') + '. Essas abas ficam bloqueadas para gravacao ate recarregar a pagina.','warn');
+      console.warn('abas nao carregadas:', _falhou);
+    }
     renderDash();
     updateBadgeReceber();
     if(typeof viewAtual!=='undefined' && viewAtual==='projetos') renderProjetos();
@@ -1834,6 +1902,10 @@ function rowFuncionario(f){ return [f.id,f.nome,f.cargo,f.telefone,f.cpf,(parseF
 function rowPonto(p){ return [p.id,p.funcionario_id,p.data,p.tipo,p.horas,p.obs,p.created_at||'',p.created_by||'',(p.valor_hora_hist==null?'':p.valor_hora_hist),(p.valor_diaria_hist==null?'':p.valor_diaria_hist),(p.valor_diaria_not_hist==null?'':p.valor_diaria_not_hist),(p.valor_calculado==null?'':p.valor_calculado),p.data_base_calculo||'']; }
 function rowLog(l){ return [l.id||'',l.ts||'',l.user||'',l.action||'']; }
 function rowCondPag(cp){ return [cp.id,cp.descricao||'',JSON.stringify(cp.parcelas||[])]; }
+function parseContaBancaria(r){
+  return {id:+r[0],nome:r[1]||'',banco:r[2]||'',tipo:r[3]||'',agencia:r[4]||'',
+          conta:r[5]||'',saldo_inicial:+r[6]||0,ativo:r[7]!=='false'&&r[7]!==false,cor:r[8]||''};
+}
 function parseCondPag(r){ var p=[]; try{p=JSON.parse(r[2]||'[]');}catch(e){p=[];} return {id:+r[0],descricao:r[1]||'',parcelas:p}; }
 function parseLog(r){ return {id:r[0]||'',ts:r[1]||'',user:r[2]||'',action:r[3]||''}; }
 function rowRefeicao(r){ return [r.id,r.funcionario_id,r.fornecedor_id,r.data,r.tipo,r.valor]; }
@@ -2443,12 +2515,12 @@ async function _syncToSheetsRaw(type){
     p.teve_arquiteto||false,p.nome_arquiteto||'',p.percentual_arquiteto||0,p.valor_arquiteto||0,
     p.estimativas||'',p.est_total||0,
     p.updated_by||'',p.updated_at||'',p.desc_escopo||'',
-    (function(){try{var its=loadItensProposta(p.id);return JSON.stringify(its.map(function(it){return {nome:it.nome,descricao:it.descricao,valor:it.valor};}));}catch(e){return '';}})()
+    (function(){try{var its=loadItensProposta(p.id);return JSON.stringify(its.map(function(it){return {nome:it.nome,descricao:it.descricao,valor:it.valor,fotos:(it.fotos||[]).filter(function(f){return String(f).indexOf('drive:')===0;})};}));}catch(e){return '';}})()
   ];}},
     proj_custos:{data:proj_custos,sheet:'ProjetoCustos',row:function(c){return[c.id,c.projeto_id,c.tipo,c.descricao,c.valor,c.data,c.created_by];}},
     proj_rateio:{data:proj_rateio,sheet:'ProjetoRateio',row:function(r){return[r.id,r.projeto_id,r.origem,r.origem_id||'',r.funcionario_id||'',r.semana||'',r.mes||'',r.percentual,r.valor_rateado,r.data,r.categoria_id||''];}},
     log:{data:actLog.slice().reverse(),sheet:'Log',row:rowLog},
-    cond_pagamento:{data:cond_pagamento,sheet:'CondicoesPagamento',row:rowCondPag},
+    cond_pagamento:{data:cond_pagamento,sheet:'Parcelamentos',row:rowCondPag},
     pontos:{data:pontos,sheet:'Pontos',row:rowPonto},
     refeicoes:{data:refeicoes,sheet:'Refeicoes',row:rowRefeicao},
     contas_receber:{data:contas_receber,sheet:'ContasReceber',row:rowContaReceber},
@@ -2457,6 +2529,11 @@ async function _syncToSheetsRaw(type){
     produtos:{data:typeof produtos!=='undefined'?produtos:[],sheet:'Produtos',row:rowProduto}
   };
   var m = maps[type]; if(!m) return;
+  // Nao gravar numa aba que nao foi lida com sucesso nesta sessao.
+  if(window._abaCarregada && window._abaCarregada[m.sheet] === false){
+    toast('Gravacao bloqueada em '+m.sheet+': a aba nao foi lida corretamente. Recarregue a pagina.','warn');
+    return false;
+  }
   var linhas;
   try{ linhas = m.data.map(m.row); }
   catch(err){
@@ -2481,6 +2558,16 @@ function defCats(){
   ];
 }
 
+function ssSafe(chave, valor){
+  try{ localStorage.setItem(chave, JSON.stringify(valor)); return true; }
+  catch(e){
+    if(e && (e.name === 'QuotaExceededError' || e.code === 22)){
+      toast('Memoria local cheia. Apague fotos antigas de propostas, senao novos dados nao sao salvos.','warn');
+    }
+    console.error('localStorage:', chave, e);
+    return false;
+  }
+}
 function nextId(arr){return arr.reduce(function(m,x){return Math.max(m,x.id||0);},0)+1;}
 var viewAtual='dashboard';
 
@@ -2507,7 +2594,7 @@ function go(v){
   if(v==='folha')renderFolha();
   if(v==='refeicoes'){populateFuncSelect('rf-func');populateFornSelect('rf-forn','refeicoes');populateFuncSelect('rf-filtro-func');renderRefeicoes();}
   if(v==='contas')renderContasBancarias();
-  if(v==='projetos'){renderProjetos();populateClienteSelect('proj-cliente');populateProjetoSelects();renderEstCats();}  
+  if(v==='projetos'){initFiltrosProjeto();renderProjetos();populateClienteSelect('proj-cliente');populateProjetoSelects();renderEstCats();}  
   if(v==='configuracoes')renderConfig();
   if(v==='usuarios')renderLog();
   closeSb();
@@ -2629,7 +2716,12 @@ function renderDash(){
     return'<div class="bar-item"><div style="display:flex;gap:2px;align-items:flex-end;height:70px"><div class="bar entrada" style="height:'+hE+'px"></div><div class="bar saida" style="height:'+hS+'px"></div></div><div class="bar-lbl">'+x.lbl+'</div></div>';
   }).join('');
   // Vencimentos
-  var prox=contas_pagar.filter(function(c){return c.status!=='pago';}).sort(function(a,b){return a.vencimento.localeCompare(b.vencimento);}).slice(0,5);
+  // Tela inicial: janela curta (vencidas + proximos 30 dias). O total geral
+  // continua no card 'A vencer'; aqui a lista e so o que exige acao agora.
+  var _lim=new Date(td.getTime()+30*86400000), _limS=fd(_lim);
+  var prox=contas_pagar.filter(function(c){
+    return c.status!=='pago' && (c.vencimento||'') <= _limS;
+  }).sort(function(a,b){return (a.vencimento||'').localeCompare(b.vencimento||'');}).slice(0,5);
   document.getElementById('dash-vencer').innerHTML=prox.length?'<table class="tbl"><tbody>'+prox.map(function(c){
     var venc=c.vencimento<hoje?'venc':c.vencimento===hoje?'pend':'pend';
     return'<tr><td style="padding:7px 6px">'+dp(c.vencimento)+'</td><td style="padding:7px 6px">'+c.descricao+'</td><td style="padding:7px 6px;text-align:right">'+fmt(c.valor)+'</td><td style="padding:7px 6px"><span class="tag '+venc+'">'+(c.vencimento<hoje?'Vencida':'Pendente')+'</span></td></tr>';
@@ -2979,7 +3071,7 @@ function saveEditRec(){
   }
   if(_eType==='contas_bancarias'){var elTipo=document.getElementById('ef_tipo');if(elTipo)item.tipo=elTipo.value;}
   save();
-  if(_eType!=='contas_bancarias') syncToSheets(_eType);
+  syncToSheets(_eType);
   document.getElementById('m-edit-rec').classList.remove('show');
   if(_eType==='clientes') renderClientes();
   else if(_eType==='fornecedores') renderFornecedores();
@@ -4727,7 +4819,7 @@ function projTab(tab, btn){
   document.querySelectorAll('#view-projetos .fbt').forEach(function(b){b.classList.remove('on');});
   if(btn) btn.classList.add('on');
   try{
-    if(tab==='lista') renderProjetos();
+    if(tab==='lista'){ initFiltrosProjeto(); renderProjetos(); }
     if(tab==='custos'){ renderCustos(); populateProjetoSelects(); populateCustoTipo(); populateProdutoSelect(); }
     if(tab==='dash'){ populateProjetoSelects(); renderExecutivo(); }
     if(tab==='cond') renderCondPag();
@@ -4846,6 +4938,111 @@ function calcValorArquiteto(){
 // PROPOSTA / CONTRATO - Conexão Design
 // ================================================================
 
+
+// ================================================================
+// FOTOS NO GOOGLE DRIVE
+// A foto nunca vai para a planilha nem para o localStorage. Vai para o Drive,
+// e o que se guarda e apenas a referencia "drive:<id>" (cerca de 40 bytes).
+// Escopo drive.file: o app so enxerga os arquivos que ele mesmo criou.
+// ================================================================
+var DRIVE_API = 'https://www.googleapis.com/drive/v3/files';
+var DRIVE_UP  = 'https://www.googleapis.com/upload/drive/v3/files';
+var _cacheFoto = {};   // id -> objectURL ja resolvido
+
+function cfgPastaFotos(){ return localStorage.getItem('cd_pasta_fotos')||''; }
+
+async function drivePastaFotos(){
+  var id = cfgPastaFotos();
+  if(id) return id;
+  if(!ACCESS_TOKEN) return '';
+  // procura pasta ja existente criada por este app
+  var q = encodeURIComponent("name='Conexao Design - Fotos' and mimeType='application/vnd.google-apps.folder' and trashed=false");
+  var r = await fetch(DRIVE_API+'?q='+q+'&fields=files(id,name)', {headers:{Authorization:'Bearer '+ACCESS_TOKEN}});
+  if(r.ok){
+    var j = await r.json();
+    if(j.files && j.files.length){ localStorage.setItem('cd_pasta_fotos', j.files[0].id); return j.files[0].id; }
+  }
+  var c = await fetch(DRIVE_API, {
+    method:'POST',
+    headers:{Authorization:'Bearer '+ACCESS_TOKEN,'Content-Type':'application/json'},
+    body: JSON.stringify({name:'Conexao Design - Fotos', mimeType:'application/vnd.google-apps.folder'})
+  });
+  if(!c.ok){ toast('Nao consegui criar a pasta de fotos no Drive','warn'); return ''; }
+  var jc = await c.json();
+  localStorage.setItem('cd_pasta_fotos', jc.id);
+  return jc.id;
+}
+
+// sobe a foto e devolve a referencia "drive:<id>"
+async function driveUploadFoto(dataUrl, nome){
+  if(!ACCESS_TOKEN){ toast('Sem conexao com o Google. Faca login para enviar fotos.','warn'); return ''; }
+  var pasta = await drivePastaFotos();
+  var base64 = dataUrl.split(',')[1];
+  var mime = (dataUrl.match(/^data:([^;]+);/)||[])[1] || 'image/jpeg';
+  var meta = {name: nome || ('foto_'+Date.now()+'.jpg'), mimeType: mime};
+  if(pasta) meta.parents = [pasta];
+  var lim = '-------cd'+Date.now();
+  var corpo =
+    '--'+lim+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+'\r\n'+
+    '--'+lim+'\r\nContent-Type: '+mime+'\r\nContent-Transfer-Encoding: base64\r\n\r\n'+base64+'\r\n'+
+    '--'+lim+'--';
+  try{
+    var res = await fetch(DRIVE_UP+'?uploadType=multipart&fields=id', {
+      method:'POST',
+      headers:{Authorization:'Bearer '+ACCESS_TOKEN,'Content-Type':'multipart/related; boundary='+lim},
+      body: corpo
+    });
+    if(!res.ok){
+      var det='HTTP '+res.status;
+      try{ var b=await res.json(); if(b&&b.error&&b.error.message) det+=': '+b.error.message; }catch(e){}
+      registraFalhaSync('Drive/fotos', det);
+      toast('Foto nao foi enviada ('+det+')','warn');
+      return '';
+    }
+    var j = await res.json();
+    return 'drive:'+j.id;
+  }catch(e){ toast('Falha de rede ao enviar a foto','warn'); return ''; }
+}
+
+// devolve uma URL utilizavel numa <img>. Aceita dataURL antigo ou "drive:<id>".
+async function fotoURL(ref){
+  if(!ref) return '';
+  if(ref.indexOf('data:')===0) return ref;                 // fotos antigas continuam funcionando
+  if(ref.indexOf('drive:')!==0) return ref;
+  var id = ref.slice(6);
+  if(_cacheFoto[id]) return _cacheFoto[id];
+  if(!ACCESS_TOKEN) return '';
+  try{
+    var r = await fetch(DRIVE_API+'/'+id+'?alt=media', {headers:{Authorization:'Bearer '+ACCESS_TOKEN}});
+    if(!r.ok) return '';
+    var blob = await r.blob();
+    _cacheFoto[id] = URL.createObjectURL(blob);
+    return _cacheFoto[id];
+  }catch(e){ return ''; }
+}
+
+// converte para dataURL (usado na proposta impressa, onde objectURL nao serve)
+async function fotoDataURL(ref){
+  if(!ref) return '';
+  if(ref.indexOf('data:')===0) return ref;
+  var u = await fotoURL(ref);
+  if(!u) return '';
+  try{
+    var b = await (await fetch(u)).blob();
+    return await new Promise(function(ok){ var fr=new FileReader(); fr.onload=function(){ok(fr.result);}; fr.readAsDataURL(b); });
+  }catch(e){ return ''; }
+}
+
+// troca os <img data-ref> por src de verdade depois que a tela ja renderizou
+function resolverFotos(raiz){
+  var alvo = raiz || document;
+  alvo.querySelectorAll('img[data-ref]').forEach(function(img){
+    var ref = img.getAttribute('data-ref');
+    img.removeAttribute('data-ref');
+    fotoURL(ref).then(function(u){ if(u) img.src = u; });
+  });
+}
+
 // --- Itens estruturados da proposta (cada um: nome, descrição, valor, fotos) ---
 // Guardados no localStorage vinculados ao projeto (fotos são grandes p/ Sheets)
 var _itensProposta = []; // [{nome, descricao, valor, fotos:[base64]}]
@@ -4902,8 +5099,18 @@ function addFotosItem(input, idx){
         ctx.drawImage(img,0,0,canvas.width,canvas.height);
         var dataUrl=canvas.toDataURL('image/jpeg',0.85);
         if(!_itensProposta[idx].fotos) _itensProposta[idx].fotos=[];
-        _itensProposta[idx].fotos.push(dataUrl);
-        renderItensProposta();
+        toast('Enviando foto...','info');
+        driveUploadFoto(dataUrl, 'item_'+(idx+1)+'_'+Date.now()+'.jpg').then(function(ref){
+          if(ref){
+            _cacheFoto[ref.slice(6)] = dataUrl;   // ja exibe sem baixar de novo
+            _itensProposta[idx].fotos.push(ref);
+            toast('Foto enviada','ok');
+          } else {
+            _itensProposta[idx].fotos.push(dataUrl);  // fallback: fica local
+            toast('Foto guardada apenas neste aparelho','warn');
+          }
+          renderItensProposta();
+        });
       };
       img.src=e.target.result;
     };
@@ -4926,7 +5133,7 @@ function renderItensProposta(){
   box.innerHTML=_itensProposta.map(function(it,i){
     var fotosHTML=(it.fotos||[]).map(function(src,fi){
       return '<div style="position:relative;width:60px;height:60px;border-radius:5px;overflow:hidden;border:1px solid var(--bd)">'+
-        '<img src="'+src+'" style="width:100%;height:100%;object-fit:cover">'+
+        '<img data-ref="'+src+'" style="width:100%;height:100%;object-fit:cover" alt="foto">'+
         '<button type="button" onclick="removeFotoItem('+i+','+fi+')" style="position:absolute;top:1px;right:1px;width:16px;height:16px;border:none;border-radius:50%;background:rgba(200,40,40,.9);color:#fff;font-size:10px;cursor:pointer;line-height:1;padding:0">×</button>'+
         '</div>';
     }).join('');
@@ -4949,6 +5156,7 @@ function renderItensProposta(){
       '</div>'+
       '</div>';
   }).join('');
+  resolverFotos(box);
 }
 
 function calcValorComDesconto(){
@@ -4959,7 +5167,22 @@ function calcValorComDesconto(){
   if(typeof calcParcelasReceber==='function') calcParcelasReceber();
 }
 
-function gerarProposta(projId){
+async function gerarProposta(projId){
+  // as fotos ficam no Drive; para a impressao precisamos do conteudo embutido
+  try{
+    var _its = loadItensProposta(projId) || [];
+    for(var _i=0;_i<_its.length;_i++){
+      var _fs = _its[_i].fotos || [];
+      for(var _j=0;_j<_fs.length;_j++){
+        if(String(_fs[_j]).indexOf('drive:')===0) _fs[_j] = await fotoDataURL(_fs[_j]) || '';
+      }
+      _its[_i].fotos = _fs.filter(function(x){ return x; });
+    }
+    window._itensPropostaImpressao = _its;
+  }catch(e){ window._itensPropostaImpressao = null; }
+  return _gerarPropostaHTML(projId);
+}
+function _gerarPropostaHTML(projId){
   var p=projId?projetos.find(function(x){return x.id==projId;}):null;
   if(!p){toast('Selecione um projeto salvo para gerar a proposta','warn');return;}
   var cfg=getCfg();
@@ -5085,7 +5308,9 @@ function gerarProposta(projId){
     for(var ii=0; ii<itens.length; ii+=perPage){
       var lote=itens.slice(ii,ii+perPage);
       var blocos=lote.map(function(it){
-        var fotosImg=(it.fotos||[]).map(function(src){return '<img src="'+src+'">';}).join('');
+        var _pi=(window._itensPropostaImpressao||[]).find(function(x){return x.nome===it.nome;});
+        var _fotos=(_pi&&_pi.fotos&&_pi.fotos.length)?_pi.fotos:(it.fotos||[]).filter(function(s){return String(s).indexOf('data:')===0;});
+        var fotosImg=_fotos.map(function(src){return '<img src="'+src+'">';}).join('');
         return '<div class="item-blk">'+
           '<div class="item-nome">'+esc(it.nome||'Item')+'</div>'+
           '<div class="item-cols">'+
@@ -5374,9 +5599,37 @@ function atualizarCustoProduto(prodId, novoValorUnit){
   p.custo_medio=p.qtd_compras>1?((p.custo_medio*(p.qtd_compras-1)+novoValorUnit)/p.qtd_compras):novoValorUnit;
   save(); if(ACCESS_TOKEN) syncToSheets('produtos');
 }
+document.addEventListener('input',function(e){
+  if(e.target && e.target.classList && e.target.classList.contains('erro')) e.target.classList.remove('erro');
+});
 function saveProjeto(){
   var nome=document.getElementById('proj-nome').value.trim();
-  if(!nome){toast('Informe o nome do projeto','warn');return;}
+  // ----- campos obrigatorios -----
+  var _obrig=[
+    {id:'proj-nome',      rotulo:'Nome do projeto'},
+    {id:'proj-cliente',   rotulo:'Cliente'},
+    {id:'proj-inicio',    rotulo:'Data de início'},
+    {id:'proj-desc',      rotulo:'Descrição'},
+    {id:'proj-valor-venda',rotulo:'Valor de venda', numerico:true}
+  ];
+  var _faltando=[], _primeiro=null;
+  _obrig.forEach(function(c){
+    var el=document.getElementById(c.id);
+    if(!el) return;
+    el.classList.remove('erro');
+    var v=(el.value||'').trim();
+    var vazio = c.numerico ? !(parseFloat(v)>0) : !v;
+    if(vazio){
+      _faltando.push(c.rotulo);
+      el.classList.add('erro');
+      if(!_primeiro) _primeiro=el;
+    }
+  });
+  if(_faltando.length){
+    toast('Preencha: '+_faltando.join(', '),'warn');
+    if(_primeiro){ _primeiro.scrollIntoView({behavior:'smooth',block:'center'}); _primeiro.focus(); }
+    return;
+  }
   var editId=window._editProjId;
   var user=CURRENT_USER?(CURRENT_USER.name||CURRENT_USER.email):'Sistema';
   // Collect dynamic estimativas
@@ -5572,13 +5825,60 @@ function getProjetoEst(p){
   return list;
 }
 
+
+// ===== FILTROS DE PROJETO =====
+// status: selecao multipla (vazio = todos). periodo: mes corrente por padrao.
+var projFiltroStatus = [];
+function projStatusAtivos(){ return projFiltroStatus; }
+function toggleFiltroStatus(k){
+  var i = projFiltroStatus.indexOf(k);
+  if(i>=0) projFiltroStatus.splice(i,1); else projFiltroStatus.push(k);
+  renderChipsStatus(); renderProjetos();
+}
+function renderChipsStatus(){
+  var box=document.getElementById('proj-chips-status'); if(!box) return;
+  var html='<button class="chip'+(projFiltroStatus.length?'':' on')+'" onclick="limparFiltroStatus()">Todos</button>';
+  html+=Object.keys(PROJ_STATUS).map(function(k){
+    return '<button class="chip'+(projFiltroStatus.indexOf(k)>=0?' on':'')+'" onclick="toggleFiltroStatus(\''+k+'\')">'+PROJ_STATUS[k].lbl+'</button>';
+  }).join('');
+  box.innerHTML=html;
+}
+function limparFiltroStatus(){ projFiltroStatus=[]; renderChipsStatus(); renderProjetos(); }
+function projPeriodoMes(){
+  var h=new Date();
+  var ini=new Date(h.getFullYear(),h.getMonth(),1), fim=new Date(h.getFullYear(),h.getMonth()+1,0);
+  var f=function(d){return d.toISOString().slice(0,10);};
+  var a=document.getElementById('proj-filtro-ini'), b=document.getElementById('proj-filtro-fim');
+  if(a) a.value=f(ini); if(b) b.value=f(fim);
+  renderProjetos();
+}
+function projPeriodoTudo(){
+  var a=document.getElementById('proj-filtro-ini'), b=document.getElementById('proj-filtro-fim');
+  if(a) a.value=''; if(b) b.value='';
+  renderProjetos();
+}
+function initFiltrosProjeto(){
+  renderChipsStatus();
+  var a=document.getElementById('proj-filtro-ini');
+  if(a && !a.value && !window._projFiltroTocado){ projPeriodoMes(); window._projFiltroTocado=true; }
+}
 function renderProjetos(){
-  var fs=document.getElementById('proj-filtro-status').value;
+  var elIni=document.getElementById('proj-filtro-ini'), elFim=document.getElementById('proj-filtro-fim');
+  var ini=elIni?elIni.value:'', fim=elFim?elFim.value:'';
+  var sts=projStatusAtivos();
+  var total=projetos.length;
   var list=projetos.filter(function(p){
-    if(fs!=='todos'&&p.status!==fs) return false;
+    if(sts.length && sts.indexOf(p.status)<0) return false;
+    if(ini && (p.inicio||'') < ini) return false;
+    if(fim && (p.inicio||'') > fim) return false;
     return true;
   }).sort(function(a,b){return(b.created_at||'').localeCompare(a.created_at||'');});
-  if(!list.length){document.getElementById('proj-body').innerHTML='<tr><td colspan="10"><div class="empty">Nenhum projeto encontrado</div></td></tr>';return;}
+  if(!list.length){
+    document.getElementById('proj-body').innerHTML='<tr><td colspan="11"><div class="empty">Nenhum projeto no filtro atual.<br><button class="btn sm" style="margin-top:8px" onclick="projPeriodoTudo();limparFiltroStatus()">Limpar filtros</button></div></td></tr>';
+    var r0=document.getElementById('proj-filtro-resumo');
+    if(r0) r0.textContent='0 de '+total+' projetos';
+    return;
+  }
   var statusCfg=PROJ_STATUS
   var html='';
   list.forEach(function(p){
@@ -5617,6 +5917,13 @@ function renderProjetos(){
       '</div></td></tr>';
   });
   document.getElementById('proj-body').innerHTML=html;
+  var res=document.getElementById('proj-filtro-resumo');
+  if(res){
+    var partes=[list.length+' de '+total+' projetos'];
+    if(sts.length) partes.push(sts.length+' status');
+    if(ini||fim) partes.push('período '+(ini?dp(ini):'início')+' a '+(fim?dp(fim):'hoje'));
+    res.textContent=partes.join('  ·  ');
+  }
 }
 
 function delProjeto(id){
