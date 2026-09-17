@@ -1712,6 +1712,39 @@ function registraFalhaSync(sheetName, msg){
 }
 function falhasSync(){ try{ return JSON.parse(localStorage.getItem('sync_falhas')||'[]'); }catch(e){ return []; } }
 
+
+// Cria na planilha as abas que o sistema usa e que ainda nao existem.
+// Antes, gravar numa aba inexistente devolvia 400 e o dado se perdia.
+async function criarAbasFaltantes(nomes){
+  if(!ACCESS_TOKEN) return [];
+  var criadas = [];
+  try{
+    var r = await fetch(SHEETS_BASE + SHEET_ID + '?fields=sheets.properties.title',
+                        {headers:{Authorization:'Bearer '+ACCESS_TOKEN}});
+    if(!r.ok){ console.warn('nao consegui listar as abas da planilha'); return []; }
+    var j = await r.json();
+    var existentes = (j.sheets||[]).map(function(s){ return s.properties.title; });
+    var faltando = nomes.filter(function(n){ return existentes.indexOf(n) < 0; });
+    if(!faltando.length) return [];
+    var reqs = faltando.map(function(n){ return {addSheet:{properties:{title:n}}}; });
+    var res = await fetch(SHEETS_BASE + SHEET_ID + ':batchUpdate', {
+      method:'POST',
+      headers:{Authorization:'Bearer '+ACCESS_TOKEN,'Content-Type':'application/json'},
+      body: JSON.stringify({requests: reqs})
+    });
+    if(!res.ok){
+      var det='HTTP '+res.status;
+      try{ var b=await res.json(); if(b&&b.error&&b.error.message) det+=': '+b.error.message; }catch(e){}
+      registraFalhaSync('criarAbas', det);
+      toast('Nao consegui criar as abas '+faltando.join(', ')+' ('+det+')','warn');
+      return [];
+    }
+    criadas = faltando;
+    toast('Aba(s) criada(s) na planilha: '+faltando.join(', '),'ok');
+  }catch(e){ console.error('criarAbasFaltantes:', e); }
+  return criadas;
+}
+
 // Initialize sheets with headers
 async function initSheets(){
   toast('Conectando ao Google Sheets...','info');
@@ -1736,6 +1769,8 @@ async function initSheets(){
     Config:['chave','valor'],
     Parcelamentos:['id','descricao','parcelas_json']
   };
+  // Garante que toda aba usada pelo sistema exista antes de qualquer leitura
+  await criarAbasFaltantes(Object.keys(headers));
   // Protecao: so cria cabecalho se a aba estiver COMPLETAMENTE vazia
   var _abasComProblema = [];
   for(var sheet in headers){
@@ -5869,8 +5904,12 @@ function renderProjetos(){
   var total=projetos.length;
   var list=projetos.filter(function(p){
     if(sts.length && sts.indexOf(p.status)<0) return false;
-    if(ini && (p.inicio||'') < ini) return false;
-    if(fim && (p.inicio||'') > fim) return false;
+    // projeto sem data de inicio nunca e escondido pelo periodo,
+    // senao ele desapareceria do sistema sem ninguem perceber
+    if(p.inicio){
+      if(ini && p.inicio < ini) return false;
+      if(fim && p.inicio > fim) return false;
+    }
     return true;
   }).sort(function(a,b){return(b.created_at||'').localeCompare(a.created_at||'');});
   if(!list.length){
@@ -5893,7 +5932,7 @@ function renderProjetos(){
       '<td><b>'+indicator+' '+p.nome+'</b>'+(p.descricao?'<br><span style="font-size:10px;color:var(--t3)">'+p.descricao+'</span>':'')+
       (p.status_receb&&p.status_receb!=='pendente'?'<br><span class="tag '+(p.status_receb==='recebido'?'pago':'pend')+'" style="font-size:9px">'+(p.status_receb==='recebido'?'Recebido':'Parcialmente Recebido')+'</span>':'')+'</td>'+
       '<td>'+(cl?cl.nome:'')+'</td>'+
-      '<td>'+dp(p.inicio)+'</td>'+
+      '<td>'+(p.inicio?dp(p.inicio):'<span style="color:var(--amber,#C47D0A);font-size:11px" title="Projeto sem data de início">sem data</span>')+'</td>'+
       '<td>'+dp(p.entrega)+'</td>'+
       '<td style="font-family:var(--fm);font-weight:600;color:var(--sage)">'+(p.valor_venda?fmt(p.valor_venda):'<span style="color:var(--t3)">-</span>')+'</td>'+
       '<td><span class="tag '+st.cls+'">'+st.lbl+'</span></td>'+
