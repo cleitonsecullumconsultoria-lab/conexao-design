@@ -1139,7 +1139,7 @@ textarea.fi{resize:vertical;min-height:72px}
         <input type="hidden" id="proj-edit-id">
         <div class="frow">
           <div class="fgroup" style="flex:2"><label class="flabel">Nome do Projeto<span class="req">*</span></label><input type="text" class="fi" id="proj-nome" placeholder="Ex: Dormitório Casal - Dr. Pablo..."></div>
-          <div class="fgroup"><label class="flabel">Cliente<span class="req">*</span></label><select class="fi" id="proj-cliente"><option value="">Selecione...</option></select></div>
+          <div class="fgroup"><label class="flabel">Cliente</label><select class="fi" id="proj-cliente"><option value="">Selecione...</option></select></div>
           <div class="fgroup"><label class="flabel">Status</label>
             <select class="fi" id="proj-status">
               <option value="rascunho">Rascunho</option>
@@ -1501,6 +1501,12 @@ var GOOGLE_CLIENT_ID = '715814366188-vv7eh5m7nkd9k9ns1vn50pl16ejt3a0e.apps.googl
 var SHEET_ID_DEFAULT = '12U1ZpuaigO-LZH4O32yJhGaJtZ3eFln4FeErru00BE4';
 var SHEET_ID = localStorage.getItem('cd_sheet_id') || SHEET_ID_DEFAULT;
 var ACCESS_TOKEN = null;
+// Descarta token antigo que nao tenha a permissao do Drive (consentimento anterior)
+try{
+  if(localStorage.getItem('cd_token') && (localStorage.getItem('cd_token_scope')||'').indexOf('drive.file')<0){
+    localStorage.removeItem('cd_token'); localStorage.removeItem('cd_token_exp');
+  }
+}catch(e){}
 var CURRENT_USER = null;
 var SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets/';
 
@@ -1526,10 +1532,23 @@ function _getTokenClient(){
         ACCESS_TOKEN = tokenResponse.access_token;
         // Guarda token e validade para reaproveitar (evita refazer login a cada abertura)
         var expSeg = parseInt(tokenResponse.expires_in||3600,10);
+        var escopos = tokenResponse.scope || '';
         try{
           localStorage.setItem('cd_token', ACCESS_TOKEN);
           localStorage.setItem('cd_token_exp', String(Date.now() + (expSeg-60)*1000));
+          localStorage.setItem('cd_token_scope', escopos);
         }catch(e){}
+        // O token pode vir de um consentimento antigo, sem permissao do Drive.
+        // Sem isso, toda foto falha em silencio.
+        if(escopos.indexOf('drive.file') < 0){
+          if(!window._pediuConsentDrive){
+            window._pediuConsentDrive = true;
+            toast('Falta a permissao do Google Drive para as fotos. Autorize na proxima tela.','warn');
+            setTimeout(function(){ _tokenClient.requestAccessToken({prompt:'consent'}); }, 600);
+            return;
+          }
+          toast('Permissao do Drive nao concedida. As fotos ficarao apenas neste aparelho.','warn');
+        }
         window.sheetStatus.online=true; updateSheetStatusUI();
         // Renova em silêncio antes de expirar
         setTimeout(function(){ if(ACCESS_TOKEN && _tokenClient) _tokenClient.requestAccessToken({prompt:''}); }, (expSeg-120)*1000);
@@ -5015,10 +5034,22 @@ function esperarUploads(){
 
 function cfgPastaFotos(){ return localStorage.getItem('cd_pasta_fotos')||''; }
 
+// Pasta escolhida por voce (Configuracoes > ID da pasta de fotos).
+// ATENCAO: com o escopo drive.file o app so escreve em pasta que ele mesmo criou.
+// Se a pasta informada recusar, o sistema cria a propria e avisa.
+var PASTA_FOTOS_PREFERIDA = '1JJqTpufYAJLW06zqe73bIp7RRY2VuPzp';
 async function drivePastaFotos(){
   var id = cfgPastaFotos();
   if(id) return id;
   if(!ACCESS_TOKEN) return '';
+  if(PASTA_FOTOS_PREFERIDA && !localStorage.getItem('cd_pasta_recusada')){
+    try{
+      var tp = await fetch(DRIVE_API+'/'+PASTA_FOTOS_PREFERIDA+'?fields=id', {headers:{Authorization:'Bearer '+ACCESS_TOKEN}});
+      if(tp.ok){ localStorage.setItem('cd_pasta_fotos', PASTA_FOTOS_PREFERIDA); return PASTA_FOTOS_PREFERIDA; }
+      localStorage.setItem('cd_pasta_recusada','1');
+      console.warn('sem acesso a pasta informada; criando pasta propria');
+    }catch(e){ localStorage.setItem('cd_pasta_recusada','1'); }
+  }
   // procura pasta ja existente criada por este app
   var q = encodeURIComponent("name='Conexao Design - Fotos' and mimeType='application/vnd.google-apps.folder' and trashed=false");
   var r = await fetch(DRIVE_API+'?q='+q+'&fields=files(id,name)', {headers:{Authorization:'Bearer '+ACCESS_TOKEN}});
@@ -5703,7 +5734,6 @@ async function saveProjeto(){
   // ----- campos obrigatorios -----
   var _obrig=[
     {id:'proj-nome',      rotulo:'Nome do projeto'},
-    {id:'proj-cliente',   rotulo:'Cliente'},
     {id:'proj-inicio',    rotulo:'Data de início'},
     {id:'proj-desc',      rotulo:'Descrição'},
     {id:'proj-valor-venda',rotulo:'Valor de venda', numerico:true}
@@ -5840,6 +5870,19 @@ function editProjeto(id){
   var _sv=function(elId,val){var el=document.getElementById(elId);if(el)el.value=(val!==undefined&&val!==null)?val:'';};
   // Campos base
   _sv('proj-nome',p.nome);
+  // O select precisa estar populado ANTES de receber o valor; caso contrario o
+  // navegador descarta o value e o campo aparece em branco.
+  populateClienteSelect('proj-cliente');
+  var _selCli=document.getElementById('proj-cliente');
+  if(_selCli && p.cliente_id){
+    var existe=Array.prototype.some.call(_selCli.options,function(o){return o.value==String(p.cliente_id);});
+    if(!existe){
+      // cliente apagado ou id orfao: mantem a referencia para nao perder no proximo salvamento
+      var op=document.createElement('option');
+      op.value=p.cliente_id; op.textContent='(cliente nao encontrado - id '+p.cliente_id+')';
+      _selCli.appendChild(op);
+    }
+  }
   _sv('proj-cliente',p.cliente_id);
   var elSt=document.getElementById('proj-status');if(elSt)elSt.value=p.status||'orcamento';
   _sv('proj-inicio',p.inicio);
