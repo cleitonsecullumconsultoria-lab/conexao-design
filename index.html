@@ -1593,7 +1593,7 @@ async function sheetsGet(sheetName){
   if(!ACCESS_TOKEN) return null;
   syncStart();
   try{
-    var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!A:Z');
+    var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!A:AB');
     var res = await fetch(url, {headers: {Authorization: 'Bearer ' + ACCESS_TOKEN}});
     if(res.status===401){
       toast('Token expirado. Renovando...','info');
@@ -1611,7 +1611,7 @@ async function sheetsAppend(sheetName, row){
   if(!ACCESS_TOKEN) return;
   syncStart();
   try{
-    var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!A:Z') + ':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS';
+    var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!A:AB') + ':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS';
     await fetch(url, {
       method: 'POST',
       headers: {Authorization: 'Bearer ' + ACCESS_TOKEN, 'Content-Type': 'application/json'},
@@ -1621,29 +1621,69 @@ async function sheetsAppend(sheetName, row){
   finally{ syncEnd(); }
 }
 
-async function sheetsClear(sheetName){
-  if(!ACCESS_TOKEN) return;
+async function sheetsClearRange(range){
+  if(!ACCESS_TOKEN) return false;
+  var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(range) + ':clear';
+  var res = await fetch(url, {method:'POST', headers:{Authorization:'Bearer '+ACCESS_TOKEN,'Content-Type':'application/json'}});
+  return res.ok;
+}
+async function sheetsClear(sheetName){ return sheetsClearRange(sheetName + '!A2:AB'); }
+
+// Grava a aba inteira. ORDEM SEGURA: escreve primeiro, só depois apaga a sobra.
+// Se a escrita falhar, a aba permanece intacta.
+async function sheetsWriteAll(sheetName, rows){
+  if(!ACCESS_TOKEN) return false;
+  syncStart();
+  var ok = false, msg = '';
   try{
-    var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!A2:Z') + ':clear';
-    await fetch(url, {method: 'POST', headers: {Authorization: 'Bearer ' + ACCESS_TOKEN, 'Content-Type': 'application/json'}});
-  } catch(e){}
+    if(rows.length === 0){
+      ok = await sheetsClear(sheetName);
+    } else {
+      var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!A2') + '?valueInputOption=RAW';
+      var res = await fetch(url, {
+        method:'PUT',
+        headers:{Authorization:'Bearer '+ACCESS_TOKEN,'Content-Type':'application/json'},
+        body: JSON.stringify({values: rows})
+      });
+      if(res.status === 401){
+        msg = 'Token expirado';
+        if(_tokenClient) _tokenClient.requestAccessToken({prompt:''});
+      } else if(res.status === 429 || res.status === 503){
+        msg = 'Limite do Google atingido';
+      } else if(!res.ok){
+        msg = 'HTTP ' + res.status;
+        try{ var body = await res.json(); if(body && body.error && body.error.message) msg += ': ' + body.error.message; }catch(e){}
+      } else {
+        ok = true;
+        // sobra: linhas que existiam além do que acabamos de gravar
+        await sheetsClearRange(sheetName + '!A' + (rows.length + 2) + ':AB');
+      }
+    }
+  } catch(e){ msg = e.message || 'falha de rede'; }
+  finally{ syncEnd(); }
+
+  if(ok){
+    window.sheetStatus.online = true; window.sheetStatus.error = '';
+    window.sheetStatus.lastSync = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  } else {
+    window.sheetStatus.online = false;
+    window.sheetStatus.error = msg || 'erro';
+    registraFalhaSync(sheetName, msg);
+    toast('NAO gravou em ' + sheetName + ': ' + (msg||'erro') + '. Dado salvo apenas neste aparelho.','warn');
+  }
+  updateSheetStatusUI();
+  return ok;
 }
 
-async function sheetsWriteAll(sheetName, rows){
-  if(!ACCESS_TOKEN) return;
-  syncStart();
+// Registro local das falhas, para nada sumir em silencio.
+function registraFalhaSync(sheetName, msg){
   try{
-    await sheetsClear(sheetName);
-    if(rows.length === 0){ syncEnd(); return; }
-    var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!A2') + '?valueInputOption=RAW';
-    await fetch(url, {
-      method: 'PUT',
-      headers: {Authorization: 'Bearer ' + ACCESS_TOKEN, 'Content-Type': 'application/json'},
-      body: JSON.stringify({values: rows})
-    });
-  } catch(e){ window.sheetStatus.online=false;window.sheetStatus.error=e.message||'erro';updateSheetStatusUI();toast('Erro ao sincronizar','warn'); }
-  finally{ var _prev=window.sheetStatus.online;window.sheetStatus.online=!window.sheetStatus.error;if(!_prev&&window.sheetStatus.online)toast('Sincronizado com Google Sheets!','ok');window.sheetStatus.error='';window.sheetStatus.lastSync=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});updateSheetStatusUI();syncEnd(); }
+    var f = JSON.parse(localStorage.getItem('sync_falhas')||'[]');
+    f.push({aba:sheetName, erro:msg||'', ts:new Date().toISOString()});
+    localStorage.setItem('sync_falhas', JSON.stringify(f.slice(-200)));
+  }catch(e){}
 }
+function falhasSync(){ try{ return JSON.parse(localStorage.getItem('sync_falhas')||'[]'); }catch(e){ return []; } }
 
 // Initialize sheets with headers
 async function initSheets(){
@@ -2364,7 +2404,25 @@ function save(){
   if(typeof produtos!=='undefined') ss('produtos',produtos);
 }
 // Sync specific collection to Sheets
-async function syncToSheets(type){
+
+// FILA SERIAL DE GRAVACAO
+// Antes, chamadas como syncToSheets('pontos') e syncToSheets('contas_pagar')
+// disparavam juntas e uma atropelava a outra. Agora entram numa fila.
+var _syncFila = Promise.resolve();
+var _syncPendentes = {};
+function syncToSheets(type){
+  if(_syncPendentes[type]) return _syncFila;   // ja ha uma gravacao desse tipo na fila
+  _syncPendentes[type] = true;
+  _syncFila = _syncFila.then(function(){
+    _syncPendentes[type] = false;
+    return _syncToSheetsRaw(type);
+  }).catch(function(e){
+    _syncPendentes[type] = false;
+    console.error('fila de sync:', e);
+  });
+  return _syncFila;
+}
+async function _syncToSheetsRaw(type){
   if(!ACCESS_TOKEN) return;
   // PROTEÇÃO ANTI-SOBRESCRITA: não gravar na planilha antes do carregamento inicial
   // dos dados terminar. Evita que um backup local antigo (ex.: hora extra zerada)
@@ -2399,7 +2457,15 @@ async function syncToSheets(type){
     produtos:{data:typeof produtos!=='undefined'?produtos:[],sheet:'Produtos',row:rowProduto}
   };
   var m = maps[type]; if(!m) return;
-  await sheetsWriteAll(m.sheet, m.data.map(m.row));
+  var linhas;
+  try{ linhas = m.data.map(m.row); }
+  catch(err){
+    console.error('syncToSheets: falha ao montar linhas de '+type, err);
+    registraFalhaSync(m.sheet, 'erro ao montar linha: '+(err.message||err));
+    toast('Erro ao preparar '+m.sheet+'. Nada foi gravado.','warn');
+    return false;
+  }
+  return sheetsWriteAll(m.sheet, linhas);
 }
 
 function defCats(){
