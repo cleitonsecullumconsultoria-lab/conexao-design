@@ -332,6 +332,18 @@ textarea.fi{resize:vertical;min-height:72px}
 .filtro-resumo{font-size:11px;color:var(--t3);margin-left:auto}
 .req{color:var(--red);margin-left:3px}
 .fi.erro{border-color:var(--red)!important;background:rgba(200,40,40,.06)}
+
+.dd{position:relative;display:inline-block}
+.dd-btn{font-size:11px;padding:6px 26px 6px 11px;border-radius:7px;border:1px solid var(--bd);background:var(--bg);color:var(--t1);cursor:pointer;min-width:168px;text-align:left;position:relative}
+.dd-btn:after{content:'';position:absolute;right:10px;top:50%;margin-top:-2px;border:4px solid transparent;border-top-color:var(--t3)}
+.dd-btn:hover{border-color:var(--sage)}
+.dd-btn.ativo{border-color:var(--sage);color:var(--sage);font-weight:600}
+.dd-pop{display:none;position:absolute;z-index:60;top:calc(100% + 4px);left:0;min-width:216px;background:var(--bg);border:1px solid var(--bd);border-radius:9px;box-shadow:0 8px 22px rgba(0,0,0,.16);padding:5px}
+.dd-pop.show{display:block}
+.dd-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:6px;font-size:12px;cursor:pointer;color:var(--t1)}
+.dd-item:hover{background:var(--bg2)}
+.dd-item input{width:14px;height:14px;accent-color:var(--sage);margin:0;cursor:pointer}
+.dd-sep{height:1px;background:var(--bg3);margin:4px 2px}
 </style>
 </head>
 <body>
@@ -1094,7 +1106,11 @@ textarea.fi{resize:vertical;min-height:72px}
         <div class="filtro-box" id="proj-filtros">
           <div class="filtro-linha">
             <span class="filtro-tit">Status</span>
-            <div class="chips" id="proj-chips-status"></div>
+            <div class="dd" id="dd-status">
+              <button type="button" class="dd-btn" id="dd-status-btn" onclick="abrirDDStatus(event)">Todos</button>
+              <div class="dd-pop" id="dd-status-pop"></div>
+            </div>
+            <button class="btn sm" onclick="limparFiltroStatus()">Limpar status</button>
           </div>
           <div class="filtro-linha">
             <span class="filtro-tit">Período de início</span>
@@ -4983,6 +4999,19 @@ function calcValorArquiteto(){
 var DRIVE_API = 'https://www.googleapis.com/drive/v3/files';
 var DRIVE_UP  = 'https://www.googleapis.com/upload/drive/v3/files';
 var _cacheFoto = {};   // id -> objectURL ja resolvido
+var _uploadsPendentes = 0;   // fotos ainda subindo para o Drive
+window.addEventListener('beforeunload', function(e){
+  if(_uploadsPendentes>0 || window._fotosNaoSalvas){
+    e.preventDefault(); e.returnValue='';
+  }
+});
+function esperarUploads(){
+  return new Promise(function(ok){
+    if(_uploadsPendentes<=0) return ok();
+    var t=setInterval(function(){ if(_uploadsPendentes<=0){ clearInterval(t); ok(); } }, 120);
+    setTimeout(function(){ clearInterval(t); ok(); }, 30000);   // teto de seguranca
+  });
+}
 
 function cfgPastaFotos(){ return localStorage.getItem('cd_pasta_fotos')||''; }
 
@@ -5074,7 +5103,15 @@ function resolverFotos(raiz){
   alvo.querySelectorAll('img[data-ref]').forEach(function(img){
     var ref = img.getAttribute('data-ref');
     img.removeAttribute('data-ref');
-    fotoURL(ref).then(function(u){ if(u) img.src = u; });
+    fotoURL(ref).then(function(u){
+      if(u){ img.src = u; return; }
+      // nao conseguiu abrir: mostra o motivo em vez de um quadrado em branco
+      img.alt = 'foto indisponivel';
+      if(img.parentNode){
+        img.parentNode.style.background = 'rgba(200,40,40,.08)';
+        img.parentNode.title = 'Nao consegui abrir esta foto no Drive. Verifique se esta logado na conta que enviou.';
+      }
+    });
   });
 }
 
@@ -5135,11 +5172,14 @@ function addFotosItem(input, idx){
         var dataUrl=canvas.toDataURL('image/jpeg',0.85);
         if(!_itensProposta[idx].fotos) _itensProposta[idx].fotos=[];
         toast('Enviando foto...','info');
+        _uploadsPendentes++;
         driveUploadFoto(dataUrl, 'item_'+(idx+1)+'_'+Date.now()+'.jpg').then(function(ref){
+          _uploadsPendentes--;
           if(ref){
             _cacheFoto[ref.slice(6)] = dataUrl;   // ja exibe sem baixar de novo
             _itensProposta[idx].fotos.push(ref);
-            toast('Foto enviada','ok');
+            window._fotosNaoSalvas = true;
+            toast('Foto enviada. Clique em Salvar para vincular ao projeto.','ok');
           } else {
             _itensProposta[idx].fotos.push(dataUrl);  // fallback: fica local
             toast('Foto guardada apenas neste aparelho','warn');
@@ -5637,7 +5677,28 @@ function atualizarCustoProduto(prodId, novoValorUnit){
 document.addEventListener('input',function(e){
   if(e.target && e.target.classList && e.target.classList.contains('erro')) e.target.classList.remove('erro');
 });
-function saveProjeto(){
+async function saveProjeto(){
+  // Se o usuario clicar em Salvar antes de a foto terminar de subir, a
+  // referencia ainda nao esta no item e a foto se perderia.
+  if(_uploadsPendentes>0){
+    var _btn=document.getElementById('btn-save-proj');
+    var _txt=_btn?_btn.innerHTML:'';
+    var _seg=0;
+    if(_btn){ _btn.disabled=true; _btn.style.opacity='.6'; _btn.style.cursor='wait'; }
+    var _tick=setInterval(function(){
+      _seg++;
+      if(_btn) _btn.innerHTML='Enviando foto... '+_seg+'s';
+    },1000);
+    if(_btn) _btn.innerHTML='Enviando foto... 0s';
+    toast('Aguardando o envio de '+_uploadsPendentes+' foto(s). O projeto sera salvo em seguida.','info');
+    await esperarUploads();
+    clearInterval(_tick);
+    if(_btn){ _btn.disabled=false; _btn.style.opacity=''; _btn.style.cursor=''; _btn.innerHTML=_txt; }
+    if(_uploadsPendentes>0){
+      toast('O envio da foto passou de 30 segundos. Salve novamente ou verifique a conexao.','warn');
+      return;
+    }
+  }
   var nome=document.getElementById('proj-nome').value.trim();
   // ----- campos obrigatorios -----
   var _obrig=[
@@ -5735,6 +5796,7 @@ function saveProjeto(){
   // Salvar fotos da proposta (localStorage, vinculadas ao id do projeto)
   var _savedProjId = editId || dados.id;
   if(typeof _itensProposta!=='undefined') saveItensProposta(_savedProjId, _itensProposta);
+  window._fotosNaoSalvas = false;
   saveProj();
   if(ACCESS_TOKEN) syncToSheets('projetos');
   projTab('lista',document.getElementById('proj-tab-lista'));
@@ -5865,19 +5927,53 @@ function getProjetoEst(p){
 // status: selecao multipla (vazio = todos). periodo: mes corrente por padrao.
 var projFiltroStatus = [];
 function projStatusAtivos(){ return projFiltroStatus; }
-function toggleFiltroStatus(k){
-  var i = projFiltroStatus.indexOf(k);
-  if(i>=0) projFiltroStatus.splice(i,1); else projFiltroStatus.push(k);
+function toggleFiltroStatus(idxGrupo){
+  var g = statusPorRotulo()[idxGrupo]; if(!g) return;
+  var marcado = g.chaves.some(function(c){ return projFiltroStatus.indexOf(c)>=0; });
+  g.chaves.forEach(function(c){
+    var i = projFiltroStatus.indexOf(c);
+    if(marcado){ if(i>=0) projFiltroStatus.splice(i,1); }
+    else if(i<0) projFiltroStatus.push(c);
+  });
   renderChipsStatus(); renderProjetos();
 }
-function renderChipsStatus(){
-  var box=document.getElementById('proj-chips-status'); if(!box) return;
-  var html='<button class="chip'+(projFiltroStatus.length?'':' on')+'" onclick="limparFiltroStatus()">Todos</button>';
-  html+=Object.keys(PROJ_STATUS).map(function(k){
-    return '<button class="chip'+(projFiltroStatus.indexOf(k)>=0?' on':'')+'" onclick="toggleFiltroStatus(\''+k+'\')">'+PROJ_STATUS[k].lbl+'</button>';
-  }).join('');
-  box.innerHTML=html;
+// PROJ_STATUS tem chaves legadas (andamento = execucao, concluido = finalizado).
+// A lista mostra um item por ROTULO e o filtro considera todas as chaves daquele rotulo.
+function statusPorRotulo(){
+  var grupos=[], vistos={};
+  Object.keys(PROJ_STATUS).forEach(function(k){
+    var lbl=PROJ_STATUS[k].lbl;
+    if(vistos[lbl]===undefined){ vistos[lbl]=grupos.length; grupos.push({lbl:lbl, chaves:[k]}); }
+    else grupos[vistos[lbl]].chaves.push(k);
+  });
+  return grupos;
 }
+function renderChipsStatus(){
+  var pop=document.getElementById('dd-status-pop'); if(!pop) return;
+  var grupos=statusPorRotulo();
+  pop.innerHTML=
+    '<label class="dd-item"><input type="checkbox" '+(projFiltroStatus.length?'':'checked')+' onchange="limparFiltroStatus()"><b>Todos</b></label>'+
+    '<div class="dd-sep"></div>'+
+    grupos.map(function(g,i){
+      var marcado=g.chaves.some(function(c){return projFiltroStatus.indexOf(c)>=0;});
+      return '<label class="dd-item"><input type="checkbox" '+(marcado?'checked':'')+' onchange="toggleFiltroStatus('+i+')">'+g.lbl+'</label>';
+    }).join('');
+  var btn=document.getElementById('dd-status-btn');
+  if(btn){
+    var sel=grupos.filter(function(g){return g.chaves.some(function(c){return projFiltroStatus.indexOf(c)>=0;});});
+    btn.textContent = sel.length===0 ? 'Todos' : (sel.length===1 ? sel[0].lbl : sel.length+' selecionados');
+    btn.classList.toggle('ativo', sel.length>0);
+  }
+}
+function abrirDDStatus(ev){
+  ev.stopPropagation();
+  var pop=document.getElementById('dd-status-pop');
+  if(pop) pop.classList.toggle('show');
+}
+document.addEventListener('click',function(e){
+  var pop=document.getElementById('dd-status-pop');
+  if(pop && pop.classList.contains('show') && !pop.contains(e.target) && e.target.id!=='dd-status-btn') pop.classList.remove('show');
+});
 function limparFiltroStatus(){ projFiltroStatus=[]; renderChipsStatus(); renderProjetos(); }
 function projPeriodoMes(){
   var h=new Date();
@@ -5959,7 +6055,7 @@ function renderProjetos(){
   var res=document.getElementById('proj-filtro-resumo');
   if(res){
     var partes=[list.length+' de '+total+' projetos'];
-    if(sts.length) partes.push(sts.length+' status');
+    if(sts.length){ var gs=statusPorRotulo().filter(function(g){return g.chaves.some(function(c){return sts.indexOf(c)>=0;});}); partes.push(gs.map(function(g){return g.lbl;}).join(', ')); }
     if(ini||fim) partes.push('período '+(ini?dp(ini):'início')+' a '+(fim?dp(fim):'hoje'));
     res.textContent=partes.join('  ·  ');
   }
