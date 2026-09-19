@@ -967,6 +967,7 @@ textarea.fi{resize:vertical;min-height:72px}
         <input type="date" class="fi" id="pt-filtro-fim" onchange="renderPonto()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
         <button class="btn sm" onclick="limparFiltroPonto()" title="Limpar filtro de período"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Limpar</button>
         <select class="fi" id="pt-filtro-func" onchange="renderPonto()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px"><option value="">Todos</option></select>
+        <button class="btn sm" onclick="pdfPonto()" title="Gerar PDF do ponto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PDF</button>
         <div style="display:flex;gap:4px;margin-left:4px">
           <button class="btn sm fbt on" id="pt-view-lista" onclick="setPontoView('lista')" title="Visualização em lista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</button>
           <button class="btn sm fbt" id="pt-view-grid" onclick="setPontoView('grid')" title="Visualização em grade semanal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Grade</button>
@@ -995,6 +996,7 @@ textarea.fi{resize:vertical;min-height:72px}
         <button class="btn sm" onclick="mudarSemanaFolha(1)" title="Próxima semana">&#9654;</button>
         <button class="btn sm" onclick="semanaAtualFolha()">Semana atual</button>
         <button class="btn sm" onclick="abrirPeriodoLivre()" id="fl-btn-periodo" title="Informar um período qualquer">Período livre</button>
+        <select class="fi" id="fl-colab" onchange="renderFolha()" style="width:auto;min-width:160px;padding:5px 9px;font-size:11px" title="Filtrar por colaborador"><option value="">Todos os colaboradores</option></select>
         <button class="btn sm" onclick="limparFiltroFolha()" title="Limpar período"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Limpar</button>
         <button class="btn" onclick="marcarPago()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>Marcar Pagos</button>
         <button class="btn" onclick="abrirRateioFolha()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Ratear Projetos</button>
@@ -1112,7 +1114,7 @@ textarea.fi{resize:vertical;min-height:72px}
     <!-- TABS -->
     <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:3px;width:fit-content">
       <button class="fbt on" id="proj-tab-lista" onclick="projTab('lista',this)">📋 Projetos</button>
-      <button class="fbt" id="proj-tab-novo" onclick="projTab('novo',this)">➕ Novo Projeto</button>
+      <button class="fbt" id="proj-tab-novo" onclick="novoProjetoLimpo(this)">➕ Novo Projeto</button>
       <button class="fbt" id="proj-tab-custos" onclick="projTab('custos',this)">💰 Custos</button>
       <button class="fbt" id="proj-tab-dash" onclick="projTab('dash',this)">📊 Dashboard</button>
       <button class="fbt" id="proj-tab-cond" onclick="projTab('cond',this)">⚙️ Condições de Pagamento</button>
@@ -1229,6 +1231,9 @@ textarea.fi{resize:vertical;min-height:72px}
               <div class="fgroup" style="flex:2"><label class="flabel">Nome do Arquiteto</label><input type="text" class="fi" id="proj-nome-arquiteto" placeholder="Nome completo..."></div>
               <div class="fgroup"><label class="flabel">Honorários (%)</label><input type="number" class="fi" id="proj-pct-arquiteto" placeholder="0" min="0" max="100" step="0.1" oninput="calcValorArquiteto()"></div>
               <div class="fgroup"><label class="flabel">Valor Honorários (R$)</label><input type="number" class="fi" id="proj-valor-arquiteto" placeholder="0,00" readonly style="background:var(--bg3);color:var(--t2)"></div>
+            </div>
+            <div id="arq-resumo" style="font-size:11px;color:var(--t2);background:var(--bg2);border:1px dashed var(--bd);border-radius:7px;padding:7px 10px;margin-top:6px"></div>
+            <div style="display:none">
             </div>
           </div>
         </div>
@@ -2826,7 +2831,7 @@ function renderDash(){
   var si=fd(semInicio),sf=fd(semFim);
   var ptSem=pontos.filter(function(p){return p.data>=si&&p.data<=sf;});
   var folhaH='';
-  funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
+  funcionarios.filter(function(f){return f.ativo!==false&&passaColab(f.id);}).forEach(function(f){
     var dias=ptSem.filter(function(p){return p.funcionario_id==f.id&&p.tipo==='diaria';}).length;
     var hExt=ptSem.filter(function(p){return p.funcionario_id==f.id&&p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
     var total=ptSem.filter(function(p){return p.funcionario_id==f.id;}).reduce(function(s,p){return s+valorPonto(p);},0);
@@ -3701,6 +3706,25 @@ function renderTiraDias(){
   }
   box.innerHTML=html;
 }
+
+// ===== FILTRO POR COLABORADOR (folha) =====
+// passaColab() e reaproveitavel por qualquer consulta que tenha funcionario_id.
+function colabFiltro(){ var el=document.getElementById('fl-colab'); return el&&el.value?el.value:''; }
+function passaColab(funcId){ var f=colabFiltro(); return !f || String(funcId)===String(f); }
+function nomeColabFiltro(){
+  var f=colabFiltro(); if(!f) return '';
+  var o=funcionarios.find(function(x){return String(x.id)===String(f);});
+  return o?o.nome:'';
+}
+function populateColabFolha(){
+  var el=document.getElementById('fl-colab'); if(!el) return;
+  var atual=el.value;
+  var ativos=funcionarios.filter(function(f){return f.ativo!==false;})
+    .sort(function(a,b){return String(a.nome||'').localeCompare(String(b.nome||''));});
+  el.innerHTML='<option value="">Todos os colaboradores</option>'+
+    ativos.map(function(f){return '<option value="'+f.id+'"'+(String(f.id)===String(atual)?' selected':'')+'>'+f.nome+'</option>';}).join('');
+  if(atual && !ativos.some(function(f){return String(f.id)===String(atual);})) el.value='';
+}
 // -- FOLHA SEMANAL -----------------------------------------
 // Wrapper: ao trocar a semana, limpa o período custom (semana e período são mutuamente exclusivos)
 function onChangeSemanaFolha(){
@@ -3744,12 +3768,13 @@ function semanasNoPeriodo(si,sf){
 }
 function renderFolha(){
   renderTiraDias();
+  populateColabFolha();
   var sem=getSemana();
   if(!sem.si){document.getElementById('fl-body').innerHTML='<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--t3)">Selecione uma semana ou um período</td></tr>';document.getElementById('fl-total').textContent=fmt(0);return;}
-  var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
+  var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf&&passaColab(p.funcionario_id);});
   var totalGeral=0;
-  var diaristas=funcionarios.filter(function(f){return f.ativo!==false&&(!f.tipo||f.tipo==='diarista');});
-  var mensalistas=funcionarios.filter(function(f){return f.ativo!==false&&(f.tipo==='mensalista'||f.tipo==='prolabore');});
+  var diaristas=funcionarios.filter(function(f){return f.ativo!==false&&(!f.tipo||f.tipo==='diarista')&&passaColab(f.id);});
+  var mensalistas=funcionarios.filter(function(f){return f.ativo!==false&&(f.tipo==='mensalista'||f.tipo==='prolabore')&&passaColab(f.id);});
   // Pré-calcular linhas para conseguir filtrar quem tem saldo a pagar
   var linhasDiarista=[];
   diaristas.forEach(function(f){
@@ -3830,12 +3855,26 @@ function renderFolha(){
   document.getElementById('fl-total').textContent=fmt(totalGeral);
 }
 function togglePagamento(key){if(!key)return;folha_paga[key]=!folha_paga[key];save();renderFolha();toast('Status atualizado!','ok');}
+
+// A marcacao de pago e o rateio gravam usando sem.key como identificador.
+// Um dia avulso gera chave diferente da semana (custom_... em vez de 2026-W30),
+// entao o registro nao casa com a semana. Confirma antes de gravar.
+function confirmaEscopoFolha(acao){
+  var s=getSemana();
+  if(!s || !s.custom) return true;
+  var umDia = s.si===s.sf;
+  var txt = umDia
+    ? ('Voce esta com apenas o dia '+dp(s.si)+' selecionado.\n\n'+acao+' vai considerar SOMENTE esse dia, e o registro ficara separado do da semana inteira.\n\nContinuar mesmo assim?')
+    : ('Voce esta com o periodo '+dp(s.si)+' a '+dp(s.sf)+' selecionado.\n\n'+acao+' vai considerar esse periodo, nao a semana.\n\nContinuar?');
+  return window.confirm(txt);
+}
 function marcarPago(){
   var sem=getSemana();if(!sem.key)return;
+  if(!confirmaEscopoFolha('Marcar Pagos')) return;
   // Marcar pagos apenas os funcionários que estavam pendentes no período atual
-  var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
+  var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf&&passaColab(p.funcionario_id);});
   var fatorSemanas=sem.custom?semanasNoPeriodo(sem.si,sem.sf):1;
-  funcionarios.filter(function(f){return f.ativo!==false;}).forEach(function(f){
+  funcionarios.filter(function(f){return f.ativo!==false&&passaColab(f.id);}).forEach(function(f){
     var pkey=sem.key+'_'+f.id;
     if(folha_paga[pkey])return;
     var temSaldo=false;
@@ -3872,7 +3911,7 @@ function projetoDoPonto(p){
 function pdfFolha(){
   var sem=getSemana(); if(!sem.si){toast('Selecione uma semana ou período','warn');return;}
   var cfg=getCfg();
-  var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
+  var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf&&passaColab(p.funcionario_id);});
   var fatorSemanas=sem.custom?semanasNoPeriodo(sem.si,sem.sf):1;
   var totalGeral=0;
   var rows='';
@@ -4727,9 +4766,84 @@ function delContaBancaria(id){
 }
 
 // -- PDF DASHBOARD ----------------------------------------
+
+// ===== PDF DE PONTO / JORNADA =====
+// Usa exatamente os mesmos filtros da tela (periodo + colaborador) e o
+// showPrint() ja existente, o mesmo dos demais relatorios.
+function pdfPonto(){
+  var elI=document.getElementById('pt-filtro-ini'), elF=document.getElementById('pt-filtro-fim'), elFn=document.getElementById('pt-filtro-func');
+  var ini=elI?elI.value:'', fim=elF?elF.value:'', ff=elFn?elFn.value:'';
+  var list=pontos.filter(function(p){
+    if(ff && String(p.funcionario_id)!==String(ff)) return false;
+    if(ini && p.data<ini) return false;
+    if(fim && p.data>fim) return false;
+    return true;
+  }).sort(function(a,b){
+    var d=String(a.data||'').localeCompare(String(b.data||''));
+    return d!==0?d:String(funcNome(a.funcionario_id)).localeCompare(String(funcNome(b.funcionario_id)));
+  });
+
+  var cfg=getCfg();
+  var periodo = (ini||fim) ? ((ini?dp(ini):'início')+' a '+(fim?dp(fim):'hoje')) : 'todos os registros';
+  var colab = ff ? funcNome(ff) : 'Todos os colaboradores';
+
+  var total=0, porFunc={};
+  var linhas=list.map(function(p){
+    var v=valorPonto(p); total+=v;
+    var nm=funcNome(p.funcionario_id)||'-';
+    if(!porFunc[nm]) porFunc[nm]={qtd:0,horas:0,valor:0};
+    porFunc[nm].qtd++; porFunc[nm].horas+=parseFloat(p.horas||0); porFunc[nm].valor+=v;
+    return '<tr>'+
+      '<td>'+dp(p.data)+'</td>'+
+      '<td>'+esc(nm)+'</td>'+
+      '<td>'+esc(tipoPontoLbl(p.tipo))+'</td>'+
+      '<td style="text-align:center">'+(parseFloat(p.horas||0)?parseFloat(p.horas).toFixed(1)+'h':'-')+'</td>'+
+      '<td>'+esc(p.obs||'')+'</td>'+
+      '<td style="text-align:right">'+fmt(v)+'</td>'+
+    '</tr>';
+  }).join('');
+
+  var resumo=Object.keys(porFunc).sort().map(function(nm){
+    return '<tr><td>'+esc(nm)+'</td><td style="text-align:center">'+porFunc[nm].qtd+'</td>'+
+           '<td style="text-align:center">'+(porFunc[nm].horas?porFunc[nm].horas.toFixed(1)+'h':'-')+'</td>'+
+           '<td style="text-align:right">'+fmt(porFunc[nm].valor)+'</td></tr>';
+  }).join('');
+
+  var corpo = list.length
+    ? ('<div class="sec">Registros</div>'+
+       '<table><thead><tr><th>Data</th><th>Colaborador</th><th>Tipo</th><th style="text-align:center">Horas</th><th>Observação</th><th style="text-align:right">Valor</th></tr></thead>'+
+       '<tbody>'+linhas+
+       '<tr style="background:#E2ECEA;font-weight:bold"><td colspan="5">TOTAL</td><td style="text-align:right">'+fmt(total)+'</td></tr></tbody></table>'+
+       '<div class="sec">Resumo por colaborador</div>'+
+       '<table><thead><tr><th>Colaborador</th><th style="text-align:center">Registros</th><th style="text-align:center">Horas extra</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+resumo+'</tbody></table>')
+    : '<table><tbody><tr><td style="text-align:center;color:#999;padding:18px">Nenhum registro de ponto no filtro selecionado</td></tr></tbody></table>';
+
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Ponto / Jornada</title><style>'+
+    'body{font-family:Arial,sans-serif;font-size:10pt;color:#1a1a1a;padding:18px}'+
+    'h1{font-size:14pt;margin:0 0 2px}.sub{font-size:9pt;color:#555;margin-bottom:12px}'+
+    '.sec{font-weight:700;font-size:10.5pt;margin:16px 0 5px;text-transform:uppercase;border-bottom:2px solid #7ab8b8;padding-bottom:3px}'+
+    'table{width:100%;border-collapse:collapse;margin-bottom:6px}'+
+    'th{background:#2c2c2c;color:#fff;padding:5px 7px;font-size:8.5pt;text-align:left}'+
+    'td{padding:4px 7px;border-bottom:1px solid #ddd;font-size:9pt}'+
+    '.ft{margin-top:20px;display:flex;justify-content:space-between;font-size:8pt;color:#666;border-top:1px solid #ccc;padding-top:6px}'+
+    '@media print{body{padding:0}}'+
+    '</style></head><body>'+
+    '<h1>Ponto / Jornada</h1>'+
+    '<div class="sub">Período: '+periodo+' &nbsp;|&nbsp; Colaborador: '+esc(colab)+' &nbsp;|&nbsp; '+list.length+' registro(s)</div>'+
+    corpo+
+    '<div class="ft"><span>'+esc(cfg.razao||'Conexão Design')+'</span><span>Gerado em '+new Date().toLocaleDateString('pt-BR')+'</span></div>'+
+    '</body></html>';
+  showPrint('Ponto / Jornada', html);
+}
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function tipoPontoLbl(t){
+  var m={diaria:'Diária',noturna:'Diária noturna',meio:'Meia diária',extra:'Hora extra',falta:'Falta'};
+  return m[t]||t||'-';
+}
 function pdfAtual(){
   if(viewAtual==='dashboard'){pdfDashboard();return;}
   if(viewAtual==='folha'){pdfFolha();return;}
+  if(viewAtual==='ponto'){pdfPonto();return;}
   if(viewAtual==='receber'){pdfContasReceber();return;}
   if(viewAtual==='pagar'){pdfContasPagar();return;}
   toast('PDF não disponível nesta tela. Use o botão PDF da tela específica.','info');
@@ -4816,11 +4930,10 @@ function pdfDashboard(){
     html+='<tr style="background:#E2ECEA;font-weight:bold"><td colspan="4">TOTAL DA SEMANA</td><td style="text-align:right">R$ '+folhaSem.toFixed(2)+'</td></tr>';
   }else{html+='<tr><td colspan="5" style="text-align:center;color:#999">Selecione uma semana na tela Folha Semanal</td></tr>';}
   html+='</tbody></table></div>';
-  // Arquiteto
-  if(p.teve_arquiteto&&p.nome_arquiteto){
-    html+='<div class="sec">Arquiteto</div>';
-    html+='<table><tbody><tr><td><b>Nome:</b> '+p.nome_arquiteto+'</td><td><b>Honorarios:</b> '+fmt(p.valor_arquiteto||0)+' ('+( p.percentual_arquiteto||0)+'% do estimado)</td></tr></tbody></table>';
-  }
+  // (bloco de arquiteto removido: referenciava a variavel 'p', que nunca foi
+  // declarada nesta funcao, e derrubava a geracao do PDF do Dashboard com
+  // ReferenceError. O dashboard e global e nao tem um projeto unico; os dados
+  // da arquiteta ficam no relatorio do projeto, que e interno.)
   html+='<div class="ft"><span>'+(cfg.razao||'Conexão Design')+' | CNPJ: '+(cfg.cnpj||'58.323.410/0001-53')+'</span><span>Gerado em '+new Date().toLocaleDateString('pt-BR')+'</span></div>';
   html+='</body></html>';
   showPrint('Relatório', html);
@@ -4997,12 +5110,49 @@ function saveProj(){
 
 // ===== NAVEGACAO: de onde o projeto foi aberto =====
 var _projVoltarPara = 'lista';
+
+// Abre o formulario SEMPRE em branco, descartando qualquer projeto aberto antes.
+function novoProjetoLimpo(btn){
+  if(window._editProjId && (window._fotosNaoSalvas || _uploadsPendentes>0)){
+    if(!window.confirm('Ha foto anexada ainda nao salva no projeto aberto.\n\nComecar um projeto novo vai descartar esse vinculo.\n\nContinuar?')) return;
+  }
+  limparEstadoProjeto();
+  projTab('novo', btn||document.getElementById('proj-tab-novo'));
+}
+// Zera TODO o estado de projeto: id, campos, categorias, itens e fotos.
+function limparEstadoProjeto(){
+  window._editProjId = null;
+  window._estCats = [];
+  window._fotosNaoSalvas = false;
+  if(typeof _itensProposta!=='undefined') _itensProposta = [];
+  var elId=document.getElementById('proj-edit-id'); if(elId) elId.value='';
+  var painel=document.getElementById('proj-panel-novo');
+  if(painel){
+    painel.querySelectorAll('input, select, textarea').forEach(function(el){
+      if(el.type==='checkbox'||el.type==='radio') el.checked=false;
+      else if(el.tagName==='SELECT') el.selectedIndex=0;
+      else el.value='';
+      el.classList.remove('erro');
+    });
+  }
+  var t=document.getElementById('proj-form-title'); if(t) t.textContent='Novo Projeto';
+  if(typeof toggleArquiteto==='function') toggleArquiteto();
+  if(typeof popularSelectAddCat==='function') popularSelectAddCat();
+  if(typeof renderEstCats==='function') renderEstCats();
+  if(typeof renderItensProposta==='function') renderItensProposta();
+  if(typeof calcEstTotal==='function') calcEstTotal();
+  if(typeof atualizarBotaoVoltar==='function') atualizarBotaoVoltar();
+  var btnPrev=document.getElementById('btn-prev-proposta'); if(btnPrev) btnPrev.style.display='none';
+}
 function voltarDoProjeto(){
+  if(window._fotosNaoSalvas || _uploadsPendentes>0){
+    if(!window.confirm('Ha foto anexada que ainda nao foi salva neste projeto.\n\nSair sem salvar vai descartar o vinculo da foto.\n\nSair mesmo assim?')) return;
+    window._fotosNaoSalvas=false;
+  }
   var destino = _projVoltarPara || 'lista';
   // limpar o modo edicao ANTES de trocar de aba, senao o botao Voltar
   // continua visivel (projTab consulta _editProjId)
-  window._editProjId = null;
-  var elId=document.getElementById('proj-edit-id'); if(elId) elId.value='';
+  limparEstadoProjeto();
   _projVoltarPara = 'lista';
   projTab(destino, document.getElementById('proj-tab-'+destino));
   atualizarBotaoVoltar();
@@ -5113,6 +5263,7 @@ function onEstValorInput(catId,val){
 }
 
 function calcEstTotal(){
+  if(typeof calcValorArquiteto==='function') setTimeout(calcValorArquiteto,0);
   var total=0;
   document.querySelectorAll('#proj-est-cats input[data-cat]').forEach(function(el){
     total+=parseFloat(el.value)||0;
@@ -5127,13 +5278,41 @@ function toggleArquiteto(){
   var chk=document.getElementById('proj-teve-arquiteto');
   var fields=document.getElementById('proj-arquiteto-fields');
   if(fields) fields.style.display=chk&&chk.checked?'':'none';
+  if(typeof calcValorArquiteto==='function') calcValorArquiteto();
+}
+// VALOR DA ARQUITETA - INFORMACAO INTERNA.
+// Base de calculo: total ESTIMADO de custos do projeto (mesma regra de antes).
+// Lido dos dados, nao do texto da tela: o parse do textContent quebrava com
+// separador de milhar (R$ 12.500,00 virava 12500,00 -> 12,50).
+function baseCalculoArquiteto(){
+  var cats=(window._estCats||[]).reduce(function(s,c){return s+(parseFloat(c.valor)||0);},0);
+  if(cats>0) return cats;
+  // fallback: le o total exibido. Parse no formato pt-BR (R$ 15.500,00):
+  // o codigo antigo tirava so os pontos e lia 15500,00 como 15,50.
+  var el=document.getElementById('proj-est-total');
+  if(!el) return 0;
+  var txt=String(el.textContent||'').replace(/[^0-9.,-]/g,'').replace(/\./g,'').replace(',','.');
+  return parseFloat(txt)||0;
 }
 function calcValorArquiteto(){
-  var pct=parseFloat(document.getElementById('proj-pct-arquiteto').value)||0;
-  var total=parseFloat(document.getElementById('proj-est-total').textContent.replace(/[^0-9,]/g,'').replace(',','.'))||0;
-  var valor=total*(pct/100);
+  var elPct=document.getElementById('proj-pct-arquiteto');
   var el=document.getElementById('proj-valor-arquiteto');
-  if(el)el.value=valor.toFixed(2);
+  if(!el) return 0;
+  var chk=document.getElementById('proj-teve-arquiteto');
+  if(chk && !chk.checked){ el.value=''; atualizarResumoArquiteto(0,0); return 0; }
+  var pct=parseFloat(elPct?elPct.value:0)||0;
+  var base=baseCalculoArquiteto();
+  var valor=base*(pct/100);
+  el.value=valor?valor.toFixed(2):'';
+  atualizarResumoArquiteto(base,valor);
+  return valor;
+}
+function atualizarResumoArquiteto(base,valor){
+  var box=document.getElementById('arq-resumo'); if(!box) return;
+  box.innerHTML = valor
+    ? ('Base de cálculo (custo estimado): <b>'+fmt(base)+'</b> &nbsp;·&nbsp; a pagar à arquiteta: <b>'+fmt(valor)+'</b>'+
+       '<br><span style="color:var(--amber,#C47D0A)">Uso interno. Não aparece na proposta nem no contrato.</span>')
+    : '';
 }
 
 // ================================================================
@@ -5687,10 +5866,9 @@ function gerarContrato(projId){
   var prazo=p.prazo_dias||45;
   var garantia=p.garantia||12;
 
-  // Itens do contrato.
-  // Fonte preferencial: itens da PROPOSTA (nome do objeto + descricao tecnica).
-  // Fonte alternativa: quadro de estimativas por categoria (comportamento antigo),
-  // usado em projetos que nunca tiveram itens de proposta cadastrados.
+  // ---- OBJETO DO CONTRATO (texto, nao tabela) ----
+  // Fonte: "Descricao do Cliente" = campo Descricao do projeto (coluna `descricao`).
+  // Alternativas, nesta ordem, para nunca gerar contrato com objeto vazio.
   function esc_(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   var itensProposta=[];
   try{ itensProposta = loadItensProposta(p.id) || []; }catch(e){ itensProposta=[]; }
@@ -5701,19 +5879,35 @@ function gerarContrato(projId){
     return it && ((it.nome && String(it.nome).trim()) || parseFloat(it.valor||0));
   });
 
-  var somaItens=0, linhasItens='', quadroItens='', usouProposta=false;
+  var textoObjeto = String(p.descricao||'').trim();
+  var origemObjeto = 'descricao';
+  if(!textoObjeto){
+    textoObjeto = String(p.desc_escopo||'').trim();
+    origemObjeto = textoObjeto ? 'escopo' : '';
+  }
+  if(!textoObjeto && itensProposta.length){
+    // ultimo recurso: enumera os itens em texto corrido, nunca em tabela
+    textoObjeto = itensProposta.map(function(it){
+      var n=String(it.nome||'').trim();
+      var d=String(it.descricao||'').trim();
+      if(d && d.toUpperCase()===n.toUpperCase()) d='';
+      return n + (d ? ' (' + d + ')' : '');
+    }).filter(Boolean).join('; ') + '.';
+    origemObjeto = 'itens';
+  }
+  if(!textoObjeto){
+    textoObjeto = 'fabricacao, fornecimento e instalacao dos itens acordados entre as Partes, conforme proposta comercial aprovada';
+    origemObjeto = 'padrao';
+  }
+  var objetoHTML = esc_(textoObjeto).replace(/\n+/g,'</p><p class="c">');
 
+  // Quadro de valores: NAO e o objeto. Fica na clausula do valor, como composicao.
+  var somaItens=0, linhasItens='';
   if(itensProposta.length){
-    usouProposta=true;
     linhasItens = itensProposta.map(function(it,i){
       var nome=String(it.nome||'').trim() || ('Item '+(i+1));
-      var desc=String(it.descricao||'').trim();
-      // nao repetir a descricao quando ela for igual ao proprio objeto
-      if(desc && desc.toUpperCase()===nome.toUpperCase()) desc='';
       var v=parseFloat(it.valor||0); somaItens+=v;
-      var celula='<b>'+esc_(nome)+'</b>';
-      if(desc) celula+='<br><span style="font-size:8.8pt;color:#444">'+esc_(desc).replace(/\n/g,'<br>')+'</span>';
-      return '<tr><td style="text-align:center;vertical-align:top">'+(i+1)+'</td><td>'+celula+'</td><td style="text-align:right;vertical-align:top">'+fmt(v)+'</td></tr>';
+      return '<tr><td style="text-align:center">'+(i+1)+'</td><td>'+esc_(nome)+'</td><td style="text-align:right">'+fmt(v)+'</td></tr>';
     }).join('');
   } else {
     var itensProj=[]; if(p.estimativas){try{itensProj=JSON.parse(p.estimativas);}catch(e){}}
@@ -5723,10 +5917,10 @@ function gerarContrato(projId){
       return '<tr><td style="text-align:center">'+(i+1)+'</td><td>'+esc_(nome)+'</td><td style="text-align:right">'+fmt(v)+'</td></tr>';
     }).join('');
   }
-  if(linhasItens){
-    quadroItens='<table class="ct"><tr><th style="width:36px">Item</th><th>'+(usouProposta?'Objeto e especificação técnica':'Descrição')+'</th><th style="width:120px;text-align:right">Valor (R$)</th></tr>'+
-      linhasItens+'<tr style="font-weight:700;background:#eee"><td colspan="2">VALOR TOTAL</td><td style="text-align:right">'+fmt(somaItens)+'</td></tr></table>';
-  }
+  var quadroItens = linhasItens
+    ? ('<table class="ct"><tr><th style="width:36px">Item</th><th>Composição</th><th style="width:120px;text-align:right">Valor (R$)</th></tr>'+
+       linhasItens+'<tr style="font-weight:700;background:#eee"><td colspan="2">VALOR TOTAL</td><td style="text-align:right">'+fmt(somaItens)+'</td></tr></table>')
+    : '';
 
   // Parcelas
   var parcelasTxt='';
@@ -5753,11 +5947,13 @@ function gerarContrato(projId){
     '<p class="c">As partes têm entre si justo e acertado o presente Contrato, que se regerá pela Lei nº 10.406/2002 (Código Civil), pela Lei nº 13.709/2018 (LGPD) e pelas cláusulas seguintes, considerando que a CONTRATADA atua na fabricação, fornecimento e instalação de estruturas em aço inoxidável e vidro, e que o CONTRATANTE aprovou a proposta comercial que integra este instrumento.</p>'+
 
     '<div class="cl">Cláusula 1ª - Do Objeto</div>'+
-    '<p class="c">O presente contrato tem por objeto a fabricação, o fornecimento e a instalação dos itens abaixo discriminados, referentes ao projeto <b>'+p.nome+'</b>, em estrita conformidade com as especificações técnicas, a proposta comercial aprovada (que integra este instrumento) e as normas técnicas aplicáveis, em especial a ABNT NBR 14718 e a ABNT NBR 7199, quando cabíveis.</p>'+
-    quadroItens+
+    '<p class="c">O presente contrato tem por objeto a fabricação, o fornecimento e a instalação, referentes ao projeto <b>'+p.nome+'</b>, do seguinte:</p>'+
+    '<p class="c">'+objetoHTML+'</p>'+
+    '<p class="c">A execução observará as especificações técnicas, a proposta comercial aprovada (que integra este instrumento) e as normas técnicas aplicáveis, em especial a ABNT NBR 14718 e a ABNT NBR 7199, quando cabíveis.</p>'+
 
     '<div class="cl">Cláusula 2ª - Do Valor</div>'+
-    '<p class="c">Pelo integral cumprimento do objeto, o CONTRATANTE pagará à CONTRATADA o valor total, certo e ajustado, de <b>'+fmt(valorTotal)+'</b>, no qual já estão incluídos todos os custos, tributos, encargos, materiais, mão de obra, transporte e demais despesas necessárias à integral execução, nada mais podendo ser exigido a esse título, ressalvados itens adicionais não previstos no quadro acima.</p>'+
+    '<p class="c">Pelo integral cumprimento do objeto, o CONTRATANTE pagará à CONTRATADA o valor total, certo e ajustado, de <b>'+fmt(valorTotal)+'</b>, no qual já estão incluídos todos os custos, tributos, encargos, materiais, mão de obra, transporte e demais despesas necessárias à integral execução, nada mais podendo ser exigido a esse título, ressalvados itens adicionais não previstos neste instrumento.</p>'+
+    quadroItens+
 
     '<div class="cl">Cláusula 3ª - Da Forma de Pagamento</div>'+
     parcelasTxt+
@@ -6081,7 +6277,11 @@ async function saveProjeto(){
 
 function editProjeto(id){
   var p=projetos.find(function(x){return x.id===id;}); if(!p) return;
+  // Limpa o estado do projeto anterior ANTES de preencher, para nao restar
+  // nenhum campo, categoria, item ou foto do projeto aberto antes deste.
+  limparEstadoProjeto();
   window._editProjId=id;
+  var elIdH=document.getElementById('proj-edit-id'); if(elIdH) elIdH.value=id;
   document.getElementById('proj-form-title').textContent='Editar Projeto';
   var _bsp=document.getElementById('btn-save-proj'); if(_bsp) _bsp.lastChild.textContent='Atualizar Projeto';
   // Carregar categorias de estimativa já escolhidas neste projeto
@@ -6868,6 +7068,7 @@ var _rfSemKey=null;
 function abrirRateioFolha(){
   var sem=getSemana();
   if(!sem.si){toast('Selecione uma semana','warn');return;}
+  if(!confirmaEscopoFolha('O rateio')) return;
   _rfSemKey=sem.key;
   var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
   var diaristas=funcionarios.filter(function(f){
