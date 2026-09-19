@@ -344,6 +344,16 @@ textarea.fi{resize:vertical;min-height:72px}
 .dd-item:hover{background:var(--bg2)}
 .dd-item input{width:14px;height:14px;accent-color:var(--sage);margin:0;cursor:pointer}
 .dd-sep{height:1px;background:var(--bg3);margin:4px 2px}
+
+.dias-strip{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.dia-chip{flex:1;min-width:62px;border:1px solid var(--bd);border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer;background:transparent;transition:.12s}
+.dia-chip:hover{border-color:var(--sage)}
+.dia-chip .dsem{display:block;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+.dia-chip .dnum{display:block;font-size:14px;font-weight:700;color:var(--t1);line-height:1.25}
+.dia-chip .dqtd{display:block;font-size:9px;color:var(--t3)}
+.dia-chip.on{background:var(--sage);border-color:var(--sage)}
+.dia-chip.on .dsem,.dia-chip.on .dnum,.dia-chip.on .dqtd{color:#fff}
+.dia-chip.hoje{border-color:var(--sage);border-width:2px}
 </style>
 </head>
 <body>
@@ -977,16 +987,27 @@ textarea.fi{resize:vertical;min-height:72px}
     <div class="card mb16">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <div class="ch" style="flex:1;margin:0">Folha Semanal</div>
-        <input type="week" class="fi" id="fl-semana" onchange="onChangeSemanaFolha()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px" title="Selecione a semana base">
-        <label style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">De</label>
-        <input type="date" class="fi" id="fl-filtro-ini" onchange="renderFolha()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
-        <label style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em">Até</label>
-        <input type="date" class="fi" id="fl-filtro-fim" onchange="renderFolha()" style="width:auto;min-width:auto;padding:5px 9px;font-size:11px">
+        <input type="week" class="fi" id="fl-semana" onchange="onChangeSemanaFolha()" style="display:none">
+        <input type="date" class="fi" id="fl-filtro-ini" onchange="renderFolha()" style="display:none">
+        <input type="date" class="fi" id="fl-filtro-fim" onchange="renderFolha()" style="display:none">
+        <button class="btn sm" onclick="mudarSemanaFolha(-1)" title="Semana anterior">&#9664;</button>
+        <span id="fl-semana-lbl" style="font-size:12px;font-weight:600;min-width:150px;text-align:center"></span>
+        <button class="btn sm" onclick="mudarSemanaFolha(1)" title="Próxima semana">&#9654;</button>
+        <button class="btn sm" onclick="semanaAtualFolha()">Semana atual</button>
+        <button class="btn sm" onclick="abrirPeriodoLivre()" id="fl-btn-periodo" title="Informar um período qualquer">Período livre</button>
         <button class="btn sm" onclick="limparFiltroFolha()" title="Limpar período"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Limpar</button>
         <button class="btn" onclick="marcarPago()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>Marcar Pagos</button>
         <button class="btn" onclick="abrirRateioFolha()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Ratear Projetos</button>
         <button class="btn sm" onclick="pdfFolha()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PDF</button>
         <button class="btn sm" onclick="exportFolha()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Excel</button>
+      </div>
+      <div id="fl-dias" class="dias-strip"></div>
+      <div id="fl-periodo-livre" style="display:none;margin-top:9px;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="filtro-tit">Período livre</span>
+        <input type="date" class="fi filtro-inp" id="fl-pl-ini" onchange="aplicarPeriodoLivre()">
+        <span style="font-size:11px;color:var(--t3)">até</span>
+        <input type="date" class="fi filtro-inp" id="fl-pl-fim" onchange="aplicarPeriodoLivre()">
+        <button class="btn sm" onclick="fecharPeriodoLivre()">Voltar para semana</button>
       </div>
     </div>
     <div class="card">
@@ -1134,8 +1155,11 @@ textarea.fi{resize:vertical;min-height:72px}
     <!-- NOVO PROJETO -->
     <div id="proj-panel-novo" style="display:none">
       <div class="card mb16">
-        <div class="ch" id="proj-form-title">Novo Projeto</div>
-        <div style="font-size:11px;color:var(--t3);margin:-6px 0 10px">Campos com <span class="req">*</span> são obrigatórios.</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
+          <button class="btn sm" id="btn-voltar-proj" onclick="voltarDoProjeto()" style="display:none" title="Voltar para a lista de projetos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Voltar</button>
+          <div class="ch" id="proj-form-title" style="margin:0">Novo Projeto</div>
+        </div>
+        <div style="font-size:11px;color:var(--t3);margin:0 0 10px">Campos com <span class="req">*</span> são obrigatórios.</div>
         <input type="hidden" id="proj-edit-id">
         <div class="frow">
           <div class="fgroup" style="flex:2"><label class="flabel">Nome do Projeto<span class="req">*</span></label><input type="text" class="fi" id="proj-nome" placeholder="Ex: Dormitório Casal - Dr. Pablo..."></div>
@@ -3589,6 +3613,94 @@ function renderPontoGrid(){
   document.getElementById('pt-grid-body').innerHTML=html;
 }
 
+
+// ===== FILTRO DA FOLHA: navegacao por semana + tira de dias =====
+// Os inputs fl-semana / fl-filtro-ini / fl-filtro-fim continuam existindo e
+// sendo a fonte de verdade de getSemana(). A tira apenas os manipula.
+function isoSemana(d){
+  var t=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  t.setDate(t.getDate()+3-((t.getDay()+6)%7));
+  var s1=new Date(t.getFullYear(),0,4);
+  var n=1+Math.round(((t-s1)/86400000-3+((s1.getDay()+6)%7))/7);
+  return t.getFullYear()+'-W'+String(n).padStart(2,'0');
+}
+function semanaAtualFolha(){
+  var el=document.getElementById('fl-semana'); if(!el) return;
+  el.value=isoSemana(new Date());
+  onChangeSemanaFolha();
+}
+function mudarSemanaFolha(delta){
+  var el=document.getElementById('fl-semana'); if(!el) return;
+  if(!el.value) el.value=isoSemana(new Date());
+  // usa o inicio da semana atual como referencia e anda 7 dias
+  var ini=document.getElementById('fl-filtro-ini').value;
+  document.getElementById('fl-filtro-ini').value='';
+  document.getElementById('fl-filtro-fim').value='';
+  var s=getSemana();
+  var base=new Date((s.si||fd(new Date()))+'T00:00:00');
+  base.setDate(base.getDate()+delta*7);
+  el.value=isoSemana(base);
+  onChangeSemanaFolha();
+}
+function selecionarDiaFolha(dia){
+  var ini=document.getElementById('fl-filtro-ini'), fim=document.getElementById('fl-filtro-fim');
+  if(ini.value===dia && fim.value===dia){ ini.value=''; fim.value=''; }   // clicar de novo volta para a semana inteira
+  else { ini.value=dia; fim.value=dia; }
+  renderFolha();
+}
+function abrirPeriodoLivre(){
+  var b=document.getElementById('fl-periodo-livre'); if(!b) return;
+  b.style.display='flex';
+  var s=getSemana();
+  if(s.si&&!document.getElementById('fl-pl-ini').value){
+    document.getElementById('fl-pl-ini').value=s.si;
+    document.getElementById('fl-pl-fim').value=s.sf;
+  }
+}
+function fecharPeriodoLivre(){
+  document.getElementById('fl-periodo-livre').style.display='none';
+  document.getElementById('fl-pl-ini').value=''; document.getElementById('fl-pl-fim').value='';
+  document.getElementById('fl-filtro-ini').value=''; document.getElementById('fl-filtro-fim').value='';
+  renderFolha();
+}
+function aplicarPeriodoLivre(){
+  document.getElementById('fl-filtro-ini').value=document.getElementById('fl-pl-ini').value;
+  document.getElementById('fl-filtro-fim').value=document.getElementById('fl-pl-fim').value;
+  renderFolha();
+}
+var DIAS_SEM=['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+function renderTiraDias(){
+  var box=document.getElementById('fl-dias'); if(!box) return;
+  var el=document.getElementById('fl-semana');
+  if(el && !el.value && !document.getElementById('fl-filtro-ini').value){ el.value=isoSemana(new Date()); }
+  // semana base: ignora o dia selecionado para nao encolher a tira
+  var iniSel=document.getElementById('fl-filtro-ini').value, fimSel=document.getElementById('fl-filtro-fim').value;
+  var diaUnico=(iniSel&&iniSel===fimSel)?iniSel:'';
+  var salvoI=iniSel, salvoF=fimSel;
+  document.getElementById('fl-filtro-ini').value=''; document.getElementById('fl-filtro-fim').value='';
+  var s=getSemana();
+  document.getElementById('fl-filtro-ini').value=salvoI; document.getElementById('fl-filtro-fim').value=salvoF;
+
+  var lbl=document.getElementById('fl-semana-lbl');
+  var periodoLivre=(salvoI&&salvoF&&salvoI!==salvoF);
+  if(periodoLivre){ if(lbl) lbl.textContent=dp(salvoI)+' a '+dp(salvoF); box.style.display='none'; return; }
+  box.style.display='flex';
+  if(!s.si){ box.innerHTML=''; if(lbl) lbl.textContent='Selecione'; return; }
+  if(lbl) lbl.textContent=dp(s.si)+' a '+dp(s.sf);
+
+  var hoje=fd(new Date()), html='';
+  for(var i=0;i<7;i++){
+    var d=new Date(s.si+'T00:00:00'); d.setDate(d.getDate()+i);
+    var iso=fd(d);
+    var qtd=pontos.filter(function(p){return p.data===iso;}).length;
+    html+='<button type="button" class="dia-chip'+(diaUnico===iso?' on':'')+(iso===hoje?' hoje':'')+'" onclick="selecionarDiaFolha(\''+iso+'\')">'+
+      '<span class="dsem">'+DIAS_SEM[d.getDay()]+'</span>'+
+      '<span class="dnum">'+String(d.getDate()).padStart(2,'0')+'</span>'+
+      '<span class="dqtd">'+(qtd?qtd+' pt':'-')+'</span>'+
+    '</button>';
+  }
+  box.innerHTML=html;
+}
 // -- FOLHA SEMANAL -----------------------------------------
 // Wrapper: ao trocar a semana, limpa o período custom (semana e período são mutuamente exclusivos)
 function onChangeSemanaFolha(){
@@ -3631,6 +3743,7 @@ function semanasNoPeriodo(si,sf){
   return dias/7;
 }
 function renderFolha(){
+  renderTiraDias();
   var sem=getSemana();
   if(!sem.si){document.getElementById('fl-body').innerHTML='<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--t3)">Selecione uma semana ou um período</td></tr>';document.getElementById('fl-total').textContent=fmt(0);return;}
   var ptSem=pontos.filter(function(p){return p.data>=sem.si&&p.data<=sem.sf;});
@@ -4881,6 +4994,23 @@ function saveProj(){
   }
 }
 
+
+// ===== NAVEGACAO: de onde o projeto foi aberto =====
+var _projVoltarPara = 'lista';
+function voltarDoProjeto(){
+  var destino = _projVoltarPara || 'lista';
+  // limpar o modo edicao ANTES de trocar de aba, senao o botao Voltar
+  // continua visivel (projTab consulta _editProjId)
+  window._editProjId = null;
+  var elId=document.getElementById('proj-edit-id'); if(elId) elId.value='';
+  _projVoltarPara = 'lista';
+  projTab(destino, document.getElementById('proj-tab-'+destino));
+  atualizarBotaoVoltar();
+}
+function atualizarBotaoVoltar(){
+  var b=document.getElementById('btn-voltar-proj');
+  if(b) b.style.display = window._editProjId ? 'inline-flex' : 'none';
+}
 function projTab(tab, btn){
   ['lista','novo','custos','dash','cond'].forEach(function(t){
     var el=document.getElementById('proj-panel-'+t);
@@ -4888,6 +5018,8 @@ function projTab(tab, btn){
   });
   document.querySelectorAll('#view-projetos .fbt').forEach(function(b){b.classList.remove('on');});
   if(btn) btn.classList.add('on');
+  if(tab!=='novo') _projVoltarPara = (tab==='lista'||tab==='dash'||tab==='custos') ? tab : 'lista';
+  if(typeof atualizarBotaoVoltar==='function') atualizarBotaoVoltar();
   try{
     if(tab==='lista'){ initFiltrosProjeto(); renderProjetos(); }
     if(tab==='custos'){ renderCustos(); populateProjetoSelects(); populateCustoTipo(); populateProdutoSelect(); }
@@ -5019,6 +5151,7 @@ var DRIVE_API = 'https://www.googleapis.com/drive/v3/files';
 var DRIVE_UP  = 'https://www.googleapis.com/upload/drive/v3/files';
 var _cacheFoto = {};   // id -> objectURL ja resolvido
 var _uploadsPendentes = 0;   // fotos ainda subindo para o Drive
+var _ultimoErroDrive = '';
 window.addEventListener('beforeunload', function(e){
   if(_uploadsPendentes>0 || window._fotosNaoSalvas){
     e.preventDefault(); e.returnValue='';
@@ -5062,7 +5195,12 @@ async function drivePastaFotos(){
     headers:{Authorization:'Bearer '+ACCESS_TOKEN,'Content-Type':'application/json'},
     body: JSON.stringify({name:'Conexao Design - Fotos', mimeType:'application/vnd.google-apps.folder'})
   });
-  if(!c.ok){ toast('Nao consegui criar a pasta de fotos no Drive','warn'); return ''; }
+  if(!c.ok){
+    var dc='HTTP '+c.status;
+    try{ var bc=await c.json(); if(bc&&bc.error&&bc.error.message) dc+=': '+bc.error.message; }catch(e){}
+    _ultimoErroDrive = 'pasta: '+dc;
+    return '';
+  }
   var jc = await c.json();
   localStorage.setItem('cd_pasta_fotos', jc.id);
   return jc.id;
@@ -5070,7 +5208,7 @@ async function drivePastaFotos(){
 
 // sobe a foto e devolve a referencia "drive:<id>"
 async function driveUploadFoto(dataUrl, nome){
-  if(!ACCESS_TOKEN){ toast('Sem conexao com o Google. Faca login para enviar fotos.','warn'); return ''; }
+  if(!ACCESS_TOKEN){ _ultimoErroDrive = 'sem token: faca login no Google'; return ''; }
   var pasta = await drivePastaFotos();
   var base64 = dataUrl.split(',')[1];
   var mime = (dataUrl.match(/^data:([^;]+);/)||[])[1] || 'image/jpeg';
@@ -5090,16 +5228,71 @@ async function driveUploadFoto(dataUrl, nome){
     if(!res.ok){
       var det='HTTP '+res.status;
       try{ var b=await res.json(); if(b&&b.error&&b.error.message) det+=': '+b.error.message; }catch(e){}
+      _ultimoErroDrive = det;
       registraFalhaSync('Drive/fotos', det);
-      toast('Foto nao foi enviada ('+det+')','warn');
       return '';
     }
     var j = await res.json();
     return 'drive:'+j.id;
-  }catch(e){ toast('Falha de rede ao enviar a foto','warn'); return ''; }
+  }catch(e){ _ultimoErroDrive = 'falha de rede: '+(e.message||''); return ''; }
 }
 
 // devolve uma URL utilizavel numa <img>. Aceita dataURL antigo ou "drive:<id>".
+
+// Diagnostico das fotos. Rode diagFotos() no console (F12) e mande o resultado.
+async function diagFotos(){
+  var r = ['=== DIAGNOSTICO DE FOTOS ==='];
+  r.push('token presente: ' + (ACCESS_TOKEN ? 'sim' : 'NAO'));
+  var esc = localStorage.getItem('cd_token_scope') || '(nao registrado)';
+  r.push('permissoes do token: ' + esc);
+  r.push('tem drive.file: ' + (esc.indexOf('drive.file')>=0 ? 'SIM' : 'NAO  <- causa provavel'));
+  r.push('pasta em uso: ' + (localStorage.getItem('cd_pasta_fotos') || '(nenhuma ainda)'));
+  r.push('pasta informada recusada: ' + (localStorage.getItem('cd_pasta_recusada') ? 'sim' : 'nao'));
+
+  if(ACCESS_TOKEN){
+    try{
+      var t = await fetch('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token='+ACCESS_TOKEN);
+      var j = await t.json();
+      r.push('escopos reais no Google: ' + (j.scope || JSON.stringify(j)));
+    }catch(e){ r.push('tokeninfo falhou: ' + e.message); }
+
+    try{
+      var p = await fetch(DRIVE_API+'/'+PASTA_FOTOS_PREFERIDA+'?fields=id,name',{headers:{Authorization:'Bearer '+ACCESS_TOKEN}});
+      var pj = await p.json().catch(function(){return {};});
+      r.push('acesso a pasta informada: HTTP '+p.status+(p.ok?' (ok: '+pj.name+')':' -> '+((pj.error&&pj.error.message)||'')));
+    }catch(e){ r.push('teste de pasta falhou: ' + e.message); }
+
+    try{
+      var lim='---diag'+Date.now();
+      var corpo='--'+lim+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+
+        JSON.stringify({name:'teste_diagnostico.txt',mimeType:'text/plain'})+'\r\n'+
+        '--'+lim+'\r\nContent-Type: text/plain\r\n\r\nteste\r\n--'+lim+'--';
+      var u = await fetch(DRIVE_UP+'?uploadType=multipart&fields=id',{
+        method:'POST',
+        headers:{Authorization:'Bearer '+ACCESS_TOKEN,'Content-Type':'multipart/related; boundary='+lim},
+        body: corpo});
+      var uj = await u.json().catch(function(){return {};});
+      r.push('upload de teste: HTTP '+u.status+(u.ok?' (ok, id '+uj.id+')':' -> '+((uj.error&&uj.error.message)||'')));
+      if(u.ok && uj.id){
+        await fetch(DRIVE_API+'/'+uj.id,{method:'DELETE',headers:{Authorization:'Bearer '+ACCESS_TOKEN}});
+        r.push('arquivo de teste apagado');
+      }
+    }catch(e){ r.push('upload de teste falhou: ' + e.message); }
+  }
+  var ult = falhasSync().filter(function(f){return /Drive/.test(f.aba);}).slice(-5);
+  r.push('ultimas falhas do Drive: ' + (ult.length ? JSON.stringify(ult) : 'nenhuma'));
+  var txt = r.join('\n');
+  console.log(txt);
+  try{ navigator.clipboard.writeText(txt); toast('Diagnostico copiado. Cole na conversa.','ok'); }catch(e){}
+  return txt;
+}
+function reautorizarGoogle(){
+  try{ localStorage.removeItem('cd_token'); localStorage.removeItem('cd_token_exp'); localStorage.removeItem('cd_token_scope'); }catch(e){}
+  window._pediuConsentDrive = true;
+  if(_tokenClient) _tokenClient.requestAccessToken({prompt:'consent'});
+  else toast('Recarregue a pagina e faca login novamente','warn');
+}
+
 async function fotoURL(ref){
   if(!ref) return '';
   if(ref.indexOf('data:')===0) return ref;                 // fotos antigas continuam funcionando
@@ -5213,7 +5406,13 @@ function addFotosItem(input, idx){
             toast('Foto enviada. Clique em Salvar para vincular ao projeto.','ok');
           } else {
             _itensProposta[idx].fotos.push(dataUrl);  // fallback: fica local
-            toast('Foto guardada apenas neste aparelho','warn');
+            var causa=_ultimoErroDrive||'motivo desconhecido';
+            var dica='';
+            if(/403|insufficient|Permission|scope/i.test(causa)) dica=' Falta autorizar o Drive: rode reautorizarGoogle() no console.';
+            else if(/disabled|has not been used|API/i.test(causa)) dica=' A Google Drive API nao esta ativada no projeto do Google Cloud.';
+            else if(/404|not found/i.test(causa)) dica=' O app nao tem acesso a pasta informada.';
+            toast('Foto so neste aparelho. Motivo: '+causa+'.'+dica,'warn');
+            console.error('[FOTO] upload recusado ->', causa);
           }
           renderItensProposta();
         });
@@ -5488,15 +5687,46 @@ function gerarContrato(projId){
   var prazo=p.prazo_dias||45;
   var garantia=p.garantia||12;
 
-  // Itens do projeto (quadro de custos do contrato)
-  var itensProj=[]; if(p.estimativas){try{itensProj=JSON.parse(p.estimativas);}catch(e){}}
-  var somaItens=0;
-  var linhasItens=itensProj.map(function(it,i){
-    var nome=(typeof catNome==='function'?catNome(it.categoria_id):'')||('Item '+(i+1));
-    var v=parseFloat(it.valor||0); somaItens+=v;
-    return '<tr><td style="text-align:center">'+(i+1)+'</td><td>'+nome+'</td><td style="text-align:right">'+fmt(v)+'</td></tr>';
-  }).join('');
-  var quadroItens=itensProj.length?('<table class="ct"><tr><th style="width:36px">Item</th><th>Descrição</th><th style="width:120px;text-align:right">Valor (R$)</th></tr>'+linhasItens+'<tr style="font-weight:700;background:#eee"><td colspan="2">VALOR TOTAL</td><td style="text-align:right">'+fmt(somaItens)+'</td></tr></table>'):'';
+  // Itens do contrato.
+  // Fonte preferencial: itens da PROPOSTA (nome do objeto + descricao tecnica).
+  // Fonte alternativa: quadro de estimativas por categoria (comportamento antigo),
+  // usado em projetos que nunca tiveram itens de proposta cadastrados.
+  function esc_(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  var itensProposta=[];
+  try{ itensProposta = loadItensProposta(p.id) || []; }catch(e){ itensProposta=[]; }
+  if(!itensProposta.length && p.itens_proposta){
+    try{ itensProposta = JSON.parse(p.itens_proposta) || []; }catch(e){ itensProposta=[]; }
+  }
+  itensProposta = itensProposta.filter(function(it){
+    return it && ((it.nome && String(it.nome).trim()) || parseFloat(it.valor||0));
+  });
+
+  var somaItens=0, linhasItens='', quadroItens='', usouProposta=false;
+
+  if(itensProposta.length){
+    usouProposta=true;
+    linhasItens = itensProposta.map(function(it,i){
+      var nome=String(it.nome||'').trim() || ('Item '+(i+1));
+      var desc=String(it.descricao||'').trim();
+      // nao repetir a descricao quando ela for igual ao proprio objeto
+      if(desc && desc.toUpperCase()===nome.toUpperCase()) desc='';
+      var v=parseFloat(it.valor||0); somaItens+=v;
+      var celula='<b>'+esc_(nome)+'</b>';
+      if(desc) celula+='<br><span style="font-size:8.8pt;color:#444">'+esc_(desc).replace(/\n/g,'<br>')+'</span>';
+      return '<tr><td style="text-align:center;vertical-align:top">'+(i+1)+'</td><td>'+celula+'</td><td style="text-align:right;vertical-align:top">'+fmt(v)+'</td></tr>';
+    }).join('');
+  } else {
+    var itensProj=[]; if(p.estimativas){try{itensProj=JSON.parse(p.estimativas);}catch(e){}}
+    linhasItens = itensProj.map(function(it,i){
+      var nome=(typeof catNome==='function'?catNome(it.categoria_id):'')||('Item '+(i+1));
+      var v=parseFloat(it.valor||0); somaItens+=v;
+      return '<tr><td style="text-align:center">'+(i+1)+'</td><td>'+esc_(nome)+'</td><td style="text-align:right">'+fmt(v)+'</td></tr>';
+    }).join('');
+  }
+  if(linhasItens){
+    quadroItens='<table class="ct"><tr><th style="width:36px">Item</th><th>'+(usouProposta?'Objeto e especificação técnica':'Descrição')+'</th><th style="width:120px;text-align:right">Valor (R$)</th></tr>'+
+      linhasItens+'<tr style="font-weight:700;background:#eee"><td colspan="2">VALOR TOTAL</td><td style="text-align:right">'+fmt(somaItens)+'</td></tr></table>';
+  }
 
   // Parcelas
   var parcelasTxt='';
@@ -5827,6 +6057,7 @@ async function saveProjeto(){
   var _savedProjId = editId || dados.id;
   if(typeof _itensProposta!=='undefined') saveItensProposta(_savedProjId, _itensProposta);
   window._fotosNaoSalvas = false;
+  if(typeof atualizarBotaoVoltar==='function') atualizarBotaoVoltar();
   saveProj();
   if(ACCESS_TOKEN) syncToSheets('projetos');
   projTab('lista',document.getElementById('proj-tab-lista'));
@@ -5865,7 +6096,10 @@ function editProjeto(id){
   renderEstCats();
   // Abrir aba de novo/editar projeto
   var btnNovo=document.getElementById('proj-tab-novo');
+  var _abaAtual=document.querySelector('#view-projetos .fbt.on');
+  if(_abaAtual && _abaAtual.id!=='proj-tab-novo') _projVoltarPara=_abaAtual.id.replace('proj-tab-','');
   if(btnNovo) projTab('novo',btnNovo);
+  atualizarBotaoVoltar();
   // Helper seguro para setar valor
   var _sv=function(elId,val){var el=document.getElementById(elId);if(el)el.value=(val!==undefined&&val!==null)?val:'';};
   // Campos base
