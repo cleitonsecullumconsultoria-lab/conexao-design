@@ -545,6 +545,111 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml;charset=utf-8
   .actbtn .lbl{display:none}
   .actbtn{padding:7px 9px}
 }
+
+/* ==========================================================================
+   BOTOES v3 - bloco de icone colorido + superficie do rotulo
+   Implementado 100% em CSS sobre o markup existente (<button class="btn">
+   <svg/>Texto</button>). Nenhum handler foi tocado: todo onclick continua
+   exatamente onde estava.
+   ========================================================================== */
+.btn{
+  --ic:#334155;                 /* cor do bloco do icone */
+  --ic2:#1E293B;                /* cor do bloco no hover */
+  position:relative;display:inline-flex;align-items:stretch;gap:0;
+  padding:0 15px 0 0;min-height:36px;overflow:hidden;
+  border:1px solid var(--ds-line2);border-radius:10px;background:var(--ds-surface);
+  color:var(--ds-ink);font-size:12.5px;font-weight:600;letter-spacing:-0.01em;
+  box-shadow:0 1px 1px rgba(11,18,32,.04),0 1px 3px rgba(11,18,32,.06);
+  transition:box-shadow .18s cubic-bezier(.4,0,.2,1),transform .18s,border-color .18s;
+}
+/* o icone vira o bloco colorido da esquerda */
+.btn>svg{
+  flex:0 0 34px;width:34px;height:auto;align-self:stretch;box-sizing:border-box;
+  padding:10px;margin-right:12px;background:var(--ic);color:#fff;
+  border-right:1px solid rgba(255,255,255,.14);
+  transition:background .18s cubic-bezier(.4,0,.2,1),transform .18s;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(11,18,32,.07),0 8px 18px rgba(11,18,32,.10);border-color:var(--ds-line2)}
+.btn:hover>svg{background:var(--ic2)}
+.btn:active{transform:translateY(0) scale(.985);box-shadow:0 1px 2px rgba(11,18,32,.08)}
+.btn:focus-visible{outline:2px solid var(--ds-brand2);outline-offset:2px}
+.btn[disabled],.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn[disabled]>svg{background:#94A3B8}
+
+/* botao so com texto: mantem o formato compacto de sempre */
+.btn:not(:has(>svg)){padding:9px 15px}
+
+/* botao so com icone: quadrado, o bloco toma o botao inteiro */
+.btn>svg:only-child{flex:0 0 36px;width:36px;margin-right:0;border-right:none;border-radius:0}
+.btn:has(>svg:only-child){padding:0;width:36px;justify-content:center}
+
+/* ---- variantes: so muda a cor do bloco ---- */
+.btn.mint,.btn.pri{--ic:#4F46E5;--ic2:#3730A3}
+.btn.success{--ic:#059669;--ic2:#047857}
+.btn.danger{--ic:#E11D48;--ic2:#BE123C}
+.btn.edit{--ic:#378ADD;--ic2:#2563EB}
+.btn.export{--ic:#0E7490;--ic2:#0F766E}
+.btn.warnb{--ic:#D97706;--ic2:#B45309}
+
+/* a acao primaria continua sendo a mais forte: superficie tambem colorida */
+.btn.mint,.btn.pri{background:linear-gradient(180deg,#FFFFFF,#F5F5FF);border-color:#C7C4F5;color:#312E81}
+.btn.mint:hover,.btn.pri:hover{box-shadow:0 2px 4px rgba(55,48,163,.16),0 10px 22px rgba(55,48,163,.16);border-color:#A7A2EF}
+.btn.success{background:linear-gradient(180deg,#FFFFFF,#F2FBF7);border-color:#B7E4CE;color:#065F46}
+.btn.danger{background:linear-gradient(180deg,#FFFFFF,#FFF5F7);border-color:#F6C9D3;color:#9F1239}
+.btn.warnb{background:linear-gradient(180deg,#FFFFFF,#FFFAF2);border-color:#F3D9B0;color:#92400E}
+.btn.edit{background:linear-gradient(180deg,#FFFFFF,#F3F8FE);border-color:#C5DDF7;color:#1D4ED8}
+.btn.export{background:linear-gradient(180deg,#FFFFFF,#F1FAFB);border-color:#B9DFE3;color:#115E59}
+
+/* ghost continua discreto, sem bloco */
+.btn.ghost{background:transparent;border-color:transparent;box-shadow:none;color:var(--t2);padding:8px 12px}
+.btn.ghost>svg{background:transparent;color:currentColor;flex:0 0 16px;width:16px;padding:0;margin-right:7px;border-right:none}
+.btn.ghost:hover{background:var(--ds-surface2);color:var(--ds-ink);transform:none;box-shadow:none}
+
+/* versao pequena: mais fina, mesma linguagem */
+.btn.sm{min-height:30px;font-size:11.5px;padding:0 12px 0 0;border-radius:8px}
+.btn.sm>svg{flex:0 0 28px;width:28px;padding:8px;margin-right:9px}
+.btn.sm:not(:has(>svg)){padding:7px 12px}
+.btn.sm>svg:only-child{flex:0 0 30px;width:30px;margin-right:0}
+.btn.sm:has(>svg:only-child){width:30px}
+.btn.ghost.sm>svg{flex:0 0 14px;width:14px;padding:0;margin-right:6px}
+
+/* ---- mesma linguagem nas acoes da tabela ---- */
+.actbtn{--ic:#475569;--ic2:#334155;
+  display:inline-flex;align-items:stretch;gap:0;padding:0 12px 0 0;min-height:32px;overflow:hidden;
+  border:1px solid var(--ds-line2);border-radius:9px;background:var(--ds-surface);color:var(--ds-ink);
+  font-size:12px;font-weight:600;box-shadow:0 1px 2px rgba(11,18,32,.05);
+  transition:box-shadow .18s,transform .18s,border-color .18s}
+.actbtn>svg{flex:0 0 30px;width:30px;height:auto;align-self:stretch;box-sizing:border-box;padding:8px;
+  margin-right:10px;background:var(--ic);color:#fff;transition:background .18s,transform .18s}
+.actbtn:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(11,18,32,.08),0 8px 16px rgba(11,18,32,.10)}
+.actbtn:hover>svg{background:var(--ic2)}
+.actbtn:active{transform:translateY(0) scale(.98)}
+.actbtn.abrir{--ic:#4F46E5;--ic2:#3730A3;background:linear-gradient(180deg,#FFFFFF,#F5F5FF);border-color:#C7C4F5;color:#312E81}
+.actbtn.ok{--ic:#059669;--ic2:#047857;background:linear-gradient(180deg,#FFFFFF,#F2FBF7);border-color:#B7E4CE;color:#065F46}
+.actbtn.del{--ic:#E11D48;--ic2:#BE123C;background:linear-gradient(180deg,#FFFFFF,#FFF5F7);border-color:#F6C9D3;color:#9F1239}
+.actbtn.edit{--ic:#378ADD;--ic2:#2563EB;background:linear-gradient(180deg,#FFFFFF,#F3F8FE);border-color:#C5DDF7;color:#1D4ED8}
+.actbtn.info{--ic:#0E7490;--ic2:#0F766E;background:linear-gradient(180deg,#FFFFFF,#F1FAFB);border-color:#B9DFE3;color:#115E59}
+.actbtn.warnb{--ic:#D97706;--ic2:#B45309;background:linear-gradient(180deg,#FFFFFF,#FFFAF2);border-color:#F3D9B0;color:#92400E}
+.actbtn>svg:only-child{flex:0 0 32px;width:32px;margin-right:0}
+.actbtn:has(>svg:only-child){padding:0;width:32px;justify-content:center}
+
+/* itens do menu de contexto ganham o mesmo chip, em escala menor */
+.amenu-item{display:flex;align-items:center;gap:10px}
+.amenu-item>svg{flex:0 0 24px;width:24px;height:24px;padding:5px;border-radius:7px;
+  background:var(--ds-surface2);color:var(--t2);transition:background .16s,color .16s}
+.amenu-item:hover>svg{background:var(--ds-brand2);color:#fff}
+.amenu-item.danger:hover>svg{background:var(--red);color:#fff}
+
+/* navegador sem :has() continua legivel: o bloco some, o botao segue igual */
+@supports not (selector(:has(*))){
+  .btn>svg,.actbtn>svg{flex:0 0 14px;width:14px;padding:0;margin-right:8px;background:transparent;color:currentColor;border-right:none}
+  .btn{padding:8px 14px}
+  .actbtn{padding:7px 11px}
+}
+@media(max-width:860px){
+  .actbtn{padding:0}
+  .actbtn>svg{margin-right:0}
+}
 </style>
 </head>
 <body>
