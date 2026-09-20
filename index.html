@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Conexão Design | Sistema de Gestão</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://accounts.google.com/gsi/client" async defer>
+</script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -545,6 +546,91 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml;charset=utf-8
   .actbtn .lbl{display:none}
   .actbtn{padding:7px 9px}
 }
+
+
+/* ==========================================================================
+   SIDEBAR v2 - grupos retrateis, modo compacto e estado ativo claro
+   O markup original e preservado; a estrutura de grupos e montada em runtime
+   movendo os nos existentes, entao todo onclick continua intacto.
+   ========================================================================== */
+.sb{background:linear-gradient(180deg,#131C2E 0%,#16233D 45%,#131F36 100%);
+    border-right:1px solid rgba(99,102,241,.18);box-shadow:2px 0 18px rgba(8,12,22,.28)}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-scroll{padding:8px 0 4px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+.sb-scroll::-webkit-scrollbar{width:6px}
+.sb-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:3px}
+
+/* ---- cabecalho de grupo (retratil) ---- */
+.sb-sec{display:flex;align-items:center;gap:8px;font-size:9.5px;font-weight:700;
+        color:rgba(255,255,255,.34);text-transform:uppercase;letter-spacing:.11em;
+        padding:13px 16px 5px;cursor:pointer;user-select:none;transition:color .16s}
+.sb-sec:hover{color:rgba(255,255,255,.66)}
+.sb-sec .caret{margin-left:auto;width:11px;height:11px;flex-shrink:0;opacity:.55;
+               transition:transform .22s cubic-bezier(.4,0,.2,1)}
+.sb-sec.fechado .caret{transform:rotate(-90deg)}
+.sb-grupo{overflow:hidden;transition:max-height .24s cubic-bezier(.4,0,.2,1),opacity .18s;max-height:600px;opacity:1}
+.sb-grupo.fechado{max-height:0;opacity:0}
+
+/* ---- item de navegacao ---- */
+.ni{position:relative;gap:11px;padding:9px 16px;font-size:13px;font-weight:500;
+    color:rgba(255,255,255,.60);border-left:3px solid transparent;border-radius:0 8px 8px 0;
+    margin-right:8px;transition:background .16s cubic-bezier(.4,0,.2,1),color .16s,border-color .16s,padding-left .16s}
+.ni:hover{color:#fff;background:rgba(255,255,255,.07);padding-left:19px}
+.ni:hover svg{opacity:1;transform:scale(1.06)}
+.ni svg{width:16px;height:16px;opacity:.55;transition:opacity .16s,transform .16s,color .16s}
+.ni.active{color:#fff;font-weight:650;
+  background:linear-gradient(90deg,rgba(99,102,241,.26),rgba(99,102,241,.06));
+  border-left-color:#818CF8;box-shadow:inset 0 0 0 1px rgba(129,140,248,.10)}
+.ni.active svg{opacity:1;color:#A5B4FC}
+.ni:focus-visible{outline:2px solid #818CF8;outline-offset:-2px}
+
+/* ---- badges ---- */
+.nbadge{margin-left:auto;min-width:20px;height:19px;padding:0 7px;border-radius:999px;
+        font-size:10.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;
+        background:#F43F5E;color:#fff;box-shadow:0 1px 4px rgba(244,63,94,.45);letter-spacing:-0.01em}
+.nbadge.zero{display:none}
+.nbadge.alerta{background:#F59E0B;box-shadow:0 1px 4px rgba(245,158,11,.45)}
+
+/* ---- rodape e logout ---- */
+.sb-foot{border-top:1px solid rgba(255,255,255,.08);padding:12px 14px 14px}
+.sb-info{font-size:10px;color:rgba(255,255,255,.34);line-height:1.5}
+.sb-foot .btn.danger{width:100%;justify-content:center;margin-top:10px;
+  background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.32);color:#FDA4AF;box-shadow:none}
+.sb-foot .btn.danger:hover{background:#E11D48;border-color:#E11D48;color:#fff;
+  box-shadow:0 3px 14px rgba(225,29,72,.34);transform:translateY(-1px)}
+
+/* ---- botao de encolher ---- */
+.sb-mini-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  padding:7px 10px;margin-bottom:4px;border-radius:8px;cursor:pointer;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);
+  color:rgba(255,255,255,.55);font-size:11px;font-weight:600;transition:all .16s}
+.sb-mini-btn:hover{background:rgba(255,255,255,.10);color:#fff}
+.sb-mini-btn svg{width:14px;height:14px;transition:transform .24s cubic-bezier(.4,0,.2,1)}
+
+/* ---- MODO COMPACTO ---- */
+.sb.mini{width:66px;min-width:66px}
+.sb.mini .ni-lbl,.sb.mini .sb-info,.sb.mini .sb-sec span:not(.caret),
+.sb.mini .sb-foot .btn.danger .lbl-sair,.sb.mini .sb-mini-btn span{display:none}
+.sb.mini .ni{justify-content:center;padding:11px 0;margin-right:6px;border-radius:0 8px 8px 0}
+.sb.mini .ni:hover{padding-left:0}
+.sb.mini .ni svg{width:18px;height:18px}
+.sb.mini .sb-sec{justify-content:center;padding:10px 0 4px;pointer-events:none}
+.sb.mini .sb-sec .caret{display:none}
+.sb.mini .sb-sec:before{content:'';display:block;width:18px;height:1px;background:rgba(255,255,255,.16)}
+.sb.mini .sb-grupo{max-height:none;opacity:1}
+.sb.mini .nbadge{position:absolute;top:5px;right:6px;min-width:16px;height:16px;padding:0 4px;font-size:9px}
+.sb.mini .sb-logo{padding:14px 8px}
+.sb.mini .sb-logo-box{padding:5px}
+.sb.mini .sb-foot{padding:10px 8px}
+.sb.mini .sb-foot .btn.danger{padding:9px 0}
+.sb.mini .sb-mini-btn svg{transform:rotate(180deg)}
+/* tooltip no modo compacto */
+.sb.mini .ni:hover:after{content:attr(data-lbl);position:absolute;left:calc(100% + 10px);top:50%;
+  transform:translateY(-50%);background:#0F172A;color:#fff;font-size:11.5px;font-weight:600;
+  padding:6px 11px;border-radius:7px;white-space:nowrap;z-index:400;
+  box-shadow:0 6px 20px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.10);pointer-events:none}
+
+@media(prefers-reduced-motion:reduce){.sb-grupo,.sb-sec .caret,.ni{transition:none}}
 </style>
 </head>
 <body>
@@ -2721,8 +2807,18 @@ function gerarContasReceber(projId, cond, valor, dataBase, nomeProj){
 
 function updateBadgeReceber(){
   var pendentes=contas_receber.filter(function(c){return c.status!=='recebido';}).length;
-  var el=document.getElementById('badge-receber');
-  if(el) el.textContent=pendentes||'';
+  pintaBadge('badge-receber', pendentes, 'conta(s) a receber em aberto');
+  var venc=contas_pagar.filter(function(c){return c.status!=='pago';}).length;
+  pintaBadge('badge-pagar', venc, 'conta(s) a pagar em aberto');
+}
+// Badge some quando zero e muda de cor quando o volume pede atencao.
+function pintaBadge(id, n, descricao){
+  var el=document.getElementById(id); if(!el) return;
+  el.textContent = n>99 ? '99+' : (n||'');
+  el.classList.toggle('zero', !n);
+  el.classList.toggle('alerta', n>=10);
+  var ni=el.closest('.ni');
+  if(ni && n) ni.setAttribute('title', ni.getAttribute('data-lbl')+' - '+n+' '+descricao);
 }
 
 // Marcar parcela como recebida + lançar no caixa
@@ -2994,11 +3090,130 @@ var viewAtual='dashboard';
 // -- NAVIGATION --------------------------------------------
 var LBLS={dashboard:'Dashboard',projetos:'Projetos',caixa:'Caixa / Extrato',pagar:'Contas a Pagar',contas:'Contas Bancárias',clientes:'Clientes',fornecedores:'Fornecedores',categorias:'Categorias',funcionarios:'Funcionários',ponto:'Ponto / Jornada',folha:'Folha Semanal',refeicoes:'Refeições',configuracoes:'Configurações',usuarios:'Usuários / Log'};
 
+
+// ================= SIDEBAR: grupos retrateis + modo compacto =================
+// Reorganiza a sidebar movendo os nos JA EXISTENTES. Nenhum onclick e recriado,
+// nenhum item e removido: os 16 links continuam os mesmos.
+var SB_CARET='<svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>';
+function montarSidebar(){
+  var scroll=document.querySelector('.sb-scroll');
+  if(!scroll || scroll.dataset.montada) return;
+
+  // 1) rotulo de cada item num span, para o modo compacto e o tooltip
+  scroll.querySelectorAll('.ni').forEach(function(ni){
+    var txt='';
+    Array.prototype.slice.call(ni.childNodes).forEach(function(n){
+      if(n.nodeType===3 && n.textContent.trim()){ txt+=n.textContent.trim(); n.parentNode.removeChild(n); }
+    });
+    if(txt){
+      var sp=document.createElement('span'); sp.className='ni-lbl'; sp.textContent=txt;
+      var badge=ni.querySelector('.nbadge');
+      if(badge) ni.insertBefore(sp,badge); else ni.appendChild(sp);
+      ni.setAttribute('data-lbl',txt);
+      if(!ni.getAttribute('title')) ni.setAttribute('title',txt);
+    }
+    ni.setAttribute('tabindex','0');
+    ni.setAttribute('role','link');
+    ni.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key===' '){ e.preventDefault(); ni.click(); }
+    });
+  });
+
+  // 2) cada .sb-sec passa a comandar os itens que vem depois dela
+  var filhos=Array.prototype.slice.call(scroll.children);
+  var grupoAtual=null;
+  filhos.forEach(function(el){
+    if(el.classList.contains('sb-sec')){
+      var nome=el.textContent.trim();
+      el.innerHTML='<span>'+nome+'</span>'+SB_CARET;
+      el.setAttribute('data-grupo',nome);
+      el.setAttribute('tabindex','0');
+      el.setAttribute('title','Recolher ou expandir '+nome);
+      grupoAtual=document.createElement('div');
+      grupoAtual.className='sb-grupo';
+      grupoAtual.setAttribute('data-grupo',nome);
+      el.parentNode.insertBefore(grupoAtual, el.nextSibling);
+      el.addEventListener('click',function(){ toggleGrupoSb(nome); });
+      el.addEventListener('keydown',function(e){
+        if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleGrupoSb(nome); }
+      });
+    } else if(el.classList.contains('ni') && grupoAtual){
+      grupoAtual.appendChild(el);   // move o no original, preserva o onclick
+    }
+  });
+
+  // 3) botao de encolher no rodape
+  var foot=document.querySelector('.sb-foot');
+  if(foot && !document.getElementById('sb-mini-btn')){
+    var b=document.createElement('div');
+    b.className='sb-mini-btn'; b.id='sb-mini-btn';
+    b.setAttribute('title','Recolher ou expandir o menu');
+    b.setAttribute('tabindex','0');
+    b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg><span>Recolher menu</span>';
+    b.addEventListener('click',toggleSidebarMini);
+    b.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleSidebarMini();} });
+    foot.insertBefore(b, foot.firstChild);
+  }
+  // rotulo do botao Sair, para sumir no modo compacto
+  var sair=foot&&foot.querySelector('.btn.danger');
+  if(sair){
+    Array.prototype.slice.call(sair.childNodes).forEach(function(n){
+      if(n.nodeType===3 && n.textContent.trim()){
+        var s=document.createElement('span'); s.className='lbl-sair'; s.textContent=n.textContent.trim();
+        sair.replaceChild(s,n);
+      }
+    });
+    sair.setAttribute('title','Sair do sistema');
+  }
+
+  scroll.dataset.montada='1';
+  restaurarEstadoSb();
+}
+function toggleGrupoSb(nome){
+  var sec=document.querySelector('.sb-sec[data-grupo="'+nome+'"]');
+  var box=document.querySelector('.sb-grupo[data-grupo="'+nome+'"]');
+  if(!sec||!box) return;
+  var fechando=!box.classList.contains('fechado');
+  box.classList.toggle('fechado',fechando);
+  sec.classList.toggle('fechado',fechando);
+  salvarEstadoSb();
+}
+function toggleSidebarMini(){
+  var sb=document.getElementById('sb'); if(!sb) return;
+  sb.classList.toggle('mini');
+  var lbl=document.querySelector('#sb-mini-btn span');
+  if(lbl) lbl.textContent=sb.classList.contains('mini')?'Expandir':'Recolher menu';
+  salvarEstadoSb();
+}
+function salvarEstadoSb(){
+  try{
+    var fechados=[];
+    document.querySelectorAll('.sb-grupo.fechado').forEach(function(g){ fechados.push(g.getAttribute('data-grupo')); });
+    localStorage.setItem('cd_sb',JSON.stringify({
+      mini:document.getElementById('sb').classList.contains('mini'), fechados:fechados
+    }));
+  }catch(e){}
+}
+function restaurarEstadoSb(){
+  try{
+    var st=JSON.parse(localStorage.getItem('cd_sb')||'{}');
+    if(st.mini) toggleSidebarMini();
+    (st.fechados||[]).forEach(function(n){ toggleGrupoSb(n); });
+  }catch(e){}
+}
+// O grupo do item ativo nunca fica escondido
+function abrirGrupoDoAtivo(){
+  var at=document.querySelector('.sb-scroll .ni.active');
+  if(!at) return;
+  var g=at.closest('.sb-grupo');
+  if(g && g.classList.contains('fechado')) toggleGrupoSb(g.getAttribute('data-grupo'));
+}
 function go(v){
   document.querySelectorAll('.view').forEach(function(e){e.classList.remove('active');});
   document.querySelectorAll('.ni').forEach(function(e){e.classList.remove('active');});
   document.getElementById('view-'+v).classList.add('active');
   document.getElementById('nav-'+v).classList.add('active');
+  if(typeof abrirGrupoDoAtivo==='function') abrirGrupoDoAtivo();
   document.getElementById('tt').textContent=LBLS[v]||v;
   viewAtual=v;
   if(v==='dashboard')renderDash();
@@ -7941,6 +8156,9 @@ var _cfg=getCfg();
   }catch(e){}
 })();
 // Show auth screen - renderDash called after login
+
+// monta a sidebar assim que o DOM estiver pronto
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){try{montarSidebar();}catch(e){console.error('sidebar',e);}});}else{try{montarSidebar();}catch(e){console.error('sidebar',e);}}
 </script>
 
 <!-- MODAL TIPOS FUNCIONÁRIO -->
