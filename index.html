@@ -631,6 +631,95 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml;charset=utf-8
   box-shadow:0 6px 20px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.10);pointer-events:none}
 
 @media(prefers-reduced-motion:reduce){.sb-grupo,.sb-sec .caret,.ni{transition:none}}
+
+/* ==========================================================================
+   TEMA ESCURO
+   Só redefine os tokens. Todo o CSS existente continua valendo, porque as
+   regras referenciam as variáveis, não cores fixas.
+   ========================================================================== */
+html[data-tema="escuro"]{
+  --bg:#0B1220;--bg2:#131B2C;--bg3:#1B2538;--bg4:#243149;
+  --bd:#233049;--bd2:#2E3D59;
+  --t:#E8EDF7;--t2:#9AA9C2;--t3:#64748B;
+  --ds-ink:#E8EDF7;--ds-line:#233049;--ds-line2:#2E3D59;
+  --ds-surface:#131B2C;--ds-surface2:#1B2538;
+  --mint:#6366F1;--mint2:#818CF8;--mint3:#A5B4FC;
+  --ds-brand:#6366F1;--ds-brand2:#818CF8;--ds-accent:#2DD4BF;
+  --sage:#2DD4BF;--sage2:#14B8A6;
+  --red:#FB7185;--red-s:rgba(251,113,133,.14);
+  --amber:#FBBF24;--amber-s:rgba(251,191,36,.14);
+  --green:#34D399;--green-s:rgba(52,211,153,.14);
+  --blue:#60A5FA;--blue-s:rgba(96,165,250,.14);
+  --teal:#2DD4BF;--teal-s:rgba(45,212,191,.14);
+  --indigo:#818CF8;--indigo-s:rgba(129,140,248,.14);
+  --sh:0 2px 18px rgba(0,0,0,.42);
+  --ds-e1:0 1px 2px rgba(0,0,0,.30);
+  --ds-e2:0 2px 10px rgba(0,0,0,.34),0 1px 3px rgba(0,0,0,.26);
+  --ds-e3:0 10px 34px rgba(0,0,0,.50),0 3px 10px rgba(0,0,0,.34);
+}
+html[data-tema="escuro"] .topbar{background:var(--bg2);border-bottom-color:var(--bd)}
+html[data-tema="escuro"] .card{background:var(--bg2);border-color:var(--bd)}
+html[data-tema="escuro"] .tbl th{background:var(--bg3);color:var(--t3);border-bottom-color:var(--bd)}
+html[data-tema="escuro"] .tbl td{border-bottom-color:var(--bd)}
+html[data-tema="escuro"] .tbl tbody tr:hover{background:rgba(129,140,248,.07)}
+html[data-tema="escuro"] .fi{background:var(--bg3);border-color:var(--bd2);color:var(--t)}
+html[data-tema="escuro"] .fi:focus{border-color:var(--ds-brand2);box-shadow:0 0 0 3px rgba(129,140,248,.20)}
+html[data-tema="escuro"] .btn{background:var(--bg3);border-color:var(--bd2);color:var(--t)}
+html[data-tema="escuro"] .btn:hover{background:var(--bg4)}
+html[data-tema="escuro"] .btn.mint,html[data-tema="escuro"] .btn.pri{background:linear-gradient(180deg,#6366F1,#4F46E5);border-color:#4F46E5;color:#fff}
+html[data-tema="escuro"] .tabbar{background:var(--bg3);border-color:var(--bd)}
+html[data-tema="escuro"] .fbt.on{background:var(--bg2);color:var(--mint3)}
+html[data-tema="escuro"] .filtro-box{background:var(--bg2);border-color:var(--bd)}
+html[data-tema="escuro"] .filtro-resumo{background:var(--bg3);border-color:var(--bd)}
+html[data-tema="escuro"] .dd-btn,html[data-tema="escuro"] .dd-pop,
+html[data-tema="escuro"] .amenu-pop{background:var(--bg2);border-color:var(--bd2);color:var(--t)}
+html[data-tema="escuro"] .dd-item:hover,html[data-tema="escuro"] .amenu-item:hover{background:var(--bg3)}
+html[data-tema="escuro"] .actbtn{background:var(--bg3);border-color:var(--bd2);color:var(--t2)}
+html[data-tema="escuro"] .actbtn.abrir{background:linear-gradient(180deg,#6366F1,#4F46E5);border-color:#4F46E5;color:#fff}
+html[data-tema="escuro"] .actbtn.ok{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.34);color:#6EE7B7}
+html[data-tema="escuro"] .actbtn.ok:hover{background:#059669;color:#fff}
+html[data-tema="escuro"] .amenu-btn{background:var(--bg3);border-color:var(--bd2);color:var(--t3)}
+html[data-tema="escuro"] .sk{background:linear-gradient(90deg,#1B2538 25%,#243149 50%,#1B2538 75%);background-size:920px 100%}
+html[data-tema="escuro"] .sb{background:linear-gradient(180deg,#0A1020 0%,#0E1628 50%,#0A1220 100%)}
+html[data-tema="escuro"] .sb-logo-box{background:rgba(255,255,255,.93)}
+html[data-tema="escuro"] .page-sub{color:var(--t2)}
+html[data-tema="escuro"] .cell-sub,html[data-tema="escuro"] .cell-meta{color:var(--t3)}
+html[data-tema="escuro"] .ds-erro{background:rgba(251,113,133,.07);border-color:rgba(251,113,133,.26)}
+html[data-tema="escuro"] .empty{color:var(--t3)}
+
+/* ---- botao de tema ---- */
+.tema-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--ds-line2);background:var(--ds-surface);
+  color:var(--t2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .16s}
+.tema-btn:hover{background:var(--ds-surface2);color:var(--ds-ink);transform:translateY(-1px)}
+.tema-btn svg{width:16px;height:16px}
+
+/* ---- filtros rapidos de status (pilulas) ---- */
+.pill-row{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:5px 13px 5px 10px;border-radius:999px;
+  font-size:11.5px;font-weight:600;cursor:pointer;user-select:none;white-space:nowrap;
+  border:1px solid var(--cor,var(--bd2));color:var(--cor,var(--t2));background:transparent;
+  transition:background .16s,color .16s,box-shadow .16s,transform .16s}
+.pill .pdot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:0 0 7px}
+.pill .pqtd{font-family:var(--fm);font-size:10.5px;opacity:.75;font-weight:700}
+.pill:hover{background:color-mix(in srgb,var(--cor,#64748B) 12%,transparent);transform:translateY(-1px)}
+.pill.on{background:var(--cor,#64748B);color:#fff;box-shadow:0 2px 10px color-mix(in srgb,var(--cor,#64748B) 42%,transparent)}
+.pill.on .pqtd{opacity:.9}
+@supports not (background:color-mix(in srgb,red 10%,transparent)){
+  .pill:hover{background:var(--bg3)} .pill.on{background:var(--cor,#64748B)}
+}
+
+/* ---- faixa de resumo da selecao ---- */
+.resumo-faixa{display:flex;gap:0;flex-wrap:wrap;background:var(--ds-surface);border:1px solid var(--ds-line);
+  border-radius:var(--ds-r2);padding:2px;margin-bottom:14px;box-shadow:var(--ds-e1);overflow:hidden}
+.rf-item{flex:1;min-width:140px;padding:11px 16px;position:relative}
+.rf-item+.rf-item:before{content:'';position:absolute;left:0;top:18%;bottom:18%;width:1px;background:var(--ds-line)}
+.rf-lbl{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)}
+.rf-val{font-family:var(--fm);font-size:17px;font-weight:600;letter-spacing:-0.025em;color:var(--ds-ink);margin-top:3px}
+.rf-val.pos{color:var(--green)} .rf-val.neg{color:var(--red)} .rf-val.mut{color:var(--t3);font-weight:500}
+@media(max-width:720px){.rf-item{min-width:50%;flex:0 0 50%}.rf-item+.rf-item:before{display:none}}
+
+/* ---- valor zerado deixa de competir por atencao ---- */
+.cell-val.zero{color:var(--t3);font-weight:500;opacity:.55}
 </style>
 </head>
 <body>
@@ -756,6 +845,7 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml;charset=utf-8
       <img id="tb-avatar" src="" style="width:22px;height:22px;border-radius:50%;display:none">
       <span id="tb-name" style="color:var(--t2)"></span>
     </div>
+    <button class="tema-btn" id="tema-btn" onclick="alternarTema()" title="Alternar tema claro / escuro" aria-label="Alternar tema"></button>
     <button class="btn sm" onclick="exportarAtual()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Excel
@@ -1416,7 +1506,8 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml;charset=utf-8
         <div class="filtro-box" id="proj-filtros">
           <div class="filtro-linha">
             <span class="filtro-tit">Status</span>
-            <div class="dd" id="dd-status">
+            <div class="pill-row" id="proj-pills"></div>
+            <div class="dd" id="dd-status" style="display:none">
               <button type="button" class="dd-btn" id="dd-status-btn" onclick="abrirDDStatus(event)">Todos</button>
               <div class="dd-pop" id="dd-status-pop"></div>
             </div>
@@ -1439,6 +1530,7 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml;charset=utf-8
             <span class="filtro-resumo" id="proj-filtro-resumo"></span>
           </div>
         </div>
+        <div class="resumo-faixa" id="proj-resumo-faixa"></div>
         <div class="tbl-wrap">
           <table class="tbl">
             <thead><tr><th>Projeto</th><th>Cliente</th><th>Início</th><th>Entrega</th><th>Valor Venda</th><th>Status</th><th>Cond. Pgto</th><th>Estimado</th><th>Real</th><th>Margem</th><th></th></tr></thead>
@@ -7212,6 +7304,69 @@ function skeletonLinhas(colunas, linhas){
   }
   return out;
 }
+
+// ================= TEMA CLARO / ESCURO =================
+var ICO_SOL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="1.5" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22.5"/><line x1="4.2" y1="4.2" x2="6" y2="6"/><line x1="18" y1="18" x2="19.8" y2="19.8"/><line x1="1.5" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22.5" y2="12"/><line x1="4.2" y1="19.8" x2="6" y2="18"/><line x1="18" y1="6" x2="19.8" y2="4.2"/></svg>';
+var ICO_LUA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function temaAtual(){ return document.documentElement.getAttribute('data-tema')||'claro'; }
+function aplicarTema(t){
+  document.documentElement.setAttribute('data-tema', t);
+  var b=document.getElementById('tema-btn');
+  if(b){ b.innerHTML = t==='escuro'?ICO_SOL:ICO_LUA;
+         b.title = t==='escuro'?'Mudar para tema claro':'Mudar para tema escuro'; }
+  try{ localStorage.setItem('cd_tema', t); }catch(e){}
+}
+function alternarTema(){ aplicarTema(temaAtual()==='escuro'?'claro':'escuro'); }
+function iniciarTema(){
+  var t=null;
+  try{ t=localStorage.getItem('cd_tema'); }catch(e){}
+  if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='escuro';
+  aplicarTema(t||'claro');
+}
+
+// ================= PILULAS DE STATUS =================
+// Compartilham o MESMO estado do filtro suspenso (projFiltroStatus): marcar
+// aqui reflete la e vice-versa, sem logica duplicada.
+function renderPillsStatus(){
+  var box=document.getElementById('proj-pills'); if(!box) return;
+  var grupos=statusPorRotulo();
+  var ativos=projStatusAtivos();
+  var html='<button type="button" class="pill'+(ativos.length?'':' on')+'" style="--cor:#64748B" title="Mostrar todos os projetos" onclick="limparFiltroStatus()">'+
+           '<span class="pdot"></span>Todos<span class="pqtd">'+projetos.length+'</span></button>';
+  html+=grupos.map(function(g,i){
+    var qtd=projetos.filter(function(p){ return g.chaves.indexOf(p.status)>=0; }).length;
+    var on=g.chaves.some(function(c){ return ativos.indexOf(c)>=0; });
+    if(!qtd && !on) return '';
+    var cor=(PROJ_STATUS[g.chaves[0]]||{}).cor||'#64748B';
+    return '<button type="button" class="pill'+(on?' on':'')+'" style="--cor:'+cor+'" '+
+           'title="'+(on?'Remover filtro':'Filtrar por')+' '+g.lbl+'" onclick="toggleFiltroStatus('+i+')">'+
+           '<span class="pdot"></span>'+g.lbl+'<span class="pqtd">'+qtd+'</span></button>';
+  }).join('');
+  box.innerHTML=html;
+}
+
+// ================= FAIXA DE RESUMO =================
+// O que a selecao atual significa em dinheiro, nao apenas quantos itens tem.
+function renderResumoFaixa(list){
+  var box=document.getElementById('proj-resumo-faixa'); if(!box) return;
+  var venda=0, real=0, ganhos=0, perdidos=0;
+  list.forEach(function(p){
+    venda+=parseFloat(p.valor_final||p.valor_venda||0)||0;
+    try{ var r=getProjetoReal(p.id); real+=(r&&r.total)||0; }catch(e){}
+    if(['aprovado','execucao','finalizado'].indexOf(p.status)>=0) ganhos++;
+    if(p.status==='perdido') perdidos++;
+  });
+  var margem=venda-real;
+  var pct=venda?(margem/venda*100):0;
+  var conv=(ganhos+perdidos)?(ganhos/(ganhos+perdidos)*100):0;
+  function item(lbl,val,cls){ return '<div class="rf-item"><div class="rf-lbl">'+lbl+'</div><div class="rf-val '+(cls||'')+'">'+val+'</div></div>'; }
+  box.innerHTML=
+    item('Projetos', list.length, list.length?'':'mut')+
+    item('Valor de venda', fmt(venda), venda?'':'mut')+
+    item('Custo realizado', fmt(real), real?'':'mut')+
+    item('Margem', fmt(margem)+(venda?' <span style="font-size:11px;opacity:.7">('+pct.toFixed(1)+'%)</span>':''), margem>0?'pos':(margem<0?'neg':'mut'))+
+    item('Conversão', (ganhos+perdidos)?conv.toFixed(0)+'%':'-', (ganhos+perdidos)?'':'mut');
+}
 function renderProjetos(){
   var _body=document.getElementById('proj-body');
   if(_body && !window._dadosCarregados){ _body.innerHTML=skeletonLinhas(11,6); return; }
@@ -7242,6 +7397,8 @@ function renderProjetos(){
   }).sort(function(a,b){return(b.created_at||'').localeCompare(a.created_at||'');});
   if(!list.length){
     document.getElementById('proj-body').innerHTML='<tr><td colspan="11"><div class="empty">Nenhum projeto no filtro atual.<br><button class="btn sm" style="margin-top:8px" onclick="projPeriodoTudo();limparFiltroStatus()">Limpar filtros</button></div></td></tr>';
+    renderPillsStatus();
+    renderResumoFaixa([]);
     var r0=document.getElementById('proj-filtro-resumo');
     if(r0) r0.textContent='0 de '+total+' projetos';
     return;
@@ -7268,9 +7425,9 @@ function renderProjetos(){
       '<td><span class="st" style="--dot-halo:'+corSt+'1f"><span class="dot" style="background:'+corSt+'"></span>'+st.lbl+'</span>'+
         (p.status==='perdido'?'<span class="cell-sub" title="'+String(p.obs_perda||'').replace(/"/g,'&quot;')+'">'+((p.motivo_perda||'').trim()||'motivo não informado')+'</span>':'')+'</td>'+
       '<td class="cell-meta">'+(p.cond_pag?({avista:'À vista','30d':'30 dias','50_50':'50/50','3x':'3x','6x':'6x'}[p.cond_pag]||p.cond_pag):'<span style="color:var(--t3)">-</span>')+'</td>'+
-      '<td class="cell-val mut">'+fmt(est)+'</td>'+
-      '<td class="cell-val mut">'+fmt(real.total)+'</td>'+
-      '<td class="cell-val" style="'+margemCls+'" title="'+(margem>0?'Margem positiva':margem<0?'Margem negativa':'Sem margem apurada')+'">'+fmt(margem)+'</td>'+
+      '<td class="cell-val mut'+(est?'':' zero')+'">'+fmt(est)+'</td>'+
+      '<td class="cell-val mut'+(real.total?'':' zero')+'">'+fmt(real.total)+'</td>'+
+      '<td class="cell-val'+(margem?'':' zero')+'" style="'+margemCls+'" title="'+(margem>0?'Margem positiva':margem<0?'Margem negativa':'Sem margem apurada')+'">'+fmt(margem)+'</td>'+
       '<td><div class="actbar" style="flex-wrap:nowrap">'+
         (['rascunho','orcamento'].includes(p.status)?'<button class="actbtn ok" onclick="confirmarProjeto('+p.id+')" title="Confirmar projeto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span class="lbl">Confirmar</span></button>':'')+
         '<button class="actbtn abrir" onclick="editProjeto('+p.id+')" title="Abrir o projeto '+String(p.nome||'').replace(/"/g,'&quot;')+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="lbl">Abrir projeto</span></button>'+
@@ -7288,6 +7445,8 @@ function renderProjetos(){
       '</div></td></tr>';
   });
   document.getElementById('proj-body').innerHTML=html;
+  renderPillsStatus();
+  renderResumoFaixa(list);
   var res=document.getElementById('proj-filtro-resumo');
   if(res){
     var partes=[list.length+' de '+total+' projetos'];
@@ -8159,6 +8318,8 @@ var _cfg=getCfg();
 
 // monta a sidebar assim que o DOM estiver pronto
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){try{montarSidebar();}catch(e){console.error('sidebar',e);}});}else{try{montarSidebar();}catch(e){console.error('sidebar',e);}}
+
+try{iniciarTema();}catch(e){console.error('tema',e);}
 </script>
 
 <!-- MODAL TIPOS FUNCIONÁRIO -->
