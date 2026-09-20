@@ -500,6 +500,51 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml;charset=utf-8
 @media(prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important}
 }
+
+/* ---------- ACOES DE LINHA: identidade, estado e leitura imediata ---------- */
+.actbar{gap:7px}
+.actbtn{padding:7px 12px;border-radius:9px;font-size:12px;font-weight:600;letter-spacing:-0.01em;
+        border:1px solid var(--ds-line2);background:var(--ds-surface);color:var(--t2);
+        box-shadow:var(--ds-e1);cursor:pointer;
+        transition:background .16s cubic-bezier(.4,0,.2,1),color .16s,border-color .16s,box-shadow .16s,transform .16s}
+.actbtn svg{width:14px;height:14px;transition:transform .16s}
+.actbtn:hover{transform:translateY(-1px)}
+.actbtn:active{transform:translateY(0) scale(.97)}
+.actbtn:focus-visible{outline:2px solid var(--ds-brand2);outline-offset:2px}
+
+/* acao principal da linha: abrir o projeto */
+.actbtn.abrir{background:linear-gradient(180deg,var(--ds-brand2),var(--ds-brand));border-color:var(--ds-brand);color:#fff;
+              box-shadow:0 1px 2px rgba(55,48,163,.28),0 3px 10px rgba(55,48,163,.16)}
+.actbtn.abrir:hover{background:linear-gradient(180deg,#5B53EA,#3E37B0);
+                    box-shadow:0 2px 4px rgba(55,48,163,.34),0 8px 20px rgba(55,48,163,.24)}
+.actbtn.abrir:hover svg{transform:translateX(1px)}
+
+/* confirmar: acao positiva, com peso de aprovacao */
+.actbtn.ok{background:rgba(5,150,105,.08);border-color:rgba(5,150,105,.35);color:#047857}
+.actbtn.ok:hover{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 3px 12px rgba(5,150,105,.30)}
+.actbtn.ok:hover svg{transform:scale(1.08)}
+.actbtn.del:hover{box-shadow:0 3px 12px rgba(225,29,72,.28)}
+.actbtn.edit:hover{box-shadow:0 3px 12px rgba(55,138,221,.28)}
+.actbtn.info{background:rgba(14,116,144,.08);border-color:rgba(14,116,144,.32);color:var(--ds-accent)}
+.actbtn.info:hover{background:var(--ds-accent);border-color:var(--ds-accent);color:#fff;box-shadow:0 3px 12px rgba(14,116,144,.28)}
+
+/* menu de tres pontos */
+.amenu-btn{width:32px;height:32px;border-radius:9px;border:1px solid var(--ds-line2);background:var(--ds-surface);
+           color:var(--t3);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+           box-shadow:var(--ds-e1);transition:all .16s}
+.amenu-btn:hover{background:var(--ds-surface2);color:var(--ds-ink);border-color:var(--ds-line2);box-shadow:var(--ds-e2)}
+.amenu-btn svg{width:15px;height:15px}
+.amenu-item.danger{color:var(--red)}
+.amenu-item.danger:hover{background:rgba(225,29,72,.07)}
+
+/* a linha revela as acoes: presentes sempre, destacadas no hover */
+.tbl tbody tr .actbar{opacity:.92;transition:opacity .16s}
+.tbl tbody tr:hover .actbar{opacity:1}
+
+@media(max-width:860px){
+  .actbtn .lbl{display:none}
+  .actbtn{padding:7px 9px}
+}
 </style>
 </head>
 <body>
@@ -1259,7 +1304,7 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml;charset=utf-8
   <div class="view" id="view-projetos">
     <div class="page-head">
       <div>
-        <div class="page-title">Projetos</div>
+        <div class="page-title">Carteira de projetos</div>
         <div class="page-sub">Acompanhe orçamentos, projetos em produção e o resultado comercial de cada obra.</div>
       </div>
       <div class="page-acts">
@@ -7013,9 +7058,10 @@ function renderProjetos(){
       '<td class="cell-val" style="'+margemCls+'" title="'+(margem>0?'Margem positiva':margem<0?'Margem negativa':'Sem margem apurada')+'">'+fmt(margem)+'</td>'+
       '<td><div class="actbar" style="flex-wrap:nowrap">'+
         (['rascunho','orcamento'].includes(p.status)?'<button class="actbtn ok" onclick="confirmarProjeto('+p.id+')" title="Confirmar projeto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span class="lbl">Confirmar</span></button>':'')+
-        '<button class="actbtn info" onclick="dashProjeto('+p.id+')" title="Abrir o centro de resultado deste projeto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span class="lbl">Abrir</span></button>'+
+        '<button class="actbtn abrir" onclick="editProjeto('+p.id+')" title="Abrir o projeto '+String(p.nome||'').replace(/"/g,'&quot;')+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="lbl">Abrir projeto</span></button>'+
         '<div class="amenu"><button class="amenu-btn" onclick="toggleAMenu(event,'+p.id+')" title="Mais ações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>'+
           '<div class="amenu-pop" id="amenu-'+p.id+'">'+
+            '<button class="amenu-item" onclick="closeAMenu();dashProjeto('+p.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Centro de resultado</button>'+
             '<button class="amenu-item" onclick="closeAMenu();editProjeto('+p.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar dados</button>'+
             '<button class="amenu-item" onclick="closeAMenu();gerarProposta('+p.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>Gerar proposta</button>'+
             '<button class="amenu-item" onclick="closeAMenu();gerarContrato('+p.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>Gerar contrato</button>'+
