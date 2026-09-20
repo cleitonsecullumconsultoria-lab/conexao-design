@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Conexão Design | Sistema de Gestão</title>
-<script>try{document.documentElement.setAttribute('data-tema',localStorage.getItem('cd_tema')||'escuro');}catch(e){document.documentElement.setAttribute('data-tema','escuro');}</script>
 <script src="https://accounts.google.com/gsi/client" async defer>
 </script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
@@ -721,21 +720,6 @@ html[data-tema="escuro"] .empty{color:var(--t3)}
 
 /* ---- valor zerado deixa de competir por atencao ---- */
 .cell-val.zero{color:var(--t3);font-weight:500;opacity:.55}
-
-html[data-tema="escuro"] .ni{color:rgba(232,237,247,.66)}
-html[data-tema="escuro"] .ni:hover{background:rgba(129,140,248,.10);color:#fff}
-html[data-tema="escuro"] .ni.active{background:linear-gradient(90deg,rgba(129,140,248,.30),rgba(129,140,248,.05));border-left-color:#A5B4FC}
-html[data-tema="escuro"] .ni.active svg{color:#C7D2FE}
-html[data-tema="escuro"] .sb-sec{color:rgba(232,237,247,.32)}
-html[data-tema="escuro"] .sb-mini-btn{background:rgba(129,140,248,.08);border-color:rgba(129,140,248,.18);color:rgba(232,237,247,.62)}
-html[data-tema="escuro"] .sb-mini-btn:hover{background:rgba(129,140,248,.18);color:#fff}
-html[data-tema="escuro"] .mbtn,html[data-tema="escuro"] .tt{color:var(--t)}
-html[data-tema="escuro"] #user-chip{background:var(--bg3);color:var(--t2)}
-html[data-tema="escuro"] .tbl-wrap{background:transparent}
-html[data-tema="escuro"] .modal,html[data-tema="escuro"] .mbox,html[data-tema="escuro"] .mc{background:var(--bg2);color:var(--t);border-color:var(--bd)}
-html[data-tema="escuro"] .toast{background:var(--bg3);color:var(--t);border:1px solid var(--bd)}
-#tema-btn{gap:7px}
-#tema-btn span{font-size:11.5px}
 </style>
 </head>
 <body>
@@ -861,7 +845,7 @@ html[data-tema="escuro"] .toast{background:var(--bg3);color:var(--t);border:1px 
       <img id="tb-avatar" src="" style="width:22px;height:22px;border-radius:50%;display:none">
       <span id="tb-name" style="color:var(--t2)"></span>
     </div>
-    <button class="btn sm" id="tema-btn" onclick="alternarTema()" title="Alternar tema claro / escuro" aria-label="Alternar tema"></button>
+    <button class="tema-btn" id="tema-btn" onclick="alternarTema()" title="Alternar tema claro / escuro" aria-label="Alternar tema"></button>
     <button class="btn sm" onclick="exportarAtual()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Excel
@@ -1799,21 +1783,6 @@ html[data-tema="escuro"] .toast{background:var(--bg3);color:var(--t);border:1px 
 
   <!-- CONFIGURAÇÕES -->
   <div class="view" id="view-configuracoes">
-    <div class="card mb16">
-      <div class="ch">Fotos dos projetos (Google Drive)</div>
-      <div style="font-size:12.5px;color:var(--t2);margin-bottom:12px">
-        As fotos anexadas às propostas são enviadas para uma pasta no Google Drive. Se elas estiverem
-        ficando só neste aparelho, rode o diagnóstico abaixo para descobrir o motivo exato.
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn mint sm" onclick="rodarDiagFotos()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>Diagnosticar fotos</button>
-        <button class="btn sm" onclick="reautorizarGoogle()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="23 4 23 10 17 10"/><path d="M20.5 15a9 9 0 1 1-2.1-9.4L23 10"/></svg>Reautorizar Google</button>
-        <button class="btn sm" onclick="enviarFotosAgora()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Enviar fotos pendentes</button>
-        <button class="btn sm" onclick="copiarDiagFotos()">Copiar resultado</button>
-      </div>
-      <div id="fotos-pendentes" style="margin-top:10px;font-size:12px"></div>
-      <pre id="diag-fotos-out" style="display:none;margin-top:12px;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;font-family:var(--fm);font-size:11.5px;line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:340px;overflow:auto;color:var(--t)"></pre>
-    </div>
     <div class="g2 mb16">
       <div class="card">
         <div class="ch">Dados da Empresa</div>
@@ -2418,7 +2387,7 @@ async function loadAllData(){
                     var merged=itensTexto.map(function(it,idx){
                       var fotosLocais=(locais[idx]&&locais[idx].fotos)?locais[idx].fotos:[];
                       // referencias do Drive vindas da planilha + fotos antigas em base64 que so existem aqui
-                      var fotosSheet=(it.fotos||[]).filter(function(f){var s=String(f);return s.indexOf('drive:')===0||s.indexOf('local:')===0;});
+                      var fotosSheet=(it.fotos||[]).filter(function(f){return String(f).indexOf('drive:')===0;});
                       var antigasLocais=fotosLocais.filter(function(f){return String(f).indexOf('data:')===0;});
                       var fotosFinal=fotosSheet.concat(antigasLocais);
                       return {nome:it.nome||'',descricao:it.descricao||'',valor:it.valor||0,fotos:fotosFinal.length?fotosFinal:fotosLocais};
@@ -2465,7 +2434,6 @@ async function loadAllData(){
     // Dados carregados: a partir daqui e seguro gravar, porem SOMENTE nas abas
     // que de fato foram lidas (ver window._abaCarregada).
     window._dadosCarregados = true;
-    if(typeof reenviarFotosPendentes==='function') setTimeout(function(){ reenviarFotosPendentes(true); }, 2500);
     var _falhou = loaders.filter(function(l){ return !window._abaCarregada[l.sheet]; })
                          .map(function(l){ return l.sheet; });
     if(_falhou.length){
@@ -3150,7 +3118,7 @@ async function _syncToSheetsRaw(type){
     p.teve_arquiteto||false,p.nome_arquiteto||'',p.percentual_arquiteto||0,p.valor_arquiteto||0,
     p.estimativas||'',p.est_total||0,
     p.updated_by||'',p.updated_at||'',p.desc_escopo||'',
-    (function(){try{var its=loadItensProposta(p.id);return JSON.stringify(its.map(function(it){return {nome:it.nome,descricao:it.descricao,valor:it.valor,fotos:(it.fotos||[]).filter(function(f){var s=String(f);return s.indexOf('drive:')===0||s.indexOf('local:')===0;})};}));}catch(e){return '';}})(),
+    (function(){try{var its=loadItensProposta(p.id);return JSON.stringify(its.map(function(it){return {nome:it.nome,descricao:it.descricao,valor:it.valor,fotos:(it.fotos||[]).filter(function(f){return String(f).indexOf('drive:')===0;})};}));}catch(e){return '';}})(),
     p.prazo_dias||'',p.desconto||0,p.valor_final||0,p.frete||'',p.instalacao||'',p.garantia||'',
     p.responsavel||'',p.link_contato||'',p.obs_proposta||'',
     p.motivo_perda||'',p.obs_perda||'',p.data_perda||''
@@ -3340,7 +3308,6 @@ function go(v){
   if(typeof abrirGrupoDoAtivo==='function') abrirGrupoDoAtivo();
   document.getElementById('tt').textContent=LBLS[v]||v;
   viewAtual=v;
-  if(v==='configuracoes' && typeof atualizarAvisoFotos==='function') atualizarAvisoFotos();
   if(v==='dashboard')renderDash();
   if(v==='caixa'){populateCatSelect('cx-cat');renderCaixa();}
   if(v==='pagar'){populateFornSelect('pg-forn');populateCatSelect('pg-cat');renderPagar();}
@@ -6050,128 +6017,6 @@ async function drivePastaFotos(){
 }
 
 // sobe a foto e devolve a referencia "drive:<id>"
-
-// ==========================================================================
-// COFRE LOCAL DE FOTOS (IndexedDB) + FILA DE ENVIO PARA O DRIVE
-// A foto NUNCA depende do Drive para ser salva. Ela entra primeiro no cofre
-// local, que nao tem o limite de ~5MB do localStorage, e fica numa fila.
-// Quando a permissao do Drive existir, a fila sobe sozinha e a referencia
-// local vira referencia do Drive. Nada se perde no caminho.
-// ==========================================================================
-var _idb=null, _idbPronto=null;
-function idbAbrir(){
-  if(_idbPronto) return _idbPronto;
-  _idbPronto=new Promise(function(ok){
-    try{
-      if(!window.indexedDB){ ok(null); return; }
-      var req=indexedDB.open('cd_fotos',1);
-      req.onupgradeneeded=function(e){
-        var db=e.target.result;
-        if(!db.objectStoreNames.contains('fotos')) db.createObjectStore('fotos',{keyPath:'id'});
-      };
-      req.onsuccess=function(e){ _idb=e.target.result; ok(_idb); };
-      req.onerror=function(){ ok(null); };
-    }catch(e){ ok(null); }
-  });
-  return _idbPronto;
-}
-function idbOp(modo, fn){
-  return idbAbrir().then(function(db){
-    if(!db) return null;
-    return new Promise(function(ok){
-      try{
-        var tx=db.transaction('fotos',modo), st=tx.objectStore('fotos');
-        var r=fn(st);
-        tx.oncomplete=function(){ ok(r&&r.result!==undefined?r.result:true); };
-        tx.onerror=function(){ ok(null); };
-      }catch(e){ ok(null); }
-    });
-  });
-}
-// fallback para navegador sem IndexedDB: guarda no localStorage (com limite)
-function lsFotos(){ try{ return JSON.parse(localStorage.getItem('cd_fotos_local')||'{}'); }catch(e){ return {}; } }
-function lsSalvaFotos(o){ try{ localStorage.setItem('cd_fotos_local',JSON.stringify(o)); return true; }catch(e){ return false; } }
-
-async function cofreSalvar(dataUrl, nome, projetoId){
-  var id='f'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
-  var reg={id:id, dataUrl:dataUrl, nome:nome||'', projeto:projetoId||'', enviada:false, ts:new Date().toISOString()};
-  var r=await idbOp('readwrite',function(st){ return st.put(reg); });
-  if(r===null){ var o=lsFotos(); o[id]=reg; if(!lsSalvaFotos(o)) return ''; }
-  return 'local:'+id;
-}
-async function cofreLer(id){
-  var r=await idbOp('readonly',function(st){ return st.get(id); });
-  if(r===null || r===true){ return lsFotos()[id]||null; }
-  return r||null;
-}
-async function cofrePendentes(){
-  var db=await idbAbrir();
-  if(!db){ var o=lsFotos(); return Object.keys(o).map(function(k){return o[k];}).filter(function(x){return !x.enviada;}); }
-  return new Promise(function(ok){
-    try{
-      var out=[], tx=db.transaction('fotos','readonly'), st=tx.objectStore('fotos');
-      st.openCursor().onsuccess=function(e){
-        var c=e.target.result;
-        if(c){ if(!c.value.enviada) out.push(c.value); c.continue(); } else ok(out);
-      };
-      tx.onerror=function(){ ok([]); };
-    }catch(e){ ok([]); }
-  });
-}
-async function cofreMarcarEnviada(id, refDrive){
-  var reg=await cofreLer(id); if(!reg) return;
-  reg.enviada=true; reg.ref=refDrive;
-  var r=await idbOp('readwrite',function(st){ return st.put(reg); });
-  if(r===null){ var o=lsFotos(); o[id]=reg; lsSalvaFotos(o); }
-}
-// Troca a referencia local pela do Drive em todos os projetos que a usam.
-function trocarRefFoto(refLocal, refDrive){
-  var mudou=false;
-  projetos.forEach(function(p){
-    var its;
-    try{ its=loadItensProposta(p.id)||[]; }catch(e){ return; }
-    var alterou=false;
-    its.forEach(function(it){
-      (it.fotos||[]).forEach(function(f,i){ if(f===refLocal){ it.fotos[i]=refDrive; alterou=true; } });
-    });
-    if(alterou){ saveItensProposta(p.id, its); mudou=true; }
-  });
-  if(mudou && typeof syncToSheets==='function') syncToSheets('projetos');
-  if(typeof _itensProposta!=='undefined'){
-    _itensProposta.forEach(function(it){
-      (it.fotos||[]).forEach(function(f,i){ if(f===refLocal) it.fotos[i]=refDrive; });
-    });
-  }
-  return mudou;
-}
-// Sobe tudo que estiver pendente. Seguro para chamar a qualquer momento.
-var _enviandoFila=false;
-async function reenviarFotosPendentes(silencioso){
-  if(_enviandoFila) return {enviadas:0,pendentes:0,motivo:'ja em andamento'};
-  var pend=await cofrePendentes();
-  if(!pend.length) return {enviadas:0,pendentes:0};
-  if(!ACCESS_TOKEN){ if(!silencioso) toast('Faça login no Google para enviar as fotos','warn'); return {enviadas:0,pendentes:pend.length,motivo:'sem login'}; }
-  _enviandoFila=true;
-  var ok=0, motivo='';
-  try{
-    for(var i=0;i<pend.length;i++){
-      var ref=await driveUploadFoto(pend[i].dataUrl, pend[i].nome||('foto_'+pend[i].id+'.jpg'));
-      if(!ref){ motivo=_ultimoErroDrive||'falha no envio'; break; }
-      await cofreMarcarEnviada(pend[i].id, ref);
-      trocarRefFoto('local:'+pend[i].id, ref);
-      _cacheFoto[ref.slice(6)]=pend[i].dataUrl;
-      ok++;
-    }
-  } finally { _enviandoFila=false; }
-  var resto=(await cofrePendentes()).length;
-  if(!silencioso){
-    if(ok && !resto) toast(ok+' foto(s) enviada(s) para o Drive','ok');
-    else if(ok) toast(ok+' enviada(s), '+resto+' pendente(s): '+motivo,'warn');
-    else toast('Não consegui enviar: '+(motivo||'motivo desconhecido'),'warn');
-  }
-  if(typeof renderItensProposta==='function') try{ renderItensProposta(); }catch(e){}
-  return {enviadas:ok, pendentes:resto, motivo:motivo};
-}
 async function driveUploadFoto(dataUrl, nome){
   if(!ACCESS_TOKEN){ _ultimoErroDrive = 'sem token: faca login no Google'; return ''; }
   var pasta = await drivePastaFotos();
@@ -6251,75 +6096,6 @@ async function diagFotos(){
   try{ navigator.clipboard.writeText(txt); toast('Diagnostico copiado. Cole na conversa.','ok'); }catch(e){}
   return txt;
 }
-
-
-// Aviso permanente de fotos que ainda nao subiram para o Drive.
-async function atualizarAvisoFotos(){
-  var box=document.getElementById('fotos-pendentes');
-  var pend=await cofrePendentes();
-  if(box){
-    box.innerHTML = pend.length
-      ? '<span style="display:inline-flex;align-items:center;gap:7px;background:var(--amber-s);color:var(--amber);'+
-        'border:1px solid var(--amber);border-radius:999px;padding:5px 12px;font-weight:600">'+
-        pend.length+' foto(s) ainda não enviada(s) ao Drive</span>'+
-        '<div style="color:var(--t3);margin-top:6px">Elas estão guardadas neste aparelho e não se perdem. '+
-        'Assim que a permissão do Drive existir, clique em "Enviar fotos pendentes".</div>'
-      : '<span style="color:var(--green);font-weight:600">Nenhuma foto pendente.</span>';
-  }
-  var bd=document.getElementById('badge-fotos');
-  if(bd){ bd.textContent=pend.length||''; bd.classList.toggle('zero',!pend.length); }
-  return pend.length;
-}
-async function enviarFotosAgora(){
-  var box=document.getElementById('fotos-pendentes');
-  if(box) box.innerHTML='<span style="color:var(--t2)">Enviando...</span>';
-  var r=await reenviarFotosPendentes();
-  await atualizarAvisoFotos();
-  if(box && r.motivo && r.pendentes){
-    box.innerHTML+='<div style="color:var(--red);margin-top:7px">Motivo da parada: '+r.motivo+
-      '. Rode o diagnóstico acima para ver o que fazer.</div>';
-  }
-}
-// Diagnostico de fotos exibido na propria tela, sem console.
-var _diagFotosTxt='';
-async function rodarDiagFotos(){
-  var box=document.getElementById('diag-fotos-out'); if(!box) return;
-  box.style.display='block';
-  box.textContent='Executando diagnóstico...';
-  try{
-    _diagFotosTxt = await diagFotos();
-    var linhas=_diagFotosTxt.split('\n');
-    var veredito=vereditoFotos(_diagFotosTxt);
-    box.innerHTML='<b style="color:'+veredito.cor+'">'+veredito.titulo+'</b>\n'+
-                  '<span style="color:var(--t2)">'+veredito.acao+'</span>\n\n'+
-                  linhas.map(function(l){ return l.replace(/</g,'&lt;'); }).join('\n');
-  }catch(e){
-    box.textContent='Falha ao executar o diagnóstico: '+(e.message||e);
-  }
-}
-// Traduz o resultado tecnico em uma acao objetiva.
-function vereditoFotos(txt){
-  if(/upload de teste: HTTP 200|\(ok, id /.test(txt))
-    return {titulo:'As fotos estão gravando normalmente.', acao:'Nenhuma ação necessária.', cor:'var(--green)'};
-  if(/has not been used in project|API .*disabled|accessNotConfigured/i.test(txt))
-    return {titulo:'A Google Drive API está desativada no projeto.', cor:'var(--red)',
-            acao:'No console.cloud.google.com: APIs e serviços > Biblioteca > Google Drive API > Ativar.'};
-  if(/insufficient authentication scopes|403/.test(txt) || /tem drive.file: NAO/.test(txt))
-    return {titulo:'O acesso ao Drive não foi autorizado.', cor:'var(--red)',
-            acao:'Declare o escopo .../auth/drive.file na tela de consentimento OAuth e clique em Reautorizar Google.'};
-  if(/File not found|404/.test(txt))
-    return {titulo:'A pasta informada não está acessível ao sistema.', cor:'var(--amber)',
-            acao:'O sistema vai criar a própria pasta. Depois é só arrastá-la para o lugar desejado no Drive.'};
-  if(/token presente: NAO/.test(txt))
-    return {titulo:'Você não está conectado ao Google.', cor:'var(--amber)', acao:'Faça login e rode o diagnóstico de novo.'};
-  return {titulo:'Não consegui classificar o resultado.', cor:'var(--amber)',
-          acao:'Copie o texto abaixo e envie para análise.'};
-}
-function copiarDiagFotos(){
-  if(!_diagFotosTxt){ toast('Rode o diagnóstico primeiro','warn'); return; }
-  try{ navigator.clipboard.writeText(_diagFotosTxt); toast('Resultado copiado','ok'); }
-  catch(e){ toast('Selecione o texto e copie manualmente','warn'); }
-}
 function reautorizarGoogle(){
   try{ localStorage.removeItem('cd_token'); localStorage.removeItem('cd_token_exp'); localStorage.removeItem('cd_token_scope'); }catch(e){}
   window._pediuConsentDrive = true;
@@ -6330,12 +6106,6 @@ function reautorizarGoogle(){
 async function fotoURL(ref){
   if(!ref) return '';
   if(ref.indexOf('data:')===0) return ref;                 // fotos antigas continuam funcionando
-  if(ref.indexOf('local:')===0){                           // foto no cofre deste aparelho
-    if(_cacheFoto[ref]) return _cacheFoto[ref];
-    var reg=await cofreLer(ref.slice(6));
-    if(reg&&reg.dataUrl){ _cacheFoto[ref]=reg.dataUrl; return reg.dataUrl; }
-    return '';
-  }
   if(ref.indexOf('drive:')!==0) return ref;
   var id = ref.slice(6);
   if(_cacheFoto[id]) return _cacheFoto[id];
@@ -6353,7 +6123,6 @@ async function fotoURL(ref){
 async function fotoDataURL(ref){
   if(!ref) return '';
   if(ref.indexOf('data:')===0) return ref;
-  if(ref.indexOf('local:')===0) return await fotoURL(ref);
   var u = await fotoURL(ref);
   if(!u) return '';
   try{
@@ -6436,33 +6205,26 @@ function addFotosItem(input, idx){
         ctx.drawImage(img,0,0,canvas.width,canvas.height);
         var dataUrl=canvas.toDataURL('image/jpeg',0.85);
         if(!_itensProposta[idx].fotos) _itensProposta[idx].fotos=[];
+        toast('Enviando foto...','info');
         _uploadsPendentes++;
-        // PASSO 1: a foto e gravada no cofre local. Isso nunca falha por
-        // permissao do Google e nao esbarra na cota do localStorage.
-        cofreSalvar(dataUrl, 'item_'+(idx+1)+'_'+Date.now()+'.jpg', window._editProjId||'').then(function(refLocal){
-          if(!refLocal){
-            _uploadsPendentes--;
-            toast('Nao consegui guardar a foto neste aparelho. Espaco esgotado?','warn');
-            return;
+        driveUploadFoto(dataUrl, 'item_'+(idx+1)+'_'+Date.now()+'.jpg').then(function(ref){
+          _uploadsPendentes--;
+          if(ref){
+            _cacheFoto[ref.slice(6)] = dataUrl;   // ja exibe sem baixar de novo
+            _itensProposta[idx].fotos.push(ref);
+            window._fotosNaoSalvas = true;
+            toast('Foto enviada. Clique em Salvar para vincular ao projeto.','ok');
+          } else {
+            _itensProposta[idx].fotos.push(dataUrl);  // fallback: fica local
+            var causa=_ultimoErroDrive||'motivo desconhecido';
+            var dica='';
+            if(/403|insufficient|Permission|scope/i.test(causa)) dica=' Falta autorizar o Drive: rode reautorizarGoogle() no console.';
+            else if(/disabled|has not been used|API/i.test(causa)) dica=' A Google Drive API nao esta ativada no projeto do Google Cloud.';
+            else if(/404|not found/i.test(causa)) dica=' O app nao tem acesso a pasta informada.';
+            toast('Foto so neste aparelho. Motivo: '+causa+'.'+dica,'warn');
+            console.error('[FOTO] upload recusado ->', causa);
           }
-          _cacheFoto[refLocal]=dataUrl;
-          _itensProposta[idx].fotos.push(refLocal);
-          window._fotosNaoSalvas=true;
           renderItensProposta();
-          toast('Foto guardada. Clique em Salvar para vincular ao projeto.','ok');
-          // PASSO 2: tenta subir para o Drive em segundo plano. Se falhar,
-          // a foto continua no cofre e sobe depois, pela fila.
-          driveUploadFoto(dataUrl, 'item_'+(idx+1)+'_'+Date.now()+'.jpg').then(function(ref){
-            _uploadsPendentes--;
-            if(ref){
-              cofreMarcarEnviada(refLocal.slice(6), ref);
-              trocarRefFoto(refLocal, ref);
-              _cacheFoto[ref.slice(6)]=dataUrl;
-              renderItensProposta();
-            } else {
-              atualizarAvisoFotos();
-            }
-          });
         });
       };
       img.src=e.target.result;
@@ -7550,16 +7312,16 @@ function temaAtual(){ return document.documentElement.getAttribute('data-tema')|
 function aplicarTema(t){
   document.documentElement.setAttribute('data-tema', t);
   var b=document.getElementById('tema-btn');
-  if(b){ b.innerHTML = (t==='escuro'?ICO_SOL:ICO_LUA)+'<span>'+(t==='escuro'?'Claro':'Escuro')+'</span>';
-         b.title = t==='escuro'?'Mudar para o tema claro':'Mudar para o tema escuro'; }
+  if(b){ b.innerHTML = t==='escuro'?ICO_SOL:ICO_LUA;
+         b.title = t==='escuro'?'Mudar para tema claro':'Mudar para tema escuro'; }
   try{ localStorage.setItem('cd_tema', t); }catch(e){}
 }
 function alternarTema(){ aplicarTema(temaAtual()==='escuro'?'claro':'escuro'); }
 function iniciarTema(){
   var t=null;
   try{ t=localStorage.getItem('cd_tema'); }catch(e){}
-  // Sem escolha registrada, o sistema abre no tema escuro.
-  aplicarTema(t||'escuro');
+  if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='escuro';
+  aplicarTema(t||'claro');
 }
 
 // ================= PILULAS DE STATUS =================
