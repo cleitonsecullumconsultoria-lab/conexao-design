@@ -1115,6 +1115,7 @@ textarea.fi{resize:vertical;min-height:72px}
     <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:3px;width:fit-content">
       <button class="fbt on" id="proj-tab-lista" onclick="projTab('lista',this)">📋 Projetos</button>
       <button class="fbt" id="proj-tab-novo" onclick="novoProjetoLimpo(this)">➕ Novo Projeto</button>
+        <button class="fbt" id="proj-tab-perdas" onclick="projTab('perdas',this)">📉 Perdas</button>
       <button class="fbt" id="proj-tab-custos" onclick="projTab('custos',this)">💰 Custos</button>
       <button class="fbt" id="proj-tab-dash" onclick="projTab('dash',this)">📊 Dashboard</button>
       <button class="fbt" id="proj-tab-cond" onclick="projTab('cond',this)">⚙️ Condições de Pagamento</button>
@@ -1155,6 +1156,34 @@ textarea.fi{resize:vertical;min-height:72px}
     </div>
 
     <!-- NOVO PROJETO -->
+    <div id="proj-panel-perdas" style="display:none">
+      <div class="filtro-box">
+        <div class="filtro-linha">
+          <span class="filtro-tit">Período</span>
+          <input type="date" class="fi filtro-inp" id="pd-ini" onchange="renderPerdas()">
+          <span style="font-size:11px;color:var(--t3)">até</span>
+          <input type="date" class="fi filtro-inp" id="pd-fim" onchange="renderPerdas()">
+          <button class="btn sm" onclick="pdPeriodoAno()">Ano atual</button>
+          <button class="btn sm" onclick="pdLimpar()">Limpar filtros</button>
+        </div>
+        <div class="filtro-linha">
+          <span class="filtro-tit">Recortes</span>
+          <select class="fi filtro-inp" id="pd-cliente" onchange="renderPerdas()"><option value="">Todos os clientes</option></select>
+          <select class="fi filtro-inp" id="pd-resp" onchange="renderPerdas()"><option value="">Todos os responsáveis</option></select>
+          <select class="fi filtro-inp" id="pd-motivo" onchange="renderPerdas()"><option value="">Todos os motivos</option></select>
+          <span class="filtro-resumo" id="pd-resumo"></span>
+        </div>
+      </div>
+      <div class="cards" id="pd-kpis" style="margin-bottom:14px"></div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="ch">Motivos da perda</div>
+        <table class="tbl"><thead><tr><th>Motivo</th><th style="text-align:center">Projetos</th><th style="text-align:center">% qtd</th><th style="text-align:right">Valor perdido</th><th style="text-align:center">% valor</th><th style="width:130px"></th></tr></thead><tbody id="pd-motivos"></tbody></table>
+      </div>
+      <div class="card">
+        <div class="ch">Projetos perdidos</div>
+        <table class="tbl"><thead><tr><th>Projeto</th><th>Cliente</th><th>Responsável</th><th>Data</th><th>Motivo</th><th>Observação</th><th style="text-align:right">Valor</th></tr></thead><tbody id="pd-lista"></tbody></table>
+      </div>
+    </div>
     <div id="proj-panel-novo" style="display:none">
       <div class="card mb16">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
@@ -1167,15 +1196,26 @@ textarea.fi{resize:vertical;min-height:72px}
           <div class="fgroup" style="flex:2"><label class="flabel">Nome do Projeto<span class="req">*</span></label><input type="text" class="fi" id="proj-nome" placeholder="Ex: Dormitório Casal - Dr. Pablo..."></div>
           <div class="fgroup"><label class="flabel">Cliente</label><select class="fi" id="proj-cliente"><option value="">Selecione...</option></select></div>
           <div class="fgroup"><label class="flabel">Status</label>
-            <select class="fi" id="proj-status">
+            <select class="fi" id="proj-status" onchange="onChangeStatusProjeto()">
               <option value="rascunho">Rascunho</option>
               <option value="orcamento">Orçado</option>
               <option value="aprovado">Aprovado</option>
               <option value="execucao">Em Execução</option>
               <option value="finalizado">Finalizado</option>
               <option value="cancelado">Cancelado</option>
+            <option value="perdido">Projeto Perdido</option>
             </select>
           </div>
+        </div>
+        <div id="perda-box" style="display:none;border:1px solid var(--bd);border-left:3px solid #8E2020;border-radius:8px;padding:10px 12px;margin:0 0 12px;background:var(--bg2)">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8E2020;margin-bottom:7px">Projeto perdido</div>
+          <div class="frow">
+            <div class="fgroup" style="flex:2"><label class="flabel">Motivo da perda<span class="req">*</span></label>
+              <select class="fi" id="proj-motivo-perda" onchange="onChangeMotivoPerda()"><option value="">Selecione o motivo...</option></select></div>
+            <div class="fgroup" style="flex:3"><label class="flabel">Observação sobre a perda (opcional)</label>
+              <input type="text" class="fi" id="proj-obs-perda" placeholder="Ex: cliente recebeu proposta 12% inferior e optou pelo concorrente"></div>
+          </div>
+          <div id="perda-hist" style="font-size:11px;color:var(--t3);margin-top:6px"></div>
         </div>
         <div class="frow">
           <div class="fgroup"><label class="flabel">Data Início<span class="req">*</span></label><input type="date" class="fi" id="proj-inicio"></div>
@@ -1676,7 +1716,7 @@ async function sheetsGet(sheetName){
   if(!ACCESS_TOKEN) return null;
   syncStart();
   try{
-    var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!A:AB');
+    var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!A:AZ');
     var res = await fetch(url, {headers: {Authorization: 'Bearer ' + ACCESS_TOKEN}});
     if(res.status===401){
       toast('Token expirado. Renovando...','info');
@@ -1694,7 +1734,7 @@ async function sheetsAppend(sheetName, row){
   if(!ACCESS_TOKEN) return false;
   syncStart();
   try{
-    var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!A:AB') + ':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS';
+    var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!A:AZ') + ':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS';
     var res = await fetch(url, {
       method: 'POST',
       headers: {Authorization: 'Bearer ' + ACCESS_TOKEN, 'Content-Type': 'application/json'},
@@ -1718,7 +1758,7 @@ async function sheetsClearRange(range){
   var res = await fetch(url, {method:'POST', headers:{Authorization:'Bearer '+ACCESS_TOKEN,'Content-Type':'application/json'}});
   return res.ok;
 }
-async function sheetsClear(sheetName){ return sheetsClearRange(sheetName + '!A2:AB'); }
+async function sheetsClear(sheetName){ return sheetsClearRange(sheetName + '!A2:AZ'); }
 
 // Grava a aba inteira. ORDEM SEGURA: escreve primeiro, só depois apaga a sobra.
 // Se a escrita falhar, a aba permanece intacta.
@@ -1747,7 +1787,7 @@ async function sheetsWriteAll(sheetName, rows){
       } else {
         ok = true;
         // sobra: linhas que existiam além do que acabamos de gravar
-        await sheetsClearRange(sheetName + '!A' + (rows.length + 2) + ':AB');
+        await sheetsClearRange(sheetName + '!A' + (rows.length + 2) + ':AZ');
       }
     }
   } catch(e){ msg = e.message || 'falha de rede'; }
@@ -1776,6 +1816,38 @@ function registraFalhaSync(sheetName, msg){
 }
 function falhasSync(){ try{ return JSON.parse(localStorage.getItem('sync_falhas')||'[]'); }catch(e){ return []; } }
 
+
+
+// Acrescenta na planilha as colunas declaradas no codigo que ainda nao existem
+// na aba. Só ADICIONA no fim; nunca reordena nem remove, para não desalinhar
+// os dados já gravados.
+async function garantirColunas(sheetName, headerDesejado){
+  if(!ACCESS_TOKEN) return {ok:false, novas:[]};
+  try{
+    var url = SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!1:1');
+    var r = await fetch(url, {headers:{Authorization:'Bearer '+ACCESS_TOKEN}});
+    if(!r.ok) return {ok:false, novas:[]};
+    var j = await r.json();
+    var atual = (j.values && j.values[0]) ? j.values[0] : [];
+    if(!atual.length) return {ok:true, novas:[]};   // aba vazia: o cabecalho e escrito pelo initSheets
+    var novas = headerDesejado.filter(function(c){ return atual.indexOf(c) < 0; });
+    if(!novas.length) return {ok:true, novas:[]};
+    var linha = atual.concat(novas);
+    var up = await fetch(SHEETS_BASE + SHEET_ID + '/values/' + encodeURIComponent(sheetName + '!1:1') + '?valueInputOption=RAW', {
+      method:'PUT',
+      headers:{Authorization:'Bearer '+ACCESS_TOKEN,'Content-Type':'application/json'},
+      body: JSON.stringify({values:[linha]})
+    });
+    if(!up.ok){
+      var d='HTTP '+up.status;
+      try{ var b=await up.json(); if(b&&b.error&&b.error.message) d+=': '+b.error.message; }catch(e){}
+      registraFalhaSync(sheetName+'/colunas', d);
+      return {ok:false, novas:[]};
+    }
+    console.log('garantirColunas: '+sheetName+' ganhou '+novas.join(', '));
+    return {ok:true, novas:novas};
+  }catch(e){ console.error('garantirColunas', e); return {ok:false, novas:[]}; }
+}
 
 // Cria na planilha as abas que o sistema usa e que ainda nao existem.
 // Antes, gravar numa aba inexistente devolvia 400 e o dado se perdia.
@@ -1824,17 +1896,26 @@ async function initSheets(){
     Pontos:['id','funcionario_id','data','tipo','horas','obs','created_at','created_by','valor_hora_hist','valor_diaria_hist','valor_diaria_not_hist','valor_calculado','data_base_calculo'],
     Refeicoes:['id','funcionario_id','fornecedor_id','data','tipo','valor'],
     ContasReceber:['id','projeto_id','descricao','valor','vencimento','status','recebido_em','conta_id'],
-    Projetos:['id','nome','cliente_id','status','inicio','entrega','descricao','est_material','est_mdo','est_espelho','est_outros','created_at','created_by','valor_venda','cond_pag','data_receb','status_receb','teve_arquiteto','nome_arquiteto','percentual_arquiteto','valor_arquiteto','estimativas','est_total','updated_by','updated_at','desc_escopo','itens_proposta'],
+    Projetos:['id','nome','cliente_id','status','inicio','entrega','descricao','est_material','est_mdo','est_espelho','est_outros','created_at','created_by','valor_venda','cond_pag','data_receb','status_receb','teve_arquiteto','nome_arquiteto','percentual_arquiteto','valor_arquiteto','estimativas','est_total','updated_by','updated_at','desc_escopo','itens_proposta','prazo_dias','desconto','valor_final','frete','instalacao','garantia','responsavel','link_contato','obs_proposta','motivo_perda','obs_perda','data_perda'],
     ProjetoCustos:['id','projeto_id','tipo','descricao','valor','qtd','valor_unit','produto_id','data','created_by'],
     ContasBancarias:['id','nome','banco','tipo','agencia','conta','saldo_inicial','ativo','cor'],
     Produtos:['id','nome','codigo','unidade','categoria_id','fornecedor_id','custo_medio','custo_ultima','qtd_compras','estoque_min','descricao','ativo'],
     ProjetoRateio:['id','projeto_id','origem','origem_id','funcionario_id','semana','mes','percentual','valor_rateado','data','categoria_id'],
     Log:['id','ts','user','action'],
     Config:['chave','valor'],
-    Parcelamentos:['id','descricao','parcelas_json']
+    Parcelamentos:['id','descricao','parcelas_json'],
+    MotivosPerda:['id','nome','grupo','ativo'],
+    HistoricoStatus:['id','projeto_id','data','usuario','status_anterior','status_novo','motivo','obs']
   };
   // Garante que toda aba usada pelo sistema exista antes de qualquer leitura
   await criarAbasFaltantes(Object.keys(headers));
+  // Colunas novas em abas que ja existem (ex.: motivo da perda em Projetos)
+  var _colunasNovas=[];
+  for(var _sh in headers){
+    var _rc = await garantirColunas(_sh, headers[_sh]);
+    if(_rc.novas && _rc.novas.length) _colunasNovas.push(_sh+': '+_rc.novas.join(', '));
+  }
+  if(_colunasNovas.length) toast('Colunas criadas na planilha -> '+_colunasNovas.join(' | '),'ok');
   // Protecao: so cria cabecalho se a aba estiver COMPLETAMENTE vazia
   var _abasComProblema = [];
   for(var sheet in headers){
@@ -1878,7 +1959,9 @@ async function loadAllData(){
       {key:'refeicoes', sheet:'Refeicoes', parser: parseRefeicao},
       {key:'contas_receber', sheet:'ContasReceber', parser: parseContaReceber},
       {key:'produtos', sheet:'Produtos', parser: parseProduto},
-      {key:'projetos', sheet:'Projetos', parser: function(r){return {id:+r[0],nome:r[1]||'',cliente_id:r[2]||'',status:r[3]||'orcamento',inicio:r[4]||'',entrega:r[5]||'',descricao:r[6]||'',est_material:+r[7]||0,est_mdo:+r[8]||0,est_espelho:+r[9]||0,est_outros:+r[10]||0,created_at:r[11]||'',created_by:r[12]||'',valor_venda:+r[13]||0,cond_pag:r[14]||'',data_receb:r[15]||'',status_receb:r[16]||'pendente',teve_arquiteto:r[17]==='true'||r[17]===true,nome_arquiteto:r[18]||'',percentual_arquiteto:+r[19]||0,valor_arquiteto:+r[20]||0,estimativas:r[21]||'',est_total:+r[22]||0,updated_by:r[23]||'',updated_at:r[24]||'',desc_escopo:r[25]||'',itens_proposta:r[26]||''};}},
+      {key:'projetos', sheet:'Projetos', parser: function(r){return {id:+r[0],nome:r[1]||'',cliente_id:r[2]||'',status:r[3]||'orcamento',inicio:r[4]||'',entrega:r[5]||'',descricao:r[6]||'',est_material:+r[7]||0,est_mdo:+r[8]||0,est_espelho:+r[9]||0,est_outros:+r[10]||0,created_at:r[11]||'',created_by:r[12]||'',valor_venda:+r[13]||0,cond_pag:r[14]||'',data_receb:r[15]||'',status_receb:r[16]||'pendente',teve_arquiteto:r[17]==='true'||r[17]===true,nome_arquiteto:r[18]||'',percentual_arquiteto:+r[19]||0,valor_arquiteto:+r[20]||0,estimativas:r[21]||'',est_total:+r[22]||0,updated_by:r[23]||'',updated_at:r[24]||'',desc_escopo:r[25]||'',itens_proposta:r[26]||'',prazo_dias:r[27]||'',desconto:+r[28]||0,valor_final:+r[29]||0,frete:r[30]||'',instalacao:r[31]||'',garantia:r[32]||'',responsavel:r[33]||'',link_contato:r[34]||'',obs_proposta:r[35]||'',motivo_perda:r[36]||'',obs_perda:r[37]||'',data_perda:r[38]||''};}},
+      {key:'motivos_perda', sheet:'MotivosPerda', parser:function(r){return {id:+r[0],nome:r[1]||'',grupo:r[2]||'',ativo:r[3]!=='false'&&r[3]!==false};}},
+      {key:'hist_status', sheet:'HistoricoStatus', parser:function(r){return {id:+r[0],projeto_id:r[1]||'',data:r[2]||'',usuario:r[3]||'',status_anterior:r[4]||'',status_novo:r[5]||'',motivo:r[6]||'',obs:r[7]||''};}},
       {key:'proj_custos', sheet:'ProjetoCustos', parser: function(r){return {id:+r[0],projeto_id:+r[1],tipo:r[2]||'',descricao:r[3]||'',valor:+r[4]||0,data:r[5]||'',created_by:r[6]||''};}},
       {key:'proj_rateio', sheet:'ProjetoRateio', parser: function(r){return {id:+r[0],projeto_id:+r[1],origem:r[2]||'',origem_id:r[3]||'',funcionario_id:+r[4]||0,semana:r[5]||'',mes:r[6]||'',percentual:+r[7]||0,valor_rateado:+r[8]||0,data:r[9]||'',categoria_id:r[10]||''};}},
       {key:'log', sheet:'Log', parser: parseLog},
@@ -1948,6 +2031,8 @@ async function loadAllData(){
           }
         }
         else if(l.key === 'cond_pagamento'){ if(data.length){ cond_pagamento=data; saveCondPag(); } }
+        else if(l.key === 'motivos_perda'){ if(data.length){ motivos_perda=data; ss('motivos_perda',motivos_perda); } }
+        else if(l.key === 'hist_status'){ hist_status=data; ss('hist_status',hist_status); }
         else if(l.key === 'contas_bancarias'){
           // MERGE por id: a planilha manda no que ja existe la, e as contas que
           // so existem neste navegador sao preservadas e sobem no proximo sync.
@@ -2022,6 +2107,29 @@ var funcionarios = sg('funcionarios')||[];
 var pontos = sg('pontos')||[];
 var refeicoes = sg('refeicoes')||[];
 var folha_paga = sg('folha_paga')||{};
+var motivos_perda = sg('motivos_perda')||[];
+var hist_status = sg('hist_status')||[];
+// Lista parametrizavel: pode ser editada na aba MotivosPerda da planilha.
+function motivosPadrao(){
+  var L=[
+    ['Preço / orçamento','Comercial'],['Cliente escolheu concorrente','Comercial'],['Condições comerciais','Comercial'],
+    ['Prazo de entrega','Comercial'],['Forma de pagamento','Comercial'],
+    ['Projeto cancelado pelo cliente','Cliente'],['Projeto adiado','Cliente'],['Cliente desistiu da contratação','Cliente'],
+    ['Cliente sem orçamento disponível','Cliente'],['Mudança de prioridade','Cliente'],['Mudança de escopo','Cliente'],
+    ['Cliente não respondeu / sem retorno','Cliente'],
+    ['Escopo não atendia à necessidade','Solução'],['Solução não adequada ao projeto','Solução'],
+    ['Prazo não atendia à necessidade','Solução'],['Cliente solicitou outra solução','Solução'],
+    ['Perda por atendimento','Processo comercial'],['Demora na proposta','Processo comercial'],
+    ['Demora no retorno','Processo comercial'],['Falha no acompanhamento comercial','Processo comercial'],
+    ['Outro problema comercial','Processo comercial'],
+    ['Concorrente','Outros'],['Projeto interno cancelado','Outros'],['Motivo não identificado','Outros'],['Outro','Outros']
+  ];
+  return L.map(function(x,i){return {id:i+1,nome:x[0],grupo:x[1],ativo:true};});
+}
+function garantirMotivos(){
+  if(!motivos_perda.length){ motivos_perda=motivosPadrao(); ss('motivos_perda',motivos_perda); }
+  return motivos_perda;
+}
 var contas_bancarias = sg('contas_bancarias')||[];
 var cond_pagamento = sg('cond_pagamento')||[];
 
@@ -2292,6 +2400,7 @@ var PROJ_STATUS={
   execucao:{lbl:'Em Execução',cls:'pend',cor:'#1565C0'},
   finalizado:{lbl:'Finalizado',cls:'pago',cor:'#5C825F'},
   cancelado:{lbl:'Cancelado',cls:'venc',cor:'#C62828'},
+  perdido:{lbl:'Projeto Perdido',cls:'venc',cor:'#8E2020'},
   // compatibilidade com status antigos
   andamento:{lbl:'Em Execução',cls:'pend',cor:'#1565C0'},
   concluido:{lbl:'Finalizado',cls:'pago',cor:'#5C825F'}
@@ -2570,7 +2679,7 @@ function save(){
   // Keep local backup
   ss('transacoes',transacoes);ss('contas_pagar',contas_pagar);ss('clientes',clientes);
   ss('fornecedores',fornecedores);ss('categorias',categorias);ss('funcionarios',funcionarios);
-  ss('pontos',pontos);ss('refeicoes',refeicoes);ss('folha_paga',folha_paga);ss('contas_bancarias',contas_bancarias);
+  ss('pontos',pontos);ss('refeicoes',refeicoes);ss('folha_paga',folha_paga);ss('motivos_perda',motivos_perda);ss('hist_status',hist_status);ss('contas_bancarias',contas_bancarias);
   if(typeof contas_receber!=='undefined') ss('contas_receber',contas_receber);
   if(typeof produtos!=='undefined') ss('produtos',produtos);
 }
@@ -2614,8 +2723,13 @@ async function _syncToSheetsRaw(type){
     p.teve_arquiteto||false,p.nome_arquiteto||'',p.percentual_arquiteto||0,p.valor_arquiteto||0,
     p.estimativas||'',p.est_total||0,
     p.updated_by||'',p.updated_at||'',p.desc_escopo||'',
-    (function(){try{var its=loadItensProposta(p.id);return JSON.stringify(its.map(function(it){return {nome:it.nome,descricao:it.descricao,valor:it.valor,fotos:(it.fotos||[]).filter(function(f){return String(f).indexOf('drive:')===0;})};}));}catch(e){return '';}})()
+    (function(){try{var its=loadItensProposta(p.id);return JSON.stringify(its.map(function(it){return {nome:it.nome,descricao:it.descricao,valor:it.valor,fotos:(it.fotos||[]).filter(function(f){return String(f).indexOf('drive:')===0;})};}));}catch(e){return '';}})(),
+    p.prazo_dias||'',p.desconto||0,p.valor_final||0,p.frete||'',p.instalacao||'',p.garantia||'',
+    p.responsavel||'',p.link_contato||'',p.obs_proposta||'',
+    p.motivo_perda||'',p.obs_perda||'',p.data_perda||''
   ];}},
+    motivos_perda:{data:typeof motivos_perda!=='undefined'?motivos_perda:[],sheet:'MotivosPerda',row:function(m){return[m.id,m.nome||'',m.grupo||'',m.ativo!==false];}},
+    hist_status:{data:typeof hist_status!=='undefined'?hist_status:[],sheet:'HistoricoStatus',row:function(h){return[h.id,h.projeto_id,h.data||'',h.usuario||'',h.status_anterior||'',h.status_novo||'',h.motivo||'',h.obs||''];}},
     proj_custos:{data:proj_custos,sheet:'ProjetoCustos',row:function(c){return[c.id,c.projeto_id,c.tipo,c.descricao,c.valor,c.data,c.created_by];}},
     proj_rateio:{data:proj_rateio,sheet:'ProjetoRateio',row:function(r){return[r.id,r.projeto_id,r.origem,r.origem_id||'',r.funcionario_id||'',r.semana||'',r.mes||'',r.percentual,r.valor_rateado,r.data,r.categoria_id||''];}},
     log:{data:actLog.slice().reverse(),sheet:'Log',row:rowLog},
@@ -5137,6 +5251,8 @@ function limparEstadoProjeto(){
   }
   var t=document.getElementById('proj-form-title'); if(t) t.textContent='Novo Projeto';
   if(typeof toggleArquiteto==='function') toggleArquiteto();
+  var _pb=document.getElementById('perda-box'); if(_pb) _pb.style.display='none';
+  var _ph=document.getElementById('perda-hist'); if(_ph) _ph.innerHTML='';
   if(typeof popularSelectAddCat==='function') popularSelectAddCat();
   if(typeof renderEstCats==='function') renderEstCats();
   if(typeof renderItensProposta==='function') renderItensProposta();
@@ -5162,19 +5278,20 @@ function atualizarBotaoVoltar(){
   if(b) b.style.display = window._editProjId ? 'inline-flex' : 'none';
 }
 function projTab(tab, btn){
-  ['lista','novo','custos','dash','cond'].forEach(function(t){
+  ['lista','novo','custos','dash','cond','perdas'].forEach(function(t){
     var el=document.getElementById('proj-panel-'+t);
     if(el) el.style.display = t===tab?'block':'none';
   });
   document.querySelectorAll('#view-projetos .fbt').forEach(function(b){b.classList.remove('on');});
   if(btn) btn.classList.add('on');
-  if(tab!=='novo') _projVoltarPara = (tab==='lista'||tab==='dash'||tab==='custos') ? tab : 'lista';
+  if(tab!=='novo') _projVoltarPara = (tab==='lista'||tab==='dash'||tab==='custos'||tab==='perdas') ? tab : 'lista';
   if(typeof atualizarBotaoVoltar==='function') atualizarBotaoVoltar();
   try{
     if(tab==='lista'){ initFiltrosProjeto(); renderProjetos(); }
     if(tab==='custos'){ renderCustos(); populateProjetoSelects(); populateCustoTipo(); populateProdutoSelect(); }
     if(tab==='dash'){ populateProjetoSelects(); renderExecutivo(); }
     if(tab==='cond') renderCondPag();
+    if(tab==='perdas') renderPerdas();
     if(tab==='novo'){
     populateCondPagSelect();
     // Se não está editando, começar grade de categorias vazia e fotos zeradas
@@ -6134,6 +6251,155 @@ function atualizarCustoProduto(prodId, novoValorUnit){
 document.addEventListener('input',function(e){
   if(e.target && e.target.classList && e.target.classList.contains('erro')) e.target.classList.remove('erro');
 });
+
+// ================= VISAO GERENCIAL DE PERDAS (win/loss) =================
+function pdPeriodoAno(){
+  var a=new Date().getFullYear();
+  var i=document.getElementById('pd-ini'), f=document.getElementById('pd-fim');
+  if(i) i.value=a+'-01-01'; if(f) f.value=a+'-12-31';
+  renderPerdas();
+}
+function pdLimpar(){
+  ['pd-ini','pd-fim','pd-cliente','pd-resp','pd-motivo'].forEach(function(id){
+    var e=document.getElementById(id); if(e) e.value='';
+  });
+  renderPerdas();
+}
+function pdPopulaFiltros(){
+  var perdidos=projetos.filter(function(p){return p.status==='perdido';});
+  function set(id, valores, rotuloVazio, mapa){
+    var el=document.getElementById(id); if(!el) return;
+    var atual=el.value;
+    el.innerHTML='<option value="">'+rotuloVazio+'</option>'+valores.map(function(v){
+      return '<option value="'+String(v).replace(/"/g,'&quot;')+'">'+(mapa?mapa(v):v)+'</option>';
+    }).join('');
+    if(atual) el.value=atual;
+  }
+  var cli=[]; perdidos.forEach(function(p){ if(p.cliente_id && cli.indexOf(String(p.cliente_id))<0) cli.push(String(p.cliente_id)); });
+  var rsp=[]; perdidos.forEach(function(p){ var v=(p.responsavel||'').trim(); if(v && rsp.indexOf(v)<0) rsp.push(v); });
+  var mot=[]; perdidos.forEach(function(p){ var v=(p.motivo_perda||'').trim(); if(v && mot.indexOf(v)<0) mot.push(v); });
+  set('pd-cliente', cli, 'Todos os clientes', function(v){
+    var c=clientes.find(function(x){return String(x.id)===String(v);}); return c?c.nome:('Cliente '+v);
+  });
+  set('pd-resp', rsp.sort(), 'Todos os responsáveis');
+  set('pd-motivo', mot.sort(), 'Todos os motivos');
+}
+function perdasFiltradas(){
+  var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
+  var ini=g('pd-ini'), fim=g('pd-fim'), cli=g('pd-cliente'), rsp=g('pd-resp'), mot=g('pd-motivo');
+  return projetos.filter(function(p){
+    if(p.status!=='perdido') return false;
+    var d=p.data_perda||p.inicio||'';
+    if((ini||fim) && !d) return false;
+    if(ini && d<ini) return false;
+    if(fim && d>fim) return false;
+    if(cli && String(p.cliente_id)!==String(cli)) return false;
+    if(rsp && (p.responsavel||'').trim()!==rsp) return false;
+    if(mot && (p.motivo_perda||'').trim()!==mot) return false;
+    return true;
+  });
+}
+function valorProjetoPerdido(p){ return parseFloat(p.valor_final||p.valor_venda||0)||0; }
+function renderPerdas(){
+  pdPopulaFiltros();
+  var list=perdasFiltradas();
+  var totalQtd=list.length;
+  var totalVal=list.reduce(function(s,p){return s+valorProjetoPerdido(p);},0);
+  var ganhos=projetos.filter(function(p){return ['aprovado','execucao','finalizado'].indexOf(p.status)>=0;}).length;
+  var taxa=(ganhos+totalQtd)>0?(totalQtd/(ganhos+totalQtd)*100):0;
+
+  var kpis=document.getElementById('pd-kpis');
+  if(kpis) kpis.innerHTML=
+    '<div class="card kpi"><div class="kl">Projetos perdidos</div><div class="kv">'+totalQtd+'</div></div>'+
+    '<div class="card kpi"><div class="kl">Valor perdido</div><div class="kv">'+fmt(totalVal)+'</div></div>'+
+    '<div class="card kpi"><div class="kl">Ticket médio perdido</div><div class="kv">'+fmt(totalQtd?totalVal/totalQtd:0)+'</div></div>'+
+    '<div class="card kpi"><div class="kl">Taxa de perda</div><div class="kv">'+taxa.toFixed(1)+'%</div></div>';
+
+  var porMotivo={};
+  list.forEach(function(p){
+    var m=(p.motivo_perda||'').trim()||'Motivo não informado';
+    if(!porMotivo[m]) porMotivo[m]={qtd:0,valor:0};
+    porMotivo[m].qtd++; porMotivo[m].valor+=valorProjetoPerdido(p);
+  });
+  var linhas=Object.keys(porMotivo).sort(function(a,b){return porMotivo[b].qtd-porMotivo[a].qtd;}).map(function(m){
+    var x=porMotivo[m];
+    var pq=totalQtd?(x.qtd/totalQtd*100):0, pv=totalVal?(x.valor/totalVal*100):0;
+    return '<tr><td>'+m+'</td><td style="text-align:center">'+x.qtd+'</td><td style="text-align:center">'+pq.toFixed(1)+'%</td>'+
+      '<td style="text-align:right">'+fmt(x.valor)+'</td><td style="text-align:center">'+pv.toFixed(1)+'%</td>'+
+      '<td><div style="background:var(--bg3);border-radius:4px;height:8px;overflow:hidden"><div style="background:#8E2020;height:100%;width:'+pq.toFixed(1)+'%"></div></div></td></tr>';
+  }).join('');
+  var tb=document.getElementById('pd-motivos');
+  if(tb) tb.innerHTML=linhas||'<tr><td colspan="6"><div class="empty">Nenhum projeto perdido no filtro atual</div></td></tr>';
+
+  var lt=document.getElementById('pd-lista');
+  if(lt) lt.innerHTML=list.length?list.slice().sort(function(a,b){return String(b.data_perda||'').localeCompare(String(a.data_perda||''));}).map(function(p){
+    var c=clientes.find(function(x){return String(x.id)===String(p.cliente_id);});
+    return '<tr><td><a href="#" onclick="editProjeto('+p.id+');return false;">'+p.nome+'</a></td><td>'+(c?c.nome:'-')+'</td>'+
+      '<td>'+(p.responsavel||'-')+'</td><td>'+(p.data_perda?dp(p.data_perda):'-')+'</td>'+
+      '<td>'+((p.motivo_perda||'').trim()||'<span style="color:var(--amber,#C47D0A)">não informado</span>')+'</td>'+
+      '<td style="font-size:11px;color:var(--t3)">'+(p.obs_perda||'')+'</td>'+
+      '<td style="text-align:right">'+fmt(valorProjetoPerdido(p))+'</td></tr>';
+  }).join(''):'<tr><td colspan="7"><div class="empty">Nenhum projeto perdido no filtro atual</div></td></tr>';
+
+  var res=document.getElementById('pd-resumo');
+  if(res) res.textContent=totalQtd+' projeto(s) · '+fmt(totalVal)+' perdidos';
+}
+// ================= PROJETOS PERDIDOS (win/loss) =================
+function populateMotivosPerda(){
+  var el=document.getElementById('proj-motivo-perda'); if(!el) return;
+  var atual=el.value;
+  var ativos=garantirMotivos().filter(function(m){return m.ativo!==false;});
+  var grupos={};
+  ativos.forEach(function(m){ (grupos[m.grupo||'Outros']=grupos[m.grupo||'Outros']||[]).push(m); });
+  el.innerHTML='<option value="">Selecione o motivo...</option>'+
+    Object.keys(grupos).map(function(g){
+      return '<optgroup label="'+g+'">'+grupos[g].map(function(m){
+        return '<option value="'+m.nome.replace(/"/g,'&quot;')+'">'+m.nome+'</option>';
+      }).join('')+'</optgroup>';
+    }).join('');
+  if(atual) el.value=atual;
+}
+function onChangeMotivoPerda(){
+  var el=document.getElementById('proj-motivo-perda');
+  if(el) el.classList.remove('erro');
+}
+// Mostra/esconde o bloco conforme o status escolhido
+function onChangeStatusProjeto(){
+  var st=document.getElementById('proj-status');
+  var box=document.getElementById('perda-box');
+  if(!box) return;
+  var perdido = st && st.value==='perdido';
+  box.style.display = perdido ? '' : 'none';
+  if(perdido) populateMotivosPerda();
+  renderHistPerda();
+}
+function renderHistPerda(){
+  var box=document.getElementById('perda-hist'); if(!box) return;
+  var id=window._editProjId;
+  if(!id){ box.innerHTML=''; return; }
+  var h=hist_status.filter(function(x){return String(x.projeto_id)===String(id);})
+                   .sort(function(a,b){return String(b.data||'').localeCompare(String(a.data||''));});
+  if(!h.length){ box.innerHTML=''; return; }
+  box.innerHTML='<b>Histórico:</b> '+h.slice(0,4).map(function(x){
+    var de=x.status_anterior?((PROJ_STATUS[x.status_anterior]||{}).lbl||x.status_anterior):'cadastro novo';
+    var para=(PROJ_STATUS[x.status_novo]||{}).lbl||x.status_novo||'?';
+    return dp((x.data||'').slice(0,10))+' '+de+' &rarr; '+para+
+           (x.motivo?' ('+x.motivo+')':'')+(x.usuario?' por '+x.usuario:'');
+  }).join('<br>');
+}
+// Registra a troca de status sem sobrescrever o que ja existe
+function registrarHistStatus(projId, antes, depois, motivo, obs){
+  if(antes===depois && !motivo) return;
+  var novo={
+    id:(hist_status.reduce(function(m,x){return Math.max(m,x.id||0);},0)+1),
+    projeto_id:String(projId), data:new Date().toISOString(),
+    usuario:(CURRENT_USER&&CURRENT_USER.name)||'',
+    status_anterior:antes||'', status_novo:depois||'', motivo:motivo||'', obs:obs||''
+  };
+  hist_status.push(novo);
+  ss('hist_status',hist_status);
+  return novo;
+}
 async function saveProjeto(){
   // Se o usuario clicar em Salvar antes de a foto terminar de subir, a
   // referencia ainda nao esta no item e a foto se perderia.
@@ -6164,6 +6430,10 @@ async function saveProjeto(){
     {id:'proj-desc',      rotulo:'Descrição'},
     {id:'proj-valor-venda',rotulo:'Valor de venda', numerico:true}
   ];
+  var _stEl=document.getElementById('proj-status');
+  if(_stEl && _stEl.value==='perdido'){
+    _obrig.push({id:'proj-motivo-perda', rotulo:'Motivo da perda'});
+  }
   var _faltando=[], _primeiro=null;
   _obrig.forEach(function(c){
     var el=document.getElementById(c.id);
@@ -6217,6 +6487,8 @@ async function saveProjeto(){
     instalacao:(document.getElementById('proj-instalacao')?document.getElementById('proj-instalacao').value:'inclusa'),
     garantia:parseInt(document.getElementById('proj-garantia')?document.getElementById('proj-garantia').value:12)||12,
     responsavel:(document.getElementById('proj-responsavel')?document.getElementById('proj-responsavel').value:''),
+    motivo_perda:(document.getElementById('proj-status')&&document.getElementById('proj-status').value==='perdido'&&document.getElementById('proj-motivo-perda')?document.getElementById('proj-motivo-perda').value:''),
+    obs_perda:(document.getElementById('proj-status')&&document.getElementById('proj-status').value==='perdido'&&document.getElementById('proj-obs-perda')?document.getElementById('proj-obs-perda').value:''),
     link_contato:(document.getElementById('proj-link-contato')?document.getElementById('proj-link-contato').value:''),
     obs_proposta:(document.getElementById('proj-obs-proposta')?document.getElementById('proj-obs-proposta').value:''),
     desc_escopo:(document.getElementById('proj-desc-escopo')?document.getElementById('proj-desc-escopo').value:''),
@@ -6238,6 +6510,18 @@ async function saveProjeto(){
         // status só pode avançar (aprovado→execucao→finalizado), não voltar a orçar
         if(['rascunho','orcamento'].includes(dados.status)) dados.status=p.status;
       }
+      // HISTORICO da mudanca de status (nunca sobrescreve o anterior)
+      var _stAntes=p.status||'', _stDepois=dados.status||'';
+      if(_stAntes!==_stDepois || (_stDepois==='perdido' && (dados.motivo_perda||'')!==(p.motivo_perda||''))){
+        registrarHistStatus(editId,_stAntes,_stDepois,dados.motivo_perda||'',dados.obs_perda||'');
+        if(_stDepois==='perdido'){
+          dados.data_perda=new Date().toISOString().slice(0,10);
+          logActivity('Projeto PERDIDO: '+nome+' - motivo: '+(dados.motivo_perda||''));
+        }
+      }
+      // Saiu de perdido: preserva o motivo anterior no historico, limpa do cadastro
+      if(_stAntes==='perdido' && _stDepois!=='perdido'){ dados.motivo_perda=''; dados.obs_perda=''; dados.data_perda=''; }
+      else if(_stDepois==='perdido' && !dados.data_perda){ dados.data_perda=p.data_perda||new Date().toISOString().slice(0,10); }
       Object.assign(p,dados);
     }
     window._editProjId=null;
@@ -6246,12 +6530,18 @@ async function saveProjeto(){
     dados.id=nextId(projetos);
     dados.created_at=new Date().toISOString();
     dados.created_by=user;
+    if(dados.status==='perdido'){ dados.data_perda=new Date().toISOString().slice(0,10); }
     projetos.push(dados);
     logActivity('Novo projeto: '+nome);
+    if(dados.status==='perdido'){
+      registrarHistStatus(dados.id,'',dados.status,dados.motivo_perda||'',dados.obs_perda||'');
+      logActivity('Projeto PERDIDO: '+nome+' - motivo: '+(dados.motivo_perda||''));
+    }
   }
   // Salvar fotos da proposta (localStorage, vinculadas ao id do projeto)
   var _savedProjId = editId || dados.id;
   if(typeof _itensProposta!=='undefined') saveItensProposta(_savedProjId, _itensProposta);
+  syncToSheets('hist_status');
   window._fotosNaoSalvas = false;
   if(typeof atualizarBotaoVoltar==='function') atualizarBotaoVoltar();
   saveProj();
@@ -6343,6 +6633,11 @@ function editProjeto(id){
   populateCondPagSelect();
   var elCond=document.getElementById('proj-cond-pag');if(elCond)elCond.value=p.cond_pag||'';
   var elStR=document.getElementById('proj-status-receb');if(elStR)elStR.value=p.status_receb||'pendente';
+  // Projeto perdido: motivo, observacao e historico
+  populateMotivosPerda();
+  var elMot=document.getElementById('proj-motivo-perda'); if(elMot) elMot.value=p.motivo_perda||'';
+  var elObsP=document.getElementById('proj-obs-perda'); if(elObsP) elObsP.value=p.obs_perda||'';
+  if(typeof onChangeStatusProjeto==='function') onChangeStatusProjeto();
   // Arquiteto
   var elChk=document.getElementById('proj-teve-arquiteto');
   if(elChk){elChk.checked=!!(p.teve_arquiteto);if(typeof toggleArquiteto==='function')toggleArquiteto();}
@@ -6508,7 +6803,8 @@ function renderProjetos(){
       '<td>'+(p.inicio?dp(p.inicio):'<span style="color:var(--amber,#C47D0A);font-size:11px" title="Projeto sem data de início">sem data</span>')+'</td>'+
       '<td>'+dp(p.entrega)+'</td>'+
       '<td style="font-family:var(--fm);font-weight:600;color:var(--sage)">'+(p.valor_venda?fmt(p.valor_venda):'<span style="color:var(--t3)">-</span>')+'</td>'+
-      '<td><span class="tag '+st.cls+'">'+st.lbl+'</span></td>'+
+      '<td><span class="tag '+st.cls+'">'+st.lbl+'</span>'+
+        (p.status==='perdido'?'<br><span style="font-size:9.5px;color:var(--t3)" title="'+String(p.obs_perda||'').replace(/"/g,'&quot;')+'">Motivo: '+((p.motivo_perda||'').trim()||'não informado')+'</span>':'')+'</td>'+
       '<td style="font-size:11px">'+(p.cond_pag?({avista:'À Vista','30d':'30d','50_50':'50/50','3x':'3x','6x':'6x'}[p.cond_pag]||p.cond_pag):'-')+'</td>'+
       '<td style="font-family:var(--fm)">'+fmt(est)+'</td>'+
       '<td style="font-family:var(--fm)">'+fmt(real.total)+'</td>'+
