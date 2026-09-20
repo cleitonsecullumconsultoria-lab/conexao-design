@@ -3027,7 +3027,7 @@ function getSaldoConta(contaId){
 // -- DASHBOARD ---------------------------------------------
 function renderDash(){
   var mes=td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0');
-  var txMes=transacoes.filter(function(t){return t.data&&t.data.startsWith(mes);});
+  var txMes=transacoes.filter(function(t){return t.data&&String(t.data||'').startsWith(mes);});
   var entradas=txMes.filter(function(t){return t.tipo==='entrada';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
   var saidas=txMes.filter(function(t){return t.tipo==='saida';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
   var cfg=getCfg();
@@ -3060,7 +3060,7 @@ function renderDash(){
   var elResCard=document.getElementById('ds-card-resultado');
   if(elRes){ elRes.textContent=fmt(resultadoMes); }
   if(elResCard){ elResCard.className='stat '+(resultadoMes>=0?'green':'red'); }
-  var rfMes=refeicoes.filter(function(r){return r.data&&r.data.startsWith(mes);}).reduce(function(s,r){return s+parseFloat(r.valor||0);},0);
+  var rfMes=refeicoes.filter(function(r){return r.data&&String(r.data||'').startsWith(mes);}).reduce(function(s,r){return s+parseFloat(r.valor||0);},0);
   var provFolha=funcionarios.filter(function(f){return f.ativo!==false&&(f.tipo==='mensalista'||f.tipo==='prolabore');}).reduce(function(s,f){return s+(parseFloat(f.salario)||0);},0);
   document.getElementById('ds-vencer').textContent=fmt(vencer+rfMes+provFolha);
   // M3: A Receber
@@ -3203,7 +3203,7 @@ function renderCaixa(){
   var list=transacoes.filter(function(t){
     if(fc!=='todas'&&t.conta!==fc)return false;
     if(ft!=='todas'&&t.tipo!==ft)return false;
-    if(fm&&t.data&&!t.data.startsWith(fm))return false;
+    if(fm&&t.data&&!String(t.data||'').startsWith(fm))return false;
     return true;
   }).sort(function(a,b){return b.data.localeCompare(a.data);});
   var html='';
@@ -3359,7 +3359,7 @@ function renderPagar(){
       :'';
     var btnDel=protegida
       ?'<button class="actbtn del"  title="Lançamento gerado automaticamente - não pode ser excluído aqui"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button>'
-      :'<button class="actbtn del" onclick="delItem(\'contas_pagar\','+c.id+',\'Conta: '+c.descricao.replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button>';
+      :'<button class="actbtn del" onclick="delItem(\'contas_pagar\','+c.id+',\'Conta: '+String(c.descricao||'sem descrição').replace(/'/g,'')+'?\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span class="lbl">Excluir</span></button>';
     var btnEdit=protegida
       ?'<button class="actbtn edit" onclick="editContaPagar('+c.id+')" title="Editar status/observação/pagamento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="lbl">Editar</span></button>'
       :'<button class="actbtn edit" onclick="editContaPagar('+c.id+')" title="Editar conta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="lbl">Editar</span></button>';
@@ -3827,7 +3827,7 @@ function renderPonto(){
     // Sem filtro: comportamento original (mês corrente)
     funcsAtivos.forEach(function(f){
       var mes=td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0');
-      var ptMes=pontos.filter(function(p){return p.funcionario_id===f.id&&p.data.startsWith(mes);});
+      var ptMes=pontos.filter(function(p){return p.funcionario_id===f.id&&String(p.data||'').startsWith(mes);});
       var dias=ptMes.filter(function(p){return p.tipo==='diaria';}).length;
       var hExt=ptMes.filter(function(p){return p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
       var total=ptMes.reduce(function(s,p){return s+valorPonto(p);},0);
@@ -4423,7 +4423,7 @@ function renderRefeicoes(){
   var ff=document.getElementById('rf-filtro-func').value;
   var list=renderRefeicoesFiltrados().filter(function(r){
     if(ff&&r.funcionario_id!=ff)return false;
-    if(mes&&!r.data.startsWith(mes))return false;
+    if(mes&&!String(r.data||'').startsWith(mes))return false;
     return true;
   });
   // Guardar lista filtrada para impressão (M1)
@@ -5128,7 +5128,7 @@ function pdfDashboard(){
   var cfg=getCfg();
   var mes=td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0');
   var mesLbl=new Date(td.getFullYear(),td.getMonth(),1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-  var txMes=transacoes.filter(function(t){return t.data&&t.data.startsWith(mes);});
+  var txMes=transacoes.filter(function(t){return t.data&&String(t.data||'').startsWith(mes);});
   var entradas=txMes.filter(function(t){return t.tipo==='entrada';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
   var saidas=txMes.filter(function(t){return t.tipo==='saida';}).reduce(function(s,t){return s+parseFloat(t.valor||0);},0);
   var cfg2=getCfg();
@@ -5222,7 +5222,7 @@ function relFuncionarios(funcId){
   var mesLbl=new Date(td.getFullYear(),td.getMonth(),1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
   var totalGeral=0; var rows='';
   lista.forEach(function(f){
-    var ptMes=pontos.filter(function(p){return p.funcionario_id===f.id&&p.data.startsWith(mes);});
+    var ptMes=pontos.filter(function(p){return p.funcionario_id===f.id&&String(p.data||'').startsWith(mes);});
     var dias=ptMes.filter(function(p){return p.tipo==='diaria';}).length;
     var meio=ptMes.filter(function(p){return p.tipo==='meio';}).length;
     var hExt=ptMes.filter(function(p){return p.tipo==='extra';}).reduce(function(s,p){return s+parseFloat(p.horas||0);},0);
@@ -5241,7 +5241,7 @@ function relFuncionarios(funcId){
 function relRefeicoesForn(){
   var mes=document.getElementById('rf-filtro-mes').value||td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0');
   var mesLbl=new Date(mes+'-01').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-  var rfMes=refeicoes.filter(function(r){return r.data.startsWith(mes);});
+  var rfMes=refeicoes.filter(function(r){return String(r.data||'').startsWith(mes);});
   var byForn={};
   rfMes.forEach(function(r){ var k=r.fornecedor_id||'_'; if(!byForn[k]) byForn[k]={nome:fornNome(r.fornecedor_id)||'Nao informado',items:[],total:0}; byForn[k].items.push(r); byForn[k].total+=parseFloat(r.valor||0); });
   var totalGeral=rfMes.reduce(function(s,r){return s+parseFloat(r.valor||0);},0);
@@ -6180,26 +6180,15 @@ function gerarContrato(projId){
   }
   var objetoHTML = esc_(textoObjeto).replace(/\n+/g,'</p><p class="c">');
 
-  // Quadro de valores: NAO e o objeto. Fica na clausula do valor, como composicao.
-  var somaItens=0, linhasItens='';
+  // O contrato NAO exibe tabela de itens. A composicao e informacao comercial
+  // da proposta; aqui vale o objeto em texto e o valor total por extenso.
+  // A soma continua calculada porque e usada como referencia de valor.
+  var somaItens=0;
   if(itensProposta.length){
-    linhasItens = itensProposta.map(function(it,i){
-      var nome=String(it.nome||'').trim() || ('Item '+(i+1));
-      var v=parseFloat(it.valor||0); somaItens+=v;
-      return '<tr><td style="text-align:center">'+(i+1)+'</td><td>'+esc_(nome)+'</td><td style="text-align:right">'+fmt(v)+'</td></tr>';
-    }).join('');
-  } else {
-    var itensProj=[]; if(p.estimativas){try{itensProj=JSON.parse(p.estimativas);}catch(e){}}
-    linhasItens = itensProj.map(function(it,i){
-      var nome=(typeof catNome==='function'?catNome(it.categoria_id):'')||('Item '+(i+1));
-      var v=parseFloat(it.valor||0); somaItens+=v;
-      return '<tr><td style="text-align:center">'+(i+1)+'</td><td>'+esc_(nome)+'</td><td style="text-align:right">'+fmt(v)+'</td></tr>';
-    }).join('');
+    itensProposta.forEach(function(it){ somaItens+=parseFloat(it.valor||0)||0; });
+  } else if(p.estimativas){
+    try{ (JSON.parse(p.estimativas)||[]).forEach(function(it){ somaItens+=parseFloat(it.valor||0)||0; }); }catch(e){}
   }
-  var quadroItens = linhasItens
-    ? ('<table class="ct"><tr><th style="width:36px">Item</th><th>Composição</th><th style="width:120px;text-align:right">Valor (R$)</th></tr>'+
-       linhasItens+'<tr style="font-weight:700;background:#eee"><td colspan="2">VALOR TOTAL</td><td style="text-align:right">'+fmt(somaItens)+'</td></tr></table>')
-    : '';
 
   // Parcelas
   var parcelasTxt='';
@@ -6232,7 +6221,6 @@ function gerarContrato(projId){
 
     '<div class="cl">Cláusula 2ª - Do Valor</div>'+
     '<p class="c">Pelo integral cumprimento do objeto, o CONTRATANTE pagará à CONTRATADA o valor total, certo e ajustado, de <b>'+fmt(valorTotal)+'</b>, no qual já estão incluídos todos os custos, tributos, encargos, materiais, mão de obra, transporte e demais despesas necessárias à integral execução, nada mais podendo ser exigido a esse título, ressalvados itens adicionais não previstos neste instrumento.</p>'+
-    quadroItens+
 
     '<div class="cl">Cláusula 3ª - Da Forma de Pagamento</div>'+
     parcelasTxt+
@@ -7834,7 +7822,7 @@ function renderRefeicoesFiltrados(){
   return refeicoes.filter(function(r){
     if(ff&&r.funcionario_id!=ff)return false;
     if(fforn&&r.fornecedor_id!=fforn)return false;
-    if(mes&&!r.data.startsWith(mes))return false;
+    if(mes&&!String(r.data||'').startsWith(mes))return false;
     if(ini&&r.data<ini)return false;
     if(fim&&r.data>fim)return false;
     if(vmin>0&&parseFloat(r.valor||0)<vmin)return false;
