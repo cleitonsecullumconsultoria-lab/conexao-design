@@ -354,6 +354,152 @@ textarea.fi{resize:vertical;min-height:72px}
 .dia-chip.on{background:var(--sage);border-color:var(--sage)}
 .dia-chip.on .dsem,.dia-chip.on .dnum,.dia-chip.on .dqtd{color:#fff}
 .dia-chip.hoje{border-color:var(--sage);border-width:2px}
+
+/* ==========================================================================
+   DESIGN SYSTEM v2 - Conexao Design
+   Camada de componentes aplicada sobre as classes ja existentes (.btn, .fi,
+   .tbl, .tag, .card, .fbt). Nenhuma classe foi removida, entao todas as telas
+   herdam a nova linguagem sem alteracao de markup.
+   ========================================================================== */
+:root{
+  --ds-ink:#0B1220;            /* texto forte */
+  --ds-line:#E6EAF0;           /* linha sutil */
+  --ds-line2:#D6DCE6;
+  --ds-surface:#FFFFFF;
+  --ds-surface2:#F7F9FC;
+  --ds-brand:#3730A3;          /* indigo profundo */
+  --ds-brand2:#4F46E5;
+  --ds-accent:#0E7490;         /* teal arquitetura */
+  --ds-warm:#B08968;           /* madeira, identidade moveis */
+  --ds-warm-s:rgba(176,137,104,0.10);
+  --ds-r:10px; --ds-r2:14px; --ds-r3:20px;
+  --ds-e1:0 1px 2px rgba(11,18,32,.05);
+  --ds-e2:0 2px 8px rgba(11,18,32,.06),0 1px 2px rgba(11,18,32,.04);
+  --ds-e3:0 8px 28px rgba(11,18,32,.10),0 2px 6px rgba(11,18,32,.05);
+  --ds-fast:.16s cubic-bezier(.4,0,.2,1);
+}
+
+/* ---------- TIPOGRAFIA ---------- */
+body{font-feature-settings:'ss01','cv01';letter-spacing:-0.006em}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:20px;flex-wrap:wrap}
+.page-title{font-family:var(--fh);font-size:26px;font-weight:600;line-height:1.15;color:var(--ds-ink);letter-spacing:-0.02em}
+.page-sub{font-size:13px;color:var(--t2);margin-top:5px;max-width:62ch}
+.page-acts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sec-title{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--t2);text-transform:none}
+
+/* ---------- BOTOES ---------- */
+.btn{padding:8px 14px;border-radius:var(--ds-r);font-size:12.5px;font-weight:550;
+     border:1px solid var(--ds-line2);background:var(--ds-surface);color:var(--ds-ink);
+     box-shadow:var(--ds-e1);transition:background var(--ds-fast),border-color var(--ds-fast),box-shadow var(--ds-fast),transform var(--ds-fast);
+     min-height:34px}
+.btn:hover{background:var(--ds-surface2);border-color:var(--ds-line2);transform:none;box-shadow:var(--ds-e2)}
+.btn:active{transform:translateY(.5px) scale(.995);box-shadow:var(--ds-e1)}
+.btn:focus-visible{outline:2px solid var(--ds-brand2);outline-offset:2px}
+.btn[disabled],.btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.btn.pri,.btn.mint{background:linear-gradient(180deg,var(--ds-brand2),var(--ds-brand));border-color:var(--ds-brand);color:#fff;box-shadow:0 1px 2px rgba(55,48,163,.30),0 4px 14px rgba(55,48,163,.18)}
+.btn.pri:hover,.btn.mint:hover{background:linear-gradient(180deg,#5B53EA,#3E37B0);box-shadow:0 2px 4px rgba(55,48,163,.34),0 8px 22px rgba(55,48,163,.22)}
+.btn.ghost{background:transparent;border-color:transparent;box-shadow:none;color:var(--t2)}
+.btn.ghost:hover{background:var(--ds-surface2);color:var(--ds-ink);box-shadow:none}
+.btn.sm{padding:6px 11px;font-size:11.5px;min-height:30px;border-radius:8px}
+.btn.success{background:var(--green);border-color:var(--green);box-shadow:0 1px 2px rgba(5,150,105,.3),0 4px 14px rgba(5,150,105,.16)}
+.btn svg{width:14px;height:14px;opacity:.95}
+
+/* ---------- ABAS ---------- */
+.fbt{padding:8px 14px;border-radius:8px;font-size:12.5px;font-weight:550;border:1px solid transparent;
+     background:transparent;color:var(--t2);cursor:pointer;font-family:var(--ff);
+     transition:background var(--ds-fast),color var(--ds-fast),box-shadow var(--ds-fast);white-space:nowrap}
+.fbt:hover{background:var(--ds-surface2);color:var(--ds-ink)}
+.fbt.on{background:var(--ds-surface);color:var(--ds-brand);box-shadow:var(--ds-e2);border-color:var(--ds-line)}
+.tabbar{display:flex;gap:3px;margin-bottom:18px;background:var(--ds-surface2);border:1px solid var(--ds-line);
+        border-radius:12px;padding:4px;width:fit-content;max-width:100%;overflow-x:auto}
+
+/* ---------- CAMPOS ---------- */
+.fi{padding:9px 12px;border-radius:var(--ds-r);border:1px solid var(--ds-line2);font-size:13px;
+    background:var(--ds-surface);transition:border-color var(--ds-fast),box-shadow var(--ds-fast);min-height:36px}
+.fi:hover{border-color:#BFC8D6}
+.fi:focus{border-color:var(--ds-brand2);box-shadow:0 0 0 3px rgba(79,70,229,.14)}
+.fi::placeholder{color:#A9B2C1}
+.flabel{font-size:11.5px;font-weight:550;color:var(--t2);letter-spacing:0;text-transform:none}
+select.fi{appearance:none;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
+
+/* ---------- CARDS ---------- */
+.card{border-radius:var(--ds-r2);border-color:var(--ds-line);box-shadow:var(--ds-e2);padding:20px 22px}
+.ch{font-size:12.5px;font-weight:600;color:var(--ds-ink);text-transform:none;letter-spacing:-0.01em;margin-bottom:16px}
+.kpi{position:relative;overflow:hidden;transition:box-shadow var(--ds-fast),transform var(--ds-fast)}
+.kpi:hover{box-shadow:var(--ds-e3)}
+.kpi:before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--ds-brand2),var(--ds-accent));opacity:.9}
+.kl{font-size:11px;font-weight:550;color:var(--t2);text-transform:none;letter-spacing:0}
+.kv{font-family:var(--fm);font-weight:600;letter-spacing:-0.02em;color:var(--ds-ink)}
+
+/* ---------- TABELA ---------- */
+.tbl{font-size:13px}
+.tbl th{padding:11px 14px;font-size:10.5px;font-weight:600;color:var(--t3);letter-spacing:.06em;
+        border-bottom:1px solid var(--ds-line);background:var(--ds-surface2)}
+.tbl th:first-child{border-top-left-radius:10px}
+.tbl th:last-child{border-top-right-radius:10px}
+.tbl td{padding:13px 14px;border-bottom:1px solid var(--ds-line);vertical-align:middle}
+.tbl tbody tr{transition:background var(--ds-fast)}
+.tbl tbody tr:hover{background:var(--ds-surface2)}
+.tbl tbody tr:last-child td{border-bottom:none}
+.cell-main{font-weight:600;color:var(--ds-ink);font-size:13.5px;letter-spacing:-0.01em;line-height:1.3}
+.cell-sub{font-size:11.5px;color:var(--t3);margin-top:3px;line-height:1.35;display:block;
+          overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical}
+.cell-meta{font-size:11.5px;color:var(--t2)}
+.cell-val{font-family:var(--fm);font-size:13.5px;font-weight:600;color:var(--ds-ink);letter-spacing:-0.02em;white-space:nowrap}
+.cell-val.mut{font-weight:500;color:var(--t2);font-size:12.5px}
+
+/* ---------- STATUS ---------- */
+.st{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:550;color:var(--t2);white-space:nowrap}
+.st .dot{width:7px;height:7px;border-radius:50%;flex:0 0 7px;box-shadow:0 0 0 3px var(--dot-halo,rgba(0,0,0,.05))}
+.tag{font-size:10.5px;padding:3px 9px;border-radius:999px;font-weight:600;letter-spacing:.01em}
+
+/* ---------- FILTROS ---------- */
+.filtro-box{background:var(--ds-surface);border:1px solid var(--ds-line);border-radius:var(--ds-r2);
+            padding:14px 16px;box-shadow:var(--ds-e1);margin-bottom:16px}
+.filtro-tit{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--t3);text-transform:uppercase;min-width:108px}
+.filtro-linha+.filtro-linha{border-top:1px solid var(--ds-line);margin-top:12px;padding-top:12px}
+.filtro-resumo{font-size:11.5px;color:var(--t2);margin-left:auto;background:var(--ds-surface2);
+               border:1px solid var(--ds-line);padding:4px 10px;border-radius:999px}
+.dd-btn{padding:8px 28px 8px 12px;border-radius:var(--ds-r);border-color:var(--ds-line2);box-shadow:var(--ds-e1);min-height:36px}
+.dd-btn.ativo{border-color:var(--ds-brand2);color:var(--ds-brand);background:rgba(79,70,229,.05)}
+.dd-pop{border-radius:12px;box-shadow:var(--ds-e3);border-color:var(--ds-line);padding:6px}
+.dd-item{border-radius:8px;padding:8px 10px}
+
+/* ---------- ACOES DE LINHA ---------- */
+.actbtn{border-radius:8px;transition:all var(--ds-fast)}
+.amenu-pop{border-radius:12px;box-shadow:var(--ds-e3);border-color:var(--ds-line);padding:6px;min-width:210px}
+.amenu-item{border-radius:8px;padding:9px 10px;font-size:12.5px}
+.amenu-item:hover{background:var(--ds-surface2)}
+
+/* ---------- SKELETON / CARREGAMENTO ---------- */
+@keyframes ds-shimmer{0%{background-position:-460px 0}100%{background-position:460px 0}}
+.sk{background:linear-gradient(90deg,#EEF2F7 25%,#F7F9FC 50%,#EEF2F7 75%);background-size:920px 100%;
+    animation:ds-shimmer 1.3s infinite linear;border-radius:6px;height:12px;display:block}
+.sk.lg{height:18px}.sk.w40{width:40%}.sk.w60{width:60%}.sk.w80{width:80%}
+
+/* ---------- ESTADO VAZIO / ERRO ---------- */
+.empty{padding:34px 20px;text-align:center;color:var(--t3);font-size:13px}
+.ds-erro{border:1px solid rgba(225,29,72,.22);background:rgba(225,29,72,.04);border-radius:var(--ds-r2);
+         padding:18px 20px;text-align:center}
+.ds-erro b{display:block;font-size:13.5px;color:var(--ds-ink);margin-bottom:4px;font-weight:600}
+.ds-erro span{font-size:12.5px;color:var(--t2)}
+
+/* ---------- RESPONSIVO ---------- */
+@media(max-width:1024px){
+  .page-title{font-size:22px}
+  .filtro-tit{min-width:auto;width:100%}
+  .filtro-resumo{margin-left:0}
+}
+@media(max-width:720px){
+  .page-head{flex-direction:column;align-items:stretch}
+  .page-acts{justify-content:flex-start}
+  .tbl th,.tbl td{padding:10px 10px}
+  .card{padding:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+}
 </style>
 </head>
 <body>
@@ -1111,14 +1257,23 @@ textarea.fi{resize:vertical;min-height:72px}
 
   <!-- PROJETOS -->
   <div class="view" id="view-projetos">
-    <!-- TABS -->
-    <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:3px;width:fit-content">
-      <button class="fbt on" id="proj-tab-lista" onclick="projTab('lista',this)">📋 Projetos</button>
-      <button class="fbt" id="proj-tab-novo" onclick="novoProjetoLimpo(this)">➕ Novo Projeto</button>
-        <button class="fbt" id="proj-tab-perdas" onclick="projTab('perdas',this)">📉 Perdas</button>
-      <button class="fbt" id="proj-tab-custos" onclick="projTab('custos',this)">💰 Custos</button>
-      <button class="fbt" id="proj-tab-dash" onclick="projTab('dash',this)">📊 Dashboard</button>
-      <button class="fbt" id="proj-tab-cond" onclick="projTab('cond',this)">⚙️ Condições de Pagamento</button>
+    <div class="page-head">
+      <div>
+        <div class="page-title">Projetos</div>
+        <div class="page-sub">Acompanhe orçamentos, projetos em produção e o resultado comercial de cada obra.</div>
+      </div>
+      <div class="page-acts">
+        <button class="btn ghost" onclick="projTab('perdas',document.getElementById('proj-tab-perdas'))" title="Análise de projetos perdidos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>Perdas</button>
+        <button class="btn mint" onclick="novoProjetoLimpo(document.getElementById('proj-tab-novo'))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo projeto</button>
+      </div>
+    </div>
+    <div class="tabbar">
+      <button class="fbt on" id="proj-tab-lista" onclick="projTab('lista',this)">Projetos</button>
+      <button class="fbt" id="proj-tab-novo" onclick="novoProjetoLimpo(this)">Novo projeto</button>
+      <button class="fbt" id="proj-tab-perdas" onclick="projTab('perdas',this)">Perdas</button>
+      <button class="fbt" id="proj-tab-custos" onclick="projTab('custos',this)">Custos</button>
+      <button class="fbt" id="proj-tab-dash" onclick="projTab('dash',this)">Centro de resultado</button>
+      <button class="fbt" id="proj-tab-cond" onclick="projTab('cond',this)">Condições de pagamento</button>
     </div>
 
     <!-- LISTA DE PROJETOS -->
@@ -1143,6 +1298,13 @@ textarea.fi{resize:vertical;min-height:72px}
             <input type="date" class="fi filtro-inp" id="proj-filtro-fim" onchange="renderProjetos()">
             <button class="btn sm" onclick="projPeriodoMes()">Mês atual</button>
             <button class="btn sm" onclick="projPeriodoTudo()">Todo o histórico</button>
+          </div>
+          <div class="filtro-linha">
+            <span class="filtro-tit">Responsável</span>
+            <select class="fi filtro-inp" id="proj-filtro-resp" onchange="renderProjetos()" style="width:auto;min-width:170px"><option value="">Todos</option></select>
+            <span class="filtro-tit" style="min-width:auto;margin-left:10px">Cliente</span>
+            <select class="fi filtro-inp" id="proj-filtro-cli" onchange="renderProjetos()" style="width:auto;min-width:190px"><option value="">Todos</option></select>
+            <button class="btn sm ghost" onclick="projLimparFiltros()">Limpar</button>
             <span class="filtro-resumo" id="proj-filtro-resumo"></span>
           </div>
         </div>
@@ -6765,13 +6927,63 @@ function initFiltrosProjeto(){
   var a=document.getElementById('proj-filtro-ini');
   if(a && !a.value && !window._projFiltroTocado){ projPeriodoMes(); window._projFiltroTocado=true; }
 }
+
+function projPopulaFiltrosExtra(){
+  var sr=document.getElementById('proj-filtro-resp'), sc=document.getElementById('proj-filtro-cli');
+  if(sr){
+    var cur=sr.value, resp=[];
+    projetos.forEach(function(p){var v=(p.responsavel||'').trim(); if(v&&resp.indexOf(v)<0)resp.push(v);});
+    resp.sort();
+    sr.innerHTML='<option value="">Todos</option>'+resp.map(function(v){return '<option value="'+v.replace(/"/g,'&quot;')+'">'+v+'</option>';}).join('');
+    if(cur&&resp.indexOf(cur)>=0) sr.value=cur;
+  }
+  if(sc){
+    var cur2=sc.value, ids=[];
+    projetos.forEach(function(p){ if(p.cliente_id&&ids.indexOf(String(p.cliente_id))<0) ids.push(String(p.cliente_id)); });
+    var opts=ids.map(function(id){var c=clientes.find(function(x){return String(x.id)===id;});return {id:id,nome:c?c.nome:('Cliente '+id)};})
+                .sort(function(a,b){return a.nome.localeCompare(b.nome);});
+    sc.innerHTML='<option value="">Todos</option>'+opts.map(function(o){return '<option value="'+o.id+'">'+o.nome+'</option>';}).join('');
+    if(cur2) sc.value=cur2;
+  }
+}
+function projLimparFiltros(){
+  ['proj-filtro-resp','proj-filtro-cli'].forEach(function(id){var e=document.getElementById(id); if(e) e.value='';});
+  limparFiltroStatus();
+  projPeriodoTudo();
+}
+// Enquanto a base nao chegou, mostra estrutura em vez de tela parada.
+function skeletonLinhas(colunas, linhas){
+  var out='';
+  for(var i=0;i<(linhas||5);i++){
+    out+='<tr>';
+    for(var c=0;c<colunas;c++){
+      var w=c===0?'w80':(c%3===0?'w40':'w60');
+      out+='<td><span class="sk '+(c===0?'lg ':'')+w+'"></span></td>';
+    }
+    out+='</tr>';
+  }
+  return out;
+}
 function renderProjetos(){
+  var _body=document.getElementById('proj-body');
+  if(_body && !window._dadosCarregados){ _body.innerHTML=skeletonLinhas(11,6); return; }
+  if(_body && window._abaCarregada && window._abaCarregada['Projetos']===false){
+    _body.innerHTML='<tr><td colspan="11"><div class="ds-erro"><b>Não foi possível carregar os projetos.</b>'+
+      '<span>A conexão com a base falhou. Seus dados não foram perdidos.</span>'+
+      '<div style="margin-top:12px"><button class="btn mint sm" onclick="loadAllData().then(renderProjetos)">Tentar novamente</button></div></div></td></tr>';
+    return;
+  }
   var elIni=document.getElementById('proj-filtro-ini'), elFim=document.getElementById('proj-filtro-fim');
   var ini=elIni?elIni.value:'', fim=elFim?elFim.value:'';
   var sts=projStatusAtivos();
+  projPopulaFiltrosExtra();
+  var fResp=(document.getElementById('proj-filtro-resp')||{}).value||'';
+  var fCli=(document.getElementById('proj-filtro-cli')||{}).value||'';
   var total=projetos.length;
   var list=projetos.filter(function(p){
     if(sts.length && sts.indexOf(p.status)<0) return false;
+    if(fResp && (p.responsavel||'').trim()!==fResp) return false;
+    if(fCli && String(p.cliente_id)!==String(fCli)) return false;
     // projeto sem data de inicio nunca e escondido pelo periodo,
     // senao ele desapareceria do sistema sem ninguem perceber
     if(p.inicio){
@@ -6796,22 +7008,24 @@ function renderProjetos(){
     var st=statusCfg[p.status]||{lbl:p.status,cls:'cat'};
     var cl=clientes.find(function(x){return x.id==p.cliente_id;});
     var indicator=margem>0?'🟢':margem<0?'🔴':'🟡';
+    var corSt=(st.cor||'#94A3B8');
     html+='<tr>'+
-      '<td><b>'+indicator+' '+p.nome+'</b>'+(p.descricao?'<br><span style="font-size:10px;color:var(--t3)">'+p.descricao+'</span>':'')+
-      (p.status_receb&&p.status_receb!=='pendente'?'<br><span class="tag '+(p.status_receb==='recebido'?'pago':'pend')+'" style="font-size:9px">'+(p.status_receb==='recebido'?'Recebido':'Parcialmente Recebido')+'</span>':'')+'</td>'+
-      '<td>'+(cl?cl.nome:'')+'</td>'+
-      '<td>'+(p.inicio?dp(p.inicio):'<span style="color:var(--amber,#C47D0A);font-size:11px" title="Projeto sem data de início">sem data</span>')+'</td>'+
-      '<td>'+dp(p.entrega)+'</td>'+
-      '<td style="font-family:var(--fm);font-weight:600;color:var(--sage)">'+(p.valor_venda?fmt(p.valor_venda):'<span style="color:var(--t3)">-</span>')+'</td>'+
-      '<td><span class="tag '+st.cls+'">'+st.lbl+'</span>'+
-        (p.status==='perdido'?'<br><span style="font-size:9.5px;color:var(--t3)" title="'+String(p.obs_perda||'').replace(/"/g,'&quot;')+'">Motivo: '+((p.motivo_perda||'').trim()||'não informado')+'</span>':'')+'</td>'+
-      '<td style="font-size:11px">'+(p.cond_pag?({avista:'À Vista','30d':'30d','50_50':'50/50','3x':'3x','6x':'6x'}[p.cond_pag]||p.cond_pag):'-')+'</td>'+
-      '<td style="font-family:var(--fm)">'+fmt(est)+'</td>'+
-      '<td style="font-family:var(--fm)">'+fmt(real.total)+'</td>'+
-      '<td style="font-family:var(--fm);font-weight:600;'+margemCls+'">'+fmt(margem)+'</td>'+
+      '<td><span class="cell-main">'+p.nome+'</span>'+
+      (p.descricao?'<span class="cell-sub" title="'+String(p.descricao).replace(/"/g,'&quot;')+'">'+p.descricao+'</span>':'')+
+      (p.status_receb&&p.status_receb!=='pendente'?'<span class="tag '+(p.status_receb==='recebido'?'pago':'pend')+'" style="margin-top:5px;display:inline-block">'+(p.status_receb==='recebido'?'Recebido':'Recebimento parcial')+'</span>':'')+'</td>'+
+      '<td class="cell-meta">'+(cl?cl.nome:'<span style="color:var(--t3)">-</span>')+'</td>'+
+      '<td class="cell-meta">'+(p.inicio?dp(p.inicio):'<span style="color:var(--amber)" title="Projeto sem data de início">sem data</span>')+'</td>'+
+      '<td class="cell-meta">'+(p.entrega?dp(p.entrega):'<span style="color:var(--t3)">-</span>')+'</td>'+
+      '<td class="cell-val">'+(p.valor_venda?fmt(p.valor_venda):'<span style="color:var(--t3);font-weight:500">-</span>')+'</td>'+
+      '<td><span class="st" style="--dot-halo:'+corSt+'1f"><span class="dot" style="background:'+corSt+'"></span>'+st.lbl+'</span>'+
+        (p.status==='perdido'?'<span class="cell-sub" title="'+String(p.obs_perda||'').replace(/"/g,'&quot;')+'">'+((p.motivo_perda||'').trim()||'motivo não informado')+'</span>':'')+'</td>'+
+      '<td class="cell-meta">'+(p.cond_pag?({avista:'À vista','30d':'30 dias','50_50':'50/50','3x':'3x','6x':'6x'}[p.cond_pag]||p.cond_pag):'<span style="color:var(--t3)">-</span>')+'</td>'+
+      '<td class="cell-val mut">'+fmt(est)+'</td>'+
+      '<td class="cell-val mut">'+fmt(real.total)+'</td>'+
+      '<td class="cell-val" style="'+margemCls+'" title="'+(margem>0?'Margem positiva':margem<0?'Margem negativa':'Sem margem apurada')+'">'+fmt(margem)+'</td>'+
       '<td><div class="actbar" style="flex-wrap:nowrap">'+
         (['rascunho','orcamento'].includes(p.status)?'<button class="actbtn ok" onclick="confirmarProjeto('+p.id+')" title="Confirmar projeto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span class="lbl">Confirmar</span></button>':'')+
-        '<button class="actbtn info" onclick="dashProjeto('+p.id+')" title="Abrir Centro de Resultado"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span class="lbl">Abrir</span></button>'+
+        '<button class="actbtn info" onclick="dashProjeto('+p.id+')" title="Abrir o centro de resultado deste projeto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span class="lbl">Abrir</span></button>'+
         '<div class="amenu"><button class="amenu-btn" onclick="toggleAMenu(event,'+p.id+')" title="Mais ações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>'+
           '<div class="amenu-pop" id="amenu-'+p.id+'">'+
             '<button class="amenu-item" onclick="closeAMenu();editProjeto('+p.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar dados</button>'+
@@ -6830,6 +7044,8 @@ function renderProjetos(){
     var partes=[list.length+' de '+total+' projetos'];
     if(sts.length){ var gs=statusPorRotulo().filter(function(g){return g.chaves.some(function(c){return sts.indexOf(c)>=0;});}); partes.push(gs.map(function(g){return g.lbl;}).join(', ')); }
     if(ini||fim) partes.push('período '+(ini?dp(ini):'início')+' a '+(fim?dp(fim):'hoje'));
+    if(fResp) partes.push(fResp);
+    if(fCli){ var _c=clientes.find(function(x){return String(x.id)===String(fCli);}); partes.push(_c?_c.nome:'cliente '+fCli); }
     res.textContent=partes.join('  ·  ');
   }
 }
@@ -6901,9 +7117,21 @@ function delCusto(id){
 }
 
 function dashProjeto(id){
+  if(!id){ toast('Projeto não identificado','warn'); return; }
+  var p=projetos.find(function(x){return String(x.id)===String(id);});
+  if(!p){ toast('Projeto não encontrado','warn'); return; }
   window._crTab='comercial';
-  document.getElementById('dash-proj-sel').value=id;
+  window._crProjId=id;
+  // A aba repopula o select, entao o valor e aplicado DEPOIS da troca de aba,
+  // senao o usuario cairia na tela pedindo para escolher o projeto de novo.
   projTab('dash',document.getElementById('proj-tab-dash'));
+  var sel=document.getElementById('dash-proj-sel');
+  if(sel){
+    if(!Array.prototype.some.call(sel.options,function(o){return String(o.value)===String(id);})){
+      var op=document.createElement('option'); op.value=id; op.textContent=p.nome; sel.appendChild(op);
+    }
+    sel.value=String(id);
+  }
   renderDashProjeto();
 }
 
